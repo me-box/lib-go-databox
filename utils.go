@@ -243,3 +243,65 @@ func WaitForStoreStatus(href string) {
 	}
 
 }
+
+type StoreMetadata struct {
+	Description    string
+	ContentType    string
+	Vendor         string
+	DataSourceType string
+	DataSourceID   string
+	StoreType      string
+	IsActuator     bool
+	Unit           string
+	Location       string
+}
+
+type relValPair struct {
+	Rel string `json:"rel"`
+	Val string `json:"val"`
+}
+type hypercat struct {
+	ItemMetadata []relValPair
+}
+
+// RegisterDatasource is used by apps and drivers to register datasource in stores they
+// own.
+func RegisterDatasource(href string, metadata StoreMetadata) (string, error) {
+
+	storeURL := GetStoreURLFromDsHref(href)
+
+	if metadata.Description == "" ||
+		metadata.ContentType == "" ||
+		metadata.Vendor == "" ||
+		metadata.DataSourceType == "" ||
+		metadata.DataSourceID == "" ||
+		metadata.StoreType == "" {
+
+		return "", errors.New("Missing required metadata")
+
+	}
+
+	cat := hypercat{}
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-hypercat:rels:hasDescription:en", Val: metadata.Description})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-hypercat:rels:isContentType", Val: metadata.ContentType})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-hypercat:rels:hasVendor", Val: metadata.Vendor})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-hypercat:rels:hasType", Val: metadata.DataSourceType})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-hypercat:rels:hasDatasourceid", Val: metadata.DataSourceID})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasStoreType", Val: metadata.StoreType})
+
+	if metadata.IsActuator {
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:isActuator", Val: "True"})
+	}
+
+	if metadata.Location != "" {
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasLocation", Val: metadata.Location})
+	}
+
+	if metadata.Unit != "" {
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasUnit", Val: metadata.Unit})
+	}
+
+	jsonByteArray, _ := json.Marshal(cat)
+	makeStoreRequestPOST(storeURL, string(jsonByteArray[:]))
+	return "", nil
+}

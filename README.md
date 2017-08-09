@@ -23,6 +23,7 @@ Examples can be found in the samples directory
 * [func GetHttpsCredentials() string](#GetHttpsCredentials)
 * [func GetStoreURLFromDsHref(href string) string](#GetStoreURLFromDsHref)
 * [func JsonUnmarshal(s string) map[string]interface{}](#JsonUnmarshal)
+* [func RegisterDatasource(href string, metadata StoreMetadata) (string, error)](#RegisterDatasource)
 * [func StoreJSONGetlatest(href string) (string, error)](#StoreJSONGetlatest)
 * [func StoreJSONWriteKV(href string, data string) error](#StoreJSONWriteKV)
 * [func StoreJSONWriteTS(href string, data string) error](#StoreJSONWriteTS)
@@ -38,6 +39,7 @@ Examples can be found in the samples directory
 * [func WSSubscribe(href string, storeType string) (string, error)](#WSSubscribe)
 * [func WSUnsubscribe(href string, storeType string) (string, error)](#WSUnsubscribe)
 * [func WaitForStoreStatus(href string)](#WaitForStoreStatus)
+* [type StoreMetadata](#StoreMetadata)
 
 
 #### <a name="pkg-files">Package files</a>
@@ -84,6 +86,15 @@ func JsonUnmarshal(s string) map[string]interface{}
 ```
 JsonUnmarshal is a helper function to translate JSON sstringified environment variable
 to go map[string]
+
+
+
+## <a name="RegisterDatasource">func</a> [RegisterDatasource](/src/target/utils.go?s=6070:6146#L259)
+``` go
+func RegisterDatasource(href string, metadata StoreMetadata) (string, error)
+```
+RegisterDatasource is used by apps and drivers to register datasource in stores they
+own.
 
 
 
@@ -185,6 +196,29 @@ WSUnsubscribe Unsubscribes the caller to write notifications for a given route
 func WaitForStoreStatus(href string)
 ```
 WaitForStoreStatus will wait for the store available at href to respond with an active status.
+
+
+
+
+## <a name="StoreMetadata">type</a> [StoreMetadata](/src/target/utils.go?s=5608:5842#L237)
+``` go
+type StoreMetadata struct {
+    Description    string
+    ContentType    string
+    Vendor         string
+    DataSourceType string
+    DataSourceID   string
+    StoreType      string
+    IsActuator     bool
+    Unit           string
+    Location       string
+}
+```
+
+
+
+
+
 
 
 
