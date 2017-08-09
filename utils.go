@@ -258,7 +258,7 @@ type relValPair struct {
 	Val string `json:"val"`
 }
 type hypercat struct {
-	ItemMetadata []relValPair
+	ItemMetadata []relValPair `json:"item-metadata"`
 }
 
 // RegisterDatasource is used by apps and drivers to register datasource in stores they
