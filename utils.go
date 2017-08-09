@@ -265,7 +265,7 @@ type hypercat struct {
 // own.
 func RegisterDatasource(href string, metadata StoreMetadata) (string, error) {
 
-	storeURL := GetStoreURLFromDsHref(href)
+	catURL := GetStoreURLFromDsHref(href) + "/cat"
 
 	if metadata.Description == "" ||
 		metadata.ContentType == "" ||
@@ -302,5 +302,5 @@ func RegisterDatasource(href string, metadata StoreMetadata) (string, error) {
 
 	fmt.Println(string(jsonByteArray[:]))
 
-	return makeStoreRequestPOST(storeURL, string(jsonByteArray[:]))
+	return makeStoreRequestPOST(catURL, string(jsonByteArray[:]))
 }
