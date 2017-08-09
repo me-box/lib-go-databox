@@ -299,6 +299,8 @@ func RegisterDatasource(href string, metadata StoreMetadata) (string, error) {
 	}
 
 	jsonByteArray, _ := json.Marshal(cat)
-	makeStoreRequestPOST(storeURL, string(jsonByteArray[:]))
-	return "", nil
+
+	fmt.Println(string(jsonByteArray[:]))
+
+	return makeStoreRequestPOST(storeURL, string(jsonByteArray[:]))
 }
