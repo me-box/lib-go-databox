@@ -230,9 +230,6 @@ func WaitForStoreStatus(href string) {
 
 	resp, err := databoxClient.Get(href + "/status")
 
-	if err != nil {
-		panic(err)
-	}
 	defer resp.Body.Close()
 	_, err = ioutil.ReadAll(resp.Body)
 
