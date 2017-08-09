@@ -259,6 +259,7 @@ type relValPair struct {
 }
 type hypercat struct {
 	ItemMetadata []relValPair `json:"item-metadata"`
+	Href         string       `json:"href"`
 }
 
 // RegisterDatasource is used by apps and drivers to register datasource in stores they
@@ -297,6 +298,8 @@ func RegisterDatasource(href string, metadata StoreMetadata) (string, error) {
 	if metadata.Unit != "" {
 		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasUnit", Val: metadata.Unit})
 	}
+
+	cat.Href = GetStoreURLFromDsHref(href) + "/" + metadata.DataSourceID
 
 	jsonByteArray, _ := json.Marshal(cat)
 
