@@ -1,7 +1,5 @@
 package libDatabox
 
-import "os"
-
 func StoreJSONGetlatest(href string) (string, error) {
 
 	data, err := makeStoreRequest(href+"/ts/latest", "GET")
