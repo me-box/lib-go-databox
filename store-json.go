@@ -2,17 +2,6 @@ package libDatabox
 
 import "os"
 
-var exportServiceURL = os.Getenv("DATABOX_EXPORT_SERVICE_ENDPOINT")
-
-func ExportLongpoll(destination string, payload string) (string, error) {
-
-	var jsonStr = "{\"id\":\"\",\"uri\":" + destination + ",\"data\":" + payload + "\"}"
-
-	res, err := makeStoreRequestPOST(exportServiceURL+"/lp/export", jsonStr)
-
-	return res, err
-}
-
 func StoreJSONGetlatest(href string) (string, error) {
 
 	data, err := makeStoreRequest(href+"/ts/latest", "GET")
