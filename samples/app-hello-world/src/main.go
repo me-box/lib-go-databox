@@ -9,8 +9,8 @@ import (
 	databox "github.com/me-box/lib-go-databox"
 )
 
-var dataSourceTest = databox.JsonUnmarshal(os.Getenv("DATASOURCE_test"))
-var storeURL = databox.GetStoreURLFromDsHref(dataSourceTest["href"].(string))
+var dataSourceTest, _ = databox.JsonUnmarshal(os.Getenv("DATASOURCE_test"))
+var storeURL, _ = databox.GetStoreURLFromDsHref(dataSourceTest["href"].(string))
 
 func main() {
 
