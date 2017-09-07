@@ -16,7 +16,7 @@ func WSConnect(href string) (chan []byte, error) {
 
 	out := make(chan []byte)
 
-	storeURL := GetStoreURLFromDsHref(href)
+	storeURL, _ := GetStoreURLFromDsHref(href)
 
 	token, err := requestToken(storeURL+"/ws", "GET")
 
@@ -64,8 +64,8 @@ func WSConnect(href string) (chan []byte, error) {
 
 //WSSubscribe Subscribes the caller to write notifications for a given route.
 func WSSubscribe(href string, storeType string) (string, error) {
-	dataSourceID := GetDsIdFromDsHref(href)
-	storeURL := GetStoreURLFromDsHref(href)
+	dataSourceID, _ := GetDsIdFromDsHref(href)
+	storeURL, _ := GetStoreURLFromDsHref(href)
 
 	resp, err := makeStoreRequest(storeURL+"/sub/"+dataSourceID+"/"+storeType, "GET")
 
@@ -75,8 +75,8 @@ func WSSubscribe(href string, storeType string) (string, error) {
 //WSUnsubscribe Unsubscribes the caller to write notifications for a given route
 func WSUnsubscribe(href string, storeType string) (string, error) {
 
-	dataSourceID := GetDsIdFromDsHref(href)
-	storeURL := GetStoreURLFromDsHref(href)
+	dataSourceID, _ := GetDsIdFromDsHref(href)
+	storeURL, _ := GetStoreURLFromDsHref(href)
 
 	resp, err := makeStoreRequest(storeURL+"/unsub/"+dataSourceID+"/"+storeType, "GET")
 
