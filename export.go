@@ -9,7 +9,7 @@ func ExportLongpoll(destination string, payload string) (string, error) {
 
 	//TODO patload must be an escaped json string detect it it is not and error or escape it!!
 
-	var jsonStr = `{\"id\":\"\",\"uri\":\"" + destination + "\",\"data\":" + payload + "}`
+	var jsonStr = "{\"id\":\"\",\"uri\":\"" + destination + "\",\"data\":" + payload + "}"
 
 	fmt.Println("Sending ", jsonStr)
 
