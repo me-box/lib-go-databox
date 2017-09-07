@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	s "strings"
 	"time"
 )
@@ -70,44 +71,44 @@ func GetHttpsCredentials() string {
 	return string("/run/secrets/DATABOX.pem")
 }
 
-//JsonUnmarshal is a helper function to translate JSON sstringified environment variable
+//JsonUnmarshal is a helper function to translate JSON stringified environment variable
 //to go map[string]
-func JsonUnmarshal(s string) map[string]interface{} {
+func JsonUnmarshal(s string) (map[string]interface{}, error) {
 
 	byt := []byte(s)
 	var dat map[string]interface{}
 	if err := json.Unmarshal(byt, &dat); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return dat
+	return dat, nil
 }
 
 // GetStoreURLFromDsHref extracts the base store url from the href provied in the DATASOURCE_[name] environment variable.
-func GetStoreURLFromDsHref(href string) string {
+func GetStoreURLFromDsHref(href string) (string, error) {
 
 	u, err := url.Parse(href)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	return u.Scheme + "://" + u.Host
+	return u.Scheme + "://" + u.Host, nil
 
 }
 
 // GetDsIdFromDsHref extracts the base data source ID from the href provied in the DATASOURCE_[name] environment variable.
-func GetDsIdFromDsHref(href string) string {
+func GetDsIdFromDsHref(href string) (string, error) {
 
 	u, err := url.Parse(href)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	return s.Replace(u.Path, "/", "", -1)
+	return s.Replace(u.Path, "/", "", -1), nil
 
 }
 
-func makeArbiterRequest(arbMethod string, path string, hostname string, endpoint string, method string) (string, string) {
+func makeArbiterRequest(arbMethod string, path string, hostname string, endpoint string, method string) (string, int) {
 
 	var jsonStr = []byte(`{"target":"` + hostname + `","path":"` + endpoint + `","method":"` + method + `"}`)
 
@@ -121,13 +122,13 @@ func makeArbiterRequest(arbMethod string, path string, hostname string, endpoint
 
 	resp, err := databoxClient.Do(req)
 	if err != nil {
-		panic(err)
+		return err.Error(), 503
 	}
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	return string(body[:]), resp.Status
+	return string(body[:]), resp.StatusCode
 }
 
 func requestToken(href string, method string) (string, error) {
@@ -144,8 +145,8 @@ func requestToken(href string, method string) (string, error) {
 
 	token, status := makeArbiterRequest("POST", "/token", host, u.Path, method)
 
-	if status != "200 OK" {
-		err = errors.New(status + ": " + token)
+	if status != 200 {
+		err = errors.New(strconv.Itoa(status) + ": " + token)
 	}
 
 	return token, err
@@ -211,7 +212,7 @@ func makeStoreRequestPOST(href string, data string) (string, error) {
 
 	resp, err := databoxClient.Do(req)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	defer resp.Body.Close()
 
@@ -226,13 +227,16 @@ func makeStoreRequestPOST(href string, data string) (string, error) {
 //WaitForStoreStatus will wait for the store available at href to respond with an active status.
 func WaitForStoreStatus(href string) {
 
-	href = GetStoreURLFromDsHref(href)
+	h, err := GetStoreURLFromDsHref(href)
 
-	resp, err := databoxClient.Get(href + "/status")
-
-	if err != nil {
-		defer resp.Body.Close()
-		_, err = ioutil.ReadAll(resp.Body)
+	if err == nil {
+		resp, err1 := databoxClient.Get(h + "/status")
+		if err1 == nil {
+			defer resp.Body.Close()
+			_, err = ioutil.ReadAll(resp.Body)
+		} else {
+			err = err1
+		}
 	}
 
 	if err != nil {
@@ -268,7 +272,8 @@ type hypercat struct {
 // own.
 func RegisterDatasource(href string, metadata StoreMetadata) (string, error) {
 
-	catURL := GetStoreURLFromDsHref(href) + "/cat"
+	catURL, _ := GetStoreURLFromDsHref(href)
+	catURL = catURL + "/cat"
 
 	if metadata.Description == "" ||
 		metadata.ContentType == "" ||
@@ -301,7 +306,8 @@ func RegisterDatasource(href string, metadata StoreMetadata) (string, error) {
 		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasUnit", Val: metadata.Unit})
 	}
 
-	cat.Href = GetStoreURLFromDsHref(href) + "/" + metadata.DataSourceID
+	href, _ = GetStoreURLFromDsHref(href)
+	cat.Href = href + "/" + metadata.DataSourceID
 
 	jsonByteArray, _ := json.Marshal(cat)
 
