@@ -55,9 +55,17 @@ func init() {
 	databoxTlsConfig = &tls.Config{RootCAs: roots}
 	tr := &http.Transport{
 		TLSClientConfig: databoxTlsConfig,
+		Dial: (&net.Dialer{
+			Timeout: 5 * time.Second,
+		}).Dial,
+		TLSHandshakeTimeout: 5 * time.Second,
+		DisableCompression:  true,
 	}
 
-	databoxClient = &http.Client{Transport: tr}
+	databoxClient = &http.Client{
+		Transport: tr,
+		Timeout:   time.Second * 10,
+	}
 
 }
 
