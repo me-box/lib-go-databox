@@ -271,9 +271,15 @@ type relValPair struct {
 	Rel string `json:"rel"`
 	Val string `json:"val"`
 }
+
+type relValPairBool struct {
+	Rel string `json:"rel"`
+	Val bool   `json:"val"`
+}
+
 type hypercat struct {
-	ItemMetadata []relValPair `json:"item-metadata"`
-	Href         string       `json:"href"`
+	ItemMetadata []interface{} `json:"item-metadata"`
+	Href         string        `json:"href"`
 }
 
 // RegisterDatasource is used by apps and drivers to register datasource in stores they
@@ -303,7 +309,7 @@ func RegisterDatasource(href string, metadata StoreMetadata) (string, error) {
 	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasStoreType", Val: metadata.StoreType})
 
 	if metadata.IsActuator {
-		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:isActuator", Val: "True"})
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPairBool{Rel: "urn:X-databox:rels:isActuator", Val: true})
 	}
 
 	if metadata.Location != "" {
