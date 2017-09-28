@@ -127,7 +127,7 @@ func makeArbiterRequest(arbMethod string, path string, hostname string, endpoint
 	req, err := http.NewRequest(arbMethod, url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("X-Api-Key", arbiterToken)
 	req.Header.Set("Content-Type", "application/json")
-
+	req.Close = true
 	resp, err := databoxClient.Do(req)
 	if err != nil {
 		return err.Error(), 503
@@ -182,7 +182,7 @@ func makeStoreRequest(href string, method string) (string, error) {
 	req, err := http.NewRequest(method, href, nil)
 	req.Header.Set("X-Api-Key", tokenCache[routeHash])
 	req.Header.Set("Content-Type", "application/json")
-
+	req.Close = true
 	resp, err := databoxClient.Do(req)
 	if err != nil {
 		panic(err)
@@ -217,7 +217,7 @@ func makeStoreRequestPOST(href string, data string) (string, error) {
 	req, err := http.NewRequest(method, href, bytes.NewBufferString(data))
 	req.Header.Set("X-Api-Key", tokenCache[routeHash])
 	req.Header.Set("Content-Type", "application/json")
-
+	req.Close = true
 	resp, err := databoxClient.Do(req)
 	if err != nil {
 		return "", err
