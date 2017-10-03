@@ -194,6 +194,10 @@ func makeStoreRequest(href string, method string) (string, error) {
 		return "", err1
 	}
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return "", errors.New(string(body[:]))
+	}
+
 	return string(body[:]), nil
 }
 
@@ -227,6 +231,10 @@ func makeStoreRequestPOST(href string, data string) (string, error) {
 	body, err1 := ioutil.ReadAll(resp.Body)
 	if err1 != nil {
 		return "", err1
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return "", errors.New(string(body[:]))
 	}
 
 	return string(body[:]), nil
