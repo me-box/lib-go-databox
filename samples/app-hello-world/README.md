@@ -10,18 +10,16 @@ Clone the git repo into the databox root directory
 
 Add the below to the end of docker-compose-dev-local-images.yaml (White space is important)
 
-     app-hello-world:
-         build:
-             context: ./lib-go-databox/samples/app-hello-world
-             dockerfile: Dockerfile${DATABOX_ARCH}
-         image: app-hello-world
-         
- Then run 
+```
+cd ./lib-go-databox/samples/
+docker build -t app-hello-world .
+```
+    
+ Then run (If databox is not running)
  
-      ./startDatbox.sh dev 
+      ./detabox-start dev 
       
-This will build all the local databox images and set up the local app store. 
- 
+
 Finaly upload the manifest file:
  
      go to http://127.0.0.1:8181 in a web browser
@@ -29,5 +27,5 @@ Finaly upload the manifest file:
      select upload and choose /lib-go-databox/samples/app-hello-world/databox-manifest.json
      
      
- 
+ app-hello-world sould than be available to install in the app store 
    
