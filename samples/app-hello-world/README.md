@@ -17,7 +17,7 @@ docker build -t app-hello-world .
     
  Then run (If databox is not running)
  
-      ./detabox-start 
+      ./databox-start 
       
 
 Finaly upload the manifest file:
