@@ -18,7 +18,7 @@ docker build -t driver-hello-world .
     
  Then run (If databox is not running)
  
-      ./detabox-start 
+      ./databox-start 
       
 
 Finaly upload the manifest file:
