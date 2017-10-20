@@ -8,7 +8,7 @@ Clone the git repo into the databox root directory
 
      git clone https://github.com/me-box/lib-go-databox.git
 
-Add the below to the end of docker-compose-dev-local-images.yaml (White space is important)
+Run the following commands in a terminal 
 
 ```
 cd ./lib-go-databox/samples/
