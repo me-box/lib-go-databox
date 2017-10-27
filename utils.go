@@ -267,6 +267,33 @@ func makeStoreRequestForm(href string, method string, values map[string]string) 
 	return string(body[:]), nil
 }
 
+func makeStoreRequestJson(href string, method string, data string) (string, error) {
+
+	method = s.ToUpper(method)
+	token, err := checkTokenCache(href, method)
+	if err != nil {
+		return "", err
+	}
+
+	//perform store request with token
+	req, err := http.NewRequest(method, href, bytes.NewBufferString(data))
+	req.Header.Set("X-Api-Key", token)
+	req.Header.Set("Content-Type", "application/json")
+	req.Close = true
+	resp, err := databoxClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err1 := ioutil.ReadAll(resp.Body)
+	if err1 != nil {
+		return "", err1
+	}
+
+	return string(body[:]), nil
+}
+
 //WaitForStoreStatus will wait for the store available at href to respond with an active status.
 func WaitForStoreStatus(href string) {
 
