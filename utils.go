@@ -162,9 +162,8 @@ func requestToken(href string, method string) (string, error) {
 
 var tokenCache = make(map[string]string)
 
-func makeStoreRequest(href string, method string) (string, error) {
+func checkTokenCache(href string, method string) (string, error) {
 
-	method = s.ToUpper(method)
 	routeHash := s.ToUpper(href) + method
 
 	_, exists := tokenCache[routeHash]
@@ -177,10 +176,20 @@ func makeStoreRequest(href string, method string) (string, error) {
 		}
 		tokenCache[routeHash] = newToken
 	}
+	return tokenCache[routeHash], nil
+}
+
+func makeStoreRequest(href string, method string) (string, error) {
+
+	method = s.ToUpper(method)
+	token, err := checkTokenCache(href, method)
+	if err != nil {
+		return "", err
+	}
 
 	//perform store request with token
 	req, err := http.NewRequest(method, href, nil)
-	req.Header.Set("X-Api-Key", tokenCache[routeHash])
+	req.Header.Set("X-Api-Key", token)
 	req.Header.Set("Content-Type", "application/json")
 	req.Close = true
 	resp, err := databoxClient.Do(req)
@@ -200,22 +209,75 @@ func makeStoreRequest(href string, method string) (string, error) {
 func makeStoreRequestPOST(href string, data string) (string, error) {
 
 	method := "POST"
-	routeHash := s.ToUpper(href) + method
-
-	_, exists := tokenCache[routeHash]
-	if !exists {
-		//request a token
-		fmt.Println("Token not in cache requesting new one")
-		newToken, err := requestToken(href, method)
-		if err != nil {
-			return "", err
-		}
-		tokenCache[routeHash] = newToken
+	token, err := checkTokenCache(href, method)
+	if err != nil {
+		return "", err
 	}
 
 	//perform store request with token
 	req, err := http.NewRequest(method, href, bytes.NewBufferString(data))
-	req.Header.Set("X-Api-Key", tokenCache[routeHash])
+	req.Header.Set("X-Api-Key", token)
+	req.Header.Set("Content-Type", "application/json")
+	req.Close = true
+	resp, err := databoxClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err1 := ioutil.ReadAll(resp.Body)
+	if err1 != nil {
+		return "", err1
+	}
+
+	return string(body[:]), nil
+}
+
+func makeStoreRequestForm(href string, method string, values map[string]string) (string, error) {
+
+	method = s.ToUpper(method)
+	token, err := checkTokenCache(href, method)
+	if err != nil {
+		return "", err
+	}
+
+	// form-style parameters
+	data := url.Values{}
+	for k,v := range values {
+		data.Set(k, v)
+	}
+	encdata := data.Encode()
+	fmt.Printf("form request %s %s %s\n", href, method, encdata)
+	//perform store request with token
+	req, err := http.NewRequest(method, href, bytes.NewBufferString(encdata))
+	req.Header.Set("X-Api-Key", token)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Close = true
+	resp, err := databoxClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err1 := ioutil.ReadAll(resp.Body)
+	if err1 != nil {
+		return "", err1
+	}
+
+	return string(body[:]), nil
+}
+
+func makeStoreRequestJson(href string, method string, data string) (string, error) {
+
+	method = s.ToUpper(method)
+	token, err := checkTokenCache(href, method)
+	if err != nil {
+		return "", err
+	}
+
+	//perform store request with token
+	req, err := http.NewRequest(method, href, bytes.NewBufferString(data))
+	req.Header.Set("X-Api-Key", token)
 	req.Header.Set("Content-Type", "application/json")
 	req.Close = true
 	resp, err := databoxClient.Do(req)
