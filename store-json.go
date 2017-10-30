@@ -15,9 +15,9 @@ func StoreJSONGetlatest(href string) (string, error) {
 
 }
 
-func StoreJSONGetrange(href string, startTimestamp int64, endTimestamp int64) (string, error) {
+func StoreJSONGetrange(href string, startTimestamp float64, endTimestamp float64) (string, error) {
 
-	params :=  "{\"startTimestamp\": "+strconv.FormatInt(startTimestamp, 10)+",\"endTimestamp\": "+strconv.FormatInt(endTimestamp, 10)+"}"
+	params :=  "{\"startTimestamp\": "+strconv.FormatFloat(startTimestamp, 'f', -1, 64)+",\"endTimestamp\": "+strconv.FormatFloat(endTimestamp, 'f', -1, 64)+"}"
 	data, err := makeStoreRequestJson(href+"/ts/range", "GET",  params)
 	if err != nil {
 		return "", err
@@ -27,9 +27,9 @@ func StoreJSONGetrange(href string, startTimestamp int64, endTimestamp int64) (s
 
 }
 
-func StoreJSONGetsince(href string, startTimestamp int64) (string, error) {
+func StoreJSONGetsince(href string, startTimestamp float64) (string, error) {
 
-	params :=  "{\"startTimestamp\": "+strconv.FormatInt(startTimestamp, 10)+"}"
+	params :=  "{\"startTimestamp\": "+strconv.FormatFloat(startTimestamp, 'f', -1, 64)+"}"
 	data, err := makeStoreRequestJson(href+"/ts/since", "GET",  params)
 	if err != nil {
 		return "", err
