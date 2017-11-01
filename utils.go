@@ -23,7 +23,6 @@ import (
 	"strconv"
 	s "strings"
 	"time"
-	zest "github.com/toshbrown/goZestClient"
 )
 
 var hostname = os.Getenv("DATABOX_LOCAL_NAME")
@@ -67,8 +66,6 @@ func init() {
 		Transport: tr,
 		Timeout:   time.Second * 10,
 	}
-
-
 
 }
 
@@ -250,7 +247,7 @@ func makeStoreRequestForm(href string, method string, values map[string]string) 
 
 	// form-style parameters
 	data := url.Values{}
-	for k,v := range values {
+	for k, v := range values {
 		data.Set(k, v)
 	}
 	encdata := data.Encode()
