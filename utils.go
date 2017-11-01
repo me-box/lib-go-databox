@@ -23,6 +23,7 @@ import (
 	"strconv"
 	s "strings"
 	"time"
+	zest "github.com/toshbrown/goZestClient"
 )
 
 var hostname = os.Getenv("DATABOX_LOCAL_NAME")
@@ -66,6 +67,8 @@ func init() {
 		Transport: tr,
 		Timeout:   time.Second * 10,
 	}
+
+
 
 }
 
