@@ -100,12 +100,14 @@ func (tsc KeyTimeSeriesClient) Write(path string, payload string) error {
 
 func (tsc KeyTimeSeriesClient) Latest(path string) (string, error) {
 
+	path = path + "/latest"
+
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
 		return "", err
 	}
 
-	resp, getErr := tsc.zestC.Get(token, path+"/latest")
+	resp, getErr := tsc.zestC.Get(token, path)
 	if getErr != nil {
 		return "", errors.New("Error getting latest data: " + err.Error())
 	}
