@@ -98,7 +98,7 @@ func (tsc KeyTimeSeriesClient) Write(path string, payload string) error {
 
 }
 
-func (tsc KeyValueClient) Latest(path string) (string, error) {
+func (tsc KeyTimeSeriesClient) Latest(path string) (string, error) {
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
