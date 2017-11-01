@@ -2,6 +2,8 @@ package libDatabox
 
 import (
 	"errors"
+	"io/ioutil"
+	"strings"
 
 	zest "github.com/toshbrown/goZestClient"
 )
@@ -9,15 +11,22 @@ import (
 type KeyValueClient struct {
 	zestC     zest.ZestClient
 	zEndpoint string
+	dEndpoint string
 }
 
-func NewKeyValueClient(ReqEndpoint string, DealerEndpoint string, ServerKey string, enableLogging bool) KeyValueClient {
+func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, error) {
+
+	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
+	if err != nil {
+		return KeyValueClient{}, err
+	}
 
 	kvc := KeyValueClient{}
-	kvc.zEndpoint = ReqEndpoint
-	kvc.zestC = zest.New(ReqEndpoint, DealerEndpoint, ServerKey, enableLogging)
+	kvc.zEndpoint = reqEndpoint
+	kvc.dEndpoint = strings.Replace(reqEndpoint, ":5555", ":5556", 1)
+	kvc.zestC = zest.New(kvc.zEndpoint, kvc.dEndpoint, string(serverKey), enableLogging)
 
-	return kvc
+	return kvc, nil
 }
 
 func (kvc KeyValueClient) Write(path string, payload string) error {
