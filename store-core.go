@@ -69,6 +69,24 @@ func (kvc KeyValueClient) Read(dataSourceID string) (string, error) {
 
 }
 
+func (kvc KeyValueClient) Observe(dataSourceID string) (<-chan zestHeader, error) {
+
+	path := "/kv/" + dataSourceID
+
+	token, err := requestToken(kvc.zEndpoint+path, "POST")
+	if err != nil {
+		return "", err
+	}
+
+	zestChan, getErr := kvc.zestC.Observe(token, path)
+	if getErr != nil {
+		return "", errors.New("Error observing: " + err.Error())
+	}
+
+	return zestChan, nil
+
+}
+
 // RegisterDatasource is used by apps and drivers to register datasource in stores they
 // own.
 func (kvc KeyValueClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error {
@@ -228,6 +246,24 @@ func (tsc TimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, toTi
 	}
 
 	return resp, nil
+
+}
+
+func (tsc TimeSeriesClient) Observe(dataSourceID string) (<-chan zestHeader, error) {
+
+	path := "/ts/" + dataSourceID
+
+	token, err := requestToken(tsc.zEndpoint+path, "POST")
+	if err != nil {
+		return "", err
+	}
+
+	zestChan, getErr := tsc.zestC.Observe(token, path)
+	if getErr != nil {
+		return "", errors.New("Error observing: " + err.Error())
+	}
+
+	return zestChan, nil
 
 }
 
