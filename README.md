@@ -41,16 +41,16 @@ Examples can be found in the samples directory
 * [func WSSubscribe(href string, storeType string) (string, error)](#WSSubscribe)
 * [func WSUnsubscribe(href string, storeType string) (string, error)](#WSUnsubscribe)
 * [func WaitForStoreStatus(href string)](#WaitForStoreStatus)
-* [type KeyTimeSeriesClient](#KeyTimeSeriesClient)
-  * [func NewKeyTimeSeriesClient(reqEndpoint string, enableLogging bool) (KeyTimeSeriesClient, error)](#NewKeyTimeSeriesClient)
-  * [func (tsc KeyTimeSeriesClient) Latest(dataSourceID string) (string, error)](#KeyTimeSeriesClient.Latest)
-  * [func (tsc KeyTimeSeriesClient) Write(dataSourceID string, payload string) error](#KeyTimeSeriesClient.Write)
-  * [func (tsc KeyTimeSeriesClient) WriteAt(dataSourceID string, timstamp uint64, payload string) error](#KeyTimeSeriesClient.WriteAt)
 * [type KeyValueClient](#KeyValueClient)
   * [func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, error)](#NewKeyValueClient)
   * [func (kvc KeyValueClient) Read(dataSourceID string) (string, error)](#KeyValueClient.Read)
   * [func (kvc KeyValueClient) Write(dataSourceID string, payload string) error](#KeyValueClient.Write)
 * [type StoreMetadata](#StoreMetadata)
+* [type TimeSeriesClient](#TimeSeriesClient)
+  * [func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeriesClient, error)](#NewTimeSeriesClient)
+  * [func (tsc TimeSeriesClient) Latest(dataSourceID string) (string, error)](#TimeSeriesClient.Latest)
+  * [func (tsc TimeSeriesClient) Write(dataSourceID string, payload string) error](#TimeSeriesClient.Write)
+  * [func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error](#TimeSeriesClient.WriteAt)
 
 
 #### <a name="pkg-files">Package files</a>
@@ -223,57 +223,6 @@ WaitForStoreStatus will wait for the store available at href to respond with an 
 
 
 
-## <a name="KeyTimeSeriesClient">type</a> [KeyTimeSeriesClient](/src/target/store-core.go?s=1330:1428#L59)
-``` go
-type KeyTimeSeriesClient struct {
-    // contains filtered or unexported fields
-}
-```
-
-
-
-
-
-
-### <a name="NewKeyTimeSeriesClient">func</a> [NewKeyTimeSeriesClient](/src/target/store-core.go?s=1543:1639#L67)
-``` go
-func NewKeyTimeSeriesClient(reqEndpoint string, enableLogging bool) (KeyTimeSeriesClient, error)
-```
-NewKeyTimeSeriesClient returns a new KeyTimeSeriesClient to enable interaction with a timesries data store
-
-
-
-
-
-### <a name="KeyTimeSeriesClient.Latest">func</a> (KeyTimeSeriesClient) [Latest](/src/target/store-core.go?s=3211:3285#L125)
-``` go
-func (tsc KeyTimeSeriesClient) Latest(dataSourceID string) (string, error)
-```
-Latest will retrieve the last entry stored at the requested datasource ID
-return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="KeyTimeSeriesClient.Write">func</a> (KeyTimeSeriesClient) [Write](/src/target/store-core.go?s=2116:2195#L83)
-``` go
-func (tsc KeyTimeSeriesClient) Write(dataSourceID string, payload string) error
-```
-Write will add data to the times series data store. Data will be time stamped at insertion (format ms since 1970)
-
-
-
-
-### <a name="KeyTimeSeriesClient.WriteAt">func</a> (KeyTimeSeriesClient) [WriteAt](/src/target/store-core.go?s=2617:2715#L103)
-``` go
-func (tsc KeyTimeSeriesClient) WriteAt(dataSourceID string, timstamp uint64, payload string) error
-```
-WriteAt will add data to the times series data store. Data will be time stamped with the timstamp provided in the
-timstamp paramiter (format ms since 1970)
-
-
-
-
 ## <a name="KeyValueClient">type</a> [KeyValueClient](/src/target/store-core.go?s=120:213#L2)
 ``` go
 type KeyValueClient struct {
@@ -327,6 +276,58 @@ type StoreMetadata struct {
 
 
 
+
+
+
+
+## <a name="TimeSeriesClient">type</a> [TimeSeriesClient](/src/target/store-core.go?s=1330:1425#L59)
+``` go
+type TimeSeriesClient struct {
+    // contains filtered or unexported fields
+}
+```
+
+
+
+
+
+
+### <a name="NewTimeSeriesClient">func</a> [NewTimeSeriesClient](/src/target/store-core.go?s=1639:1729#L67)
+``` go
+func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeriesClient, error)
+```
+NewTimeSeriesClient returns a new KeyTimeSeriesClient to enable interaction with a time series data store
+reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox app and drivers.
+
+
+
+
+
+### <a name="TimeSeriesClient.Latest">func</a> (TimeSeriesClient) [Latest](/src/target/store-core.go?s=3287:3358#L125)
+``` go
+func (tsc TimeSeriesClient) Latest(dataSourceID string) (string, error)
+```
+Latest will retrieve the last entry stored at the requested datasource ID
+return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TimeSeriesClient.Write">func</a> (TimeSeriesClient) [Write](/src/target/store-core.go?s=2200:2276#L83)
+``` go
+func (tsc TimeSeriesClient) Write(dataSourceID string, payload string) error
+```
+Write will add data to the times series data store. Data will be time stamped at insertion (format ms since 1970)
+
+
+
+
+### <a name="TimeSeriesClient.WriteAt">func</a> (TimeSeriesClient) [WriteAt](/src/target/store-core.go?s=2698:2792#L103)
+``` go
+func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error
+```
+WriteAt will add data to the times series data store. Data will be time stamped with the timstamp provided in the
+timstamp paramiter (format ms since 1970)
 
 
 
