@@ -16,6 +16,8 @@ type KeyValueClient struct {
 	dEndpoint string
 }
 
+// NewKeyValueClient returns a new KeyValueClient to enable interaction with a key value data store
+// reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
 func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, error) {
 
 	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
@@ -94,7 +96,7 @@ type TimeSeriesClient struct {
 }
 
 // NewTimeSeriesClient returns a new KeyTimeSeriesClient to enable interaction with a time series data store
-// reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox app and drivers.
+// reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
 func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeriesClient, error) {
 
 	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
@@ -154,6 +156,66 @@ func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload
 func (tsc TimeSeriesClient) Latest(dataSourceID string) (string, error) {
 
 	path := "/ts/" + dataSourceID + "/latest"
+
+	token, err := requestToken(tsc.zEndpoint+path, "GET")
+	if err != nil {
+		return "", err
+	}
+
+	resp, getErr := tsc.zestC.Get(token, path)
+	if getErr != nil {
+		return "", errors.New("Error getting latest data: " + err.Error())
+	}
+
+	return resp, nil
+
+}
+
+// LastN will retrieve the last N entries stored at the requested datasource ID
+// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+func (tsc TimeSeriesClient) LastN(dataSourceID string, n int) (string, error) {
+
+	path := "/ts/" + dataSourceID + "/last/" + strconv.Itoa(n)
+
+	token, err := requestToken(tsc.zEndpoint+path, "GET")
+	if err != nil {
+		return "", err
+	}
+
+	resp, getErr := tsc.zestC.Get(token, path)
+	if getErr != nil {
+		return "", errors.New("Error getting latest data: " + err.Error())
+	}
+
+	return resp, nil
+
+}
+
+//Since will retrieve all entries since the requested timestamp (ms since unix epoch)
+// return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+func (tsc TimeSeriesClient) Since(dataSourceID string, sinceTimeStamp int64) (string, error) {
+
+	path := "/ts/" + dataSourceID + "/since/" + strconv.FormatInt(sinceTimeStamp, 10)
+
+	token, err := requestToken(tsc.zEndpoint+path, "GET")
+	if err != nil {
+		return "", err
+	}
+
+	resp, getErr := tsc.zestC.Get(token, path)
+	if getErr != nil {
+		return "", errors.New("Error getting latest data: " + err.Error())
+	}
+
+	return resp, nil
+
+}
+
+// Range will retrieve all entries between  formTimeStamp and toTimeStamp timestamp in ms since unix epoch
+// return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+func (tsc TimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) (string, error) {
+
+	path := "/ts/" + dataSourceID + "/range/" + strconv.FormatInt(formTimeStamp, 10) + "/" + strconv.FormatInt(toTimeStamp, 10)
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
