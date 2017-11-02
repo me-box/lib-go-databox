@@ -1,6 +1,7 @@
 package libDatabox
 
 import (
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"strconv"
@@ -64,6 +65,26 @@ func (kvc KeyValueClient) Read(dataSourceID string) (string, error) {
 
 	return resp, nil
 
+}
+
+// RegisterDatasource is used by apps and drivers to register datasource in stores they
+// own.
+func (kvc KeyValueClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error {
+
+	path := "/cat"
+
+	token, err := requestToken(kvc.zEndpoint+path, "POST")
+	if err != nil {
+		return errors.New("Error getting token: " + err.Error())
+	}
+	hypercatJSON, err := storeMetadataToJSON(metadata)
+
+	writeErr := kvc.zestC.Post(token, path, string(hypercatJSON))
+	if writeErr != nil {
+		return errors.New("Error writing: " + writeErr.Error())
+	}
+
+	return nil
 }
 
 type TimeSeriesClient struct {
@@ -145,5 +166,61 @@ func (tsc TimeSeriesClient) Latest(dataSourceID string) (string, error) {
 	}
 
 	return resp, nil
+
+}
+
+// RegisterDatasource is used by apps and drivers to register datasource in stores they
+// own.
+func (tsc TimeSeriesClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error {
+
+	path := "/cat"
+
+	token, err := requestToken(tsc.zEndpoint+path, "POST")
+	if err != nil {
+		return err
+	}
+	hypercatJSON, err := storeMetadataToJSON(metadata)
+
+	writeErr := tsc.zestC.Post(token, path, string(hypercatJSON))
+	if writeErr != nil {
+		return errors.New("Error writing: " + writeErr.Error())
+	}
+
+	return nil
+}
+
+func storeMetadataToJSON(metadata StoreMetadata) ([]byte, error) {
+
+	if metadata.Description == "" ||
+		metadata.ContentType == "" ||
+		metadata.Vendor == "" ||
+		metadata.DataSourceType == "" ||
+		metadata.DataSourceID == "" ||
+		metadata.StoreType == "" {
+
+		return nil, errors.New("Missing required metadata")
+	}
+
+	cat := hypercat{}
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-hypercat:rels:hasDescription:en", Val: metadata.Description})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-hypercat:rels:isContentType", Val: metadata.ContentType})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasVendor", Val: metadata.Vendor})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasType", Val: metadata.DataSourceType})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasDatasourceid", Val: metadata.DataSourceID})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasStoreType", Val: metadata.StoreType})
+
+	if metadata.IsActuator {
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPairBool{Rel: "urn:X-databox:rels:isActuator", Val: true})
+	}
+
+	if metadata.Location != "" {
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasLocation", Val: metadata.Location})
+	}
+
+	if metadata.Unit != "" {
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasUnit", Val: metadata.Unit})
+	}
+
+	return json.Marshal(cat)
 
 }

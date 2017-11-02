@@ -44,11 +44,13 @@ Examples can be found in the samples directory
 * [type KeyValueClient](#KeyValueClient)
   * [func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, error)](#NewKeyValueClient)
   * [func (kvc KeyValueClient) Read(dataSourceID string) (string, error)](#KeyValueClient.Read)
+  * [func (kvc KeyValueClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error](#KeyValueClient.RegisterDatasource)
   * [func (kvc KeyValueClient) Write(dataSourceID string, payload string) error](#KeyValueClient.Write)
 * [type StoreMetadata](#StoreMetadata)
 * [type TimeSeriesClient](#TimeSeriesClient)
   * [func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeriesClient, error)](#NewTimeSeriesClient)
   * [func (tsc TimeSeriesClient) Latest(dataSourceID string) (string, error)](#TimeSeriesClient.Latest)
+  * [func (tsc TimeSeriesClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error](#TimeSeriesClient.RegisterDatasource)
   * [func (tsc TimeSeriesClient) Write(dataSourceID string, payload string) error](#TimeSeriesClient.Write)
   * [func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error](#TimeSeriesClient.WriteAt)
 
@@ -223,7 +225,7 @@ WaitForStoreStatus will wait for the store available at href to respond with an 
 
 
 
-## <a name="KeyValueClient">type</a> [KeyValueClient](/src/target/store-core.go?s=120:213#L2)
+## <a name="KeyValueClient">type</a> [KeyValueClient](/src/target/store-core.go?s=137:230#L3)
 ``` go
 type KeyValueClient struct {
     // contains filtered or unexported fields
@@ -235,7 +237,7 @@ type KeyValueClient struct {
 
 
 
-### <a name="NewKeyValueClient">func</a> [NewKeyValueClient](/src/target/store-core.go?s=215:301#L8)
+### <a name="NewKeyValueClient">func</a> [NewKeyValueClient](/src/target/store-core.go?s=232:318#L9)
 ``` go
 func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, error)
 ```
@@ -243,14 +245,24 @@ func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, 
 
 
 
-### <a name="KeyValueClient.Read">func</a> (KeyValueClient) [Read](/src/target/store-core.go?s=982:1049#L41)
+### <a name="KeyValueClient.Read">func</a> (KeyValueClient) [Read](/src/target/store-core.go?s=1007:1074#L42)
 ``` go
 func (kvc KeyValueClient) Read(dataSourceID string) (string, error)
 ```
 
 
 
-### <a name="KeyValueClient.Write">func</a> (KeyValueClient) [Write](/src/target/store-core.go?s=651:725#L23)
+### <a name="KeyValueClient.RegisterDatasource">func</a> (KeyValueClient) [RegisterDatasource](/src/target/store-core.go?s=1451:1546#L62)
+``` go
+func (kvc KeyValueClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error
+```
+RegisterDatasource is used by apps and drivers to register datasource in stores they
+own.
+
+
+
+
+### <a name="KeyValueClient.Write">func</a> (KeyValueClient) [Write](/src/target/store-core.go?s=668:742#L24)
 ``` go
 func (kvc KeyValueClient) Write(dataSourceID string, payload string) error
 ```
@@ -280,7 +292,7 @@ type StoreMetadata struct {
 
 
 
-## <a name="TimeSeriesClient">type</a> [TimeSeriesClient](/src/target/store-core.go?s=1330:1425#L59)
+## <a name="TimeSeriesClient">type</a> [TimeSeriesClient](/src/target/store-core.go?s=1871:1966#L80)
 ``` go
 type TimeSeriesClient struct {
     // contains filtered or unexported fields
@@ -292,7 +304,7 @@ type TimeSeriesClient struct {
 
 
 
-### <a name="NewTimeSeriesClient">func</a> [NewTimeSeriesClient](/src/target/store-core.go?s=1639:1729#L67)
+### <a name="NewTimeSeriesClient">func</a> [NewTimeSeriesClient](/src/target/store-core.go?s=2180:2270#L88)
 ``` go
 func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeriesClient, error)
 ```
@@ -303,7 +315,7 @@ reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to datab
 
 
 
-### <a name="TimeSeriesClient.Latest">func</a> (TimeSeriesClient) [Latest](/src/target/store-core.go?s=3287:3358#L125)
+### <a name="TimeSeriesClient.Latest">func</a> (TimeSeriesClient) [Latest](/src/target/store-core.go?s=3814:3885#L144)
 ``` go
 func (tsc TimeSeriesClient) Latest(dataSourceID string) (string, error)
 ```
@@ -313,7 +325,17 @@ return data is a JSON object of the format {"timestamp":213123123,"data":[data-w
 
 
 
-### <a name="TimeSeriesClient.Write">func</a> (TimeSeriesClient) [Write](/src/target/store-core.go?s=2200:2276#L83)
+### <a name="TimeSeriesClient.RegisterDatasource">func</a> (TimeSeriesClient) [RegisterDatasource](/src/target/store-core.go?s=4281:4378#L164)
+``` go
+func (tsc TimeSeriesClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error
+```
+RegisterDatasource is used by apps and drivers to register datasource in stores they
+own.
+
+
+
+
+### <a name="TimeSeriesClient.Write">func</a> (TimeSeriesClient) [Write](/src/target/store-core.go?s=2741:2817#L104)
 ``` go
 func (tsc TimeSeriesClient) Write(dataSourceID string, payload string) error
 ```
@@ -322,7 +344,7 @@ Write will add data to the times series data store. Data will be time stamped at
 
 
 
-### <a name="TimeSeriesClient.WriteAt">func</a> (TimeSeriesClient) [WriteAt](/src/target/store-core.go?s=2698:2792#L103)
+### <a name="TimeSeriesClient.WriteAt">func</a> (TimeSeriesClient) [WriteAt](/src/target/store-core.go?s=3239:3333#L124)
 ``` go
 func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error
 ```
