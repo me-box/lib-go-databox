@@ -114,7 +114,7 @@ func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload
 
 	path := "/ts/" + dataSourceID
 
-	token, err := requestToken(tsc.zEndpoint+path, "POST")
+	token, err := requestToken(tsc.zEndpoint+path+"/*", "POST")
 	if err != nil {
 		return err
 	}
