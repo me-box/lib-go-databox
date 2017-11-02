@@ -66,22 +66,22 @@ func (kvc KeyValueClient) Read(dataSourceID string) (string, error) {
 
 }
 
-type KeyTimeSeriesClient struct {
+type TimeSeriesClient struct {
 	zestC     zest.ZestClient
 	zEndpoint string
 	dEndpoint string
 }
 
-// NewKeyTimeSeriesClient returns a new KeyTimeSeriesClient to enable interaction with a time series data store
+// NewTimeSeriesClient returns a new KeyTimeSeriesClient to enable interaction with a time series data store
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox app and drivers.
-func NewKeyTimeSeriesClient(reqEndpoint string, enableLogging bool) (KeyTimeSeriesClient, error) {
+func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeriesClient, error) {
 
 	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
 	if err != nil {
-		return KeyTimeSeriesClient{}, err
+		return TimeSeriesClient{}, err
 	}
 
-	tsc := KeyTimeSeriesClient{}
+	tsc := TimeSeriesClient{}
 	tsc.zEndpoint = reqEndpoint
 	tsc.dEndpoint = strings.Replace(reqEndpoint, ":5555", ":5556", 1)
 	tsc.zestC = zest.New(tsc.zEndpoint, tsc.dEndpoint, string(serverKey), enableLogging)
@@ -90,7 +90,7 @@ func NewKeyTimeSeriesClient(reqEndpoint string, enableLogging bool) (KeyTimeSeri
 }
 
 // Write will add data to the times series data store. Data will be time stamped at insertion (format ms since 1970)
-func (tsc KeyTimeSeriesClient) Write(dataSourceID string, payload string) error {
+func (tsc TimeSeriesClient) Write(dataSourceID string, payload string) error {
 
 	path := "/ts/" + dataSourceID
 
@@ -110,7 +110,7 @@ func (tsc KeyTimeSeriesClient) Write(dataSourceID string, payload string) error 
 
 // WriteAt will add data to the times series data store. Data will be time stamped with the timstamp provided in the
 // timstamp paramiter (format ms since 1970)
-func (tsc KeyTimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error {
+func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error {
 
 	path := "/ts/" + dataSourceID
 
@@ -132,7 +132,7 @@ func (tsc KeyTimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payl
 
 //Latest will retrieve the last entry stored at the requested datasource ID
 // return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-func (tsc KeyTimeSeriesClient) Latest(dataSourceID string) (string, error) {
+func (tsc TimeSeriesClient) Latest(dataSourceID string) (string, error) {
 
 	path := "/ts/" + dataSourceID + "/latest"
 
