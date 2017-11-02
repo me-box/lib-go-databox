@@ -69,21 +69,21 @@ func (kvc KeyValueClient) Read(dataSourceID string) (string, error) {
 
 }
 
-func (kvc KeyValueClient) Observe(dataSourceID string) (<-chan zestHeader, error) {
+func (kvc KeyValueClient) Observe(dataSourceID string) (<-chan string, error) {
 
 	path := "/kv/" + dataSourceID
 
 	token, err := requestToken(kvc.zEndpoint+path, "POST")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	zestChan, getErr := kvc.zestC.Observe(token, path)
+	payloadChan, getErr := kvc.zestC.Observe(token, path)
 	if getErr != nil {
-		return "", errors.New("Error observing: " + err.Error())
+		return nil, errors.New("Error observing: " + err.Error())
 	}
 
-	return zestChan, nil
+	return payloadChan, nil
 
 }
 
@@ -249,21 +249,21 @@ func (tsc TimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, toTi
 
 }
 
-func (tsc TimeSeriesClient) Observe(dataSourceID string) (<-chan zestHeader, error) {
+func (tsc TimeSeriesClient) Observe(dataSourceID string) (<-chan string, error) {
 
 	path := "/ts/" + dataSourceID
 
 	token, err := requestToken(tsc.zEndpoint+path, "POST")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	zestChan, getErr := tsc.zestC.Observe(token, path)
+	payloadChan, getErr := tsc.zestC.Observe(token, path)
 	if getErr != nil {
-		return "", errors.New("Error observing: " + err.Error())
+		return nil, errors.New("Error observing: " + err.Error())
 	}
 
-	return zestChan, nil
+	return payloadChan, nil
 
 }
 
