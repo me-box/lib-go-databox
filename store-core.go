@@ -32,7 +32,7 @@ func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, 
 
 func (kvc KeyValueClient) Write(dataSourceID string, payload string) error {
 
-	path := "/kv/" + path
+	path := "/kv/" + dataSourceID
 
 	token, err := requestToken(kvc.zEndpoint+path, "POST")
 	if err != nil {
