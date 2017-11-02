@@ -72,8 +72,8 @@ type KeyTimeSeriesClient struct {
 	dEndpoint string
 }
 
-// NewKeyTimeSeriesClient returns a new KeyTimeSeriesClient to enable interaction with a timesries data store
-//
+// NewKeyTimeSeriesClient returns a new KeyTimeSeriesClient to enable interaction with a time series data store
+// reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox app and drivers.
 func NewKeyTimeSeriesClient(reqEndpoint string, enableLogging bool) (KeyTimeSeriesClient, error) {
 
 	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
@@ -110,7 +110,7 @@ func (tsc KeyTimeSeriesClient) Write(dataSourceID string, payload string) error 
 
 // WriteAt will add data to the times series data store. Data will be time stamped with the timstamp provided in the
 // timstamp paramiter (format ms since 1970)
-func (tsc KeyTimeSeriesClient) WriteAt(dataSourceID string, timstamp uint64, payload string) error {
+func (tsc KeyTimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error {
 
 	path := "/ts/" + dataSourceID
 
@@ -119,7 +119,7 @@ func (tsc KeyTimeSeriesClient) WriteAt(dataSourceID string, timstamp uint64, pay
 		return err
 	}
 
-	path = path + "/at/" + strconv.FormatUint(timstamp, 10)
+	path = path + "/at/" + strconv.FormatInt(timstamp, 10)
 
 	err = tsc.zestC.Post(token, path, payload)
 	if err != nil {
