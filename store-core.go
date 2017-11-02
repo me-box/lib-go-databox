@@ -112,14 +112,12 @@ func (tsc TimeSeriesClient) Write(dataSourceID string, payload string) error {
 // timstamp paramiter (format ms since 1970)
 func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error {
 
-	path := "/ts/" + dataSourceID
+	path := "/ts/" + dataSourceID + "/at/" + strconv.FormatInt(timstamp, 10)
 
-	token, err := requestToken(tsc.zEndpoint+path+"/*", "POST")
+	token, err := requestToken(tsc.zEndpoint+path, "POST")
 	if err != nil {
 		return err
 	}
-
-	path = path + "/at/" + strconv.FormatInt(timstamp, 10)
 
 	err = tsc.zestC.Post(token, path, payload)
 	if err != nil {
