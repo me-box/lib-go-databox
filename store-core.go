@@ -28,9 +28,9 @@ func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, 
 	kvc := KeyValueClient{}
 	kvc.zEndpoint = reqEndpoint
 	kvc.dEndpoint = strings.Replace(reqEndpoint, ":5555", ":5556", 1)
-	kvc.zestC = zest.New(kvc.zEndpoint, kvc.dEndpoint, string(serverKey), enableLogging)
+	kvc.zestC, err = zest.New(kvc.zEndpoint, kvc.dEndpoint, string(serverKey), enableLogging)
 
-	return kvc, nil
+	return kvc, err
 }
 
 func (kvc KeyValueClient) Write(dataSourceID string, payload string) error {
@@ -125,9 +125,9 @@ func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeriesClie
 	tsc := TimeSeriesClient{}
 	tsc.zEndpoint = reqEndpoint
 	tsc.dEndpoint = strings.Replace(reqEndpoint, ":5555", ":5556", 1)
-	tsc.zestC = zest.New(tsc.zEndpoint, tsc.dEndpoint, string(serverKey), enableLogging)
+	tsc.zestC, err = zest.New(tsc.zEndpoint, tsc.dEndpoint, string(serverKey), enableLogging)
 
-	return tsc, nil
+	return tsc, err
 }
 
 // Write will add data to the times series data store. Data will be time stamped at insertion (format ms since 1970)
