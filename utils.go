@@ -115,6 +115,8 @@ func makeArbiterRequest(arbMethod string, path string, hostname string, endpoint
 	return string(body[:]), resp.StatusCode
 }
 
+var tokenCache = make(map[string]string)
+
 func requestToken(href string, method string) (string, error) {
 
 	u, err := url.Parse(href)
@@ -127,32 +129,21 @@ func requestToken(href string, method string) (string, error) {
 		return href, err1
 	}
 
-	token, status := makeArbiterRequest("POST", "/token", host, u.Path, method)
+	//TODO tokenCache is never invalidated
+	routeHash := s.ToUpper(href) + method
+	token, exists := tokenCache[routeHash]
+	if !exists {
+		var status int
+		token, status = makeArbiterRequest("POST", "/token", host, u.Path, method)
 
-	if status != 200 {
-		err = errors.New(strconv.Itoa(status) + ": " + token)
+		if status != 200 {
+			err = errors.New(strconv.Itoa(status) + ": " + token)
+			return "", err
+		}
+		tokenCache[routeHash] = token
 	}
 
 	return token, err
-}
-
-var tokenCache = make(map[string]string)
-
-func checkTokenCache(href string, method string) (string, error) {
-
-	routeHash := s.ToUpper(href) + method
-
-	_, exists := tokenCache[routeHash]
-	if !exists {
-		//request a token
-		fmt.Println("Token not in cache requesting new one")
-		newToken, err := requestToken(href, method)
-		if err != nil {
-			return "", err
-		}
-		tokenCache[routeHash] = newToken
-	}
-	return tokenCache[routeHash], nil
 }
 
 type StoreMetadata struct {
