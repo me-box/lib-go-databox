@@ -73,7 +73,7 @@ func (kvc KeyValueClient) Observe(dataSourceID string) (<-chan string, error) {
 
 	path := "/kv/" + dataSourceID
 
-	token, err := requestToken(kvc.zEndpoint+path, "POST")
+	token, err := requestToken(kvc.zEndpoint+path, "GET")
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +253,7 @@ func (tsc TimeSeriesClient) Observe(dataSourceID string) (<-chan string, error) 
 
 	path := "/ts/" + dataSourceID
 
-	token, err := requestToken(tsc.zEndpoint+path, "POST")
+	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
 		return nil, err
 	}
