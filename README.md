@@ -24,9 +24,9 @@ Examples can be found in the samples directory
 * [type DataSourceMetadata](#DataSourceMetadata)
   * [func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, error)](#HypercatToDataSourceMetadata)
 * [type KeyValue_0_2_0](#KeyValue_0_2_0)
-  * [func NewKeyValueClient(reqEndpoint string, dataSourceID string, enableLogging bool) (KeyValue_0_2_0, error)](#NewKeyValueClient)
+  * [func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValue_0_2_0, error)](#NewKeyValueClient)
 * [type TimeSeries_0_2_0](#TimeSeries_0_2_0)
-  * [func NewTimeSeriesClient(reqEndpoint string, dataSourceID string, enableLogging bool) (TimeSeries_0_2_0, error)](#NewTimeSeriesClient)
+  * [func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeries_0_2_0, error)](#NewTimeSeriesClient)
 
 
 #### <a name="pkg-files">Package files</a>
@@ -94,15 +94,15 @@ HypercatToDataSourceMetadata is a helper function to convert the hypercat descri
 
 
 
-## <a name="KeyValue_0_2_0">type</a> [KeyValue_0_2_0](/src/target/store-core-kv.go?s=109:458#L1)
+## <a name="KeyValue_0_2_0">type</a> [KeyValue_0_2_0](/src/target/store-core-kv.go?s=109:517#L1)
 ``` go
 type KeyValue_0_2_0 interface {
     // Write value.
-    Write(payload string) error
+    Write(dataSourceID string, payload string) error
     // Read values.
-    Read() (string, error)
+    Read(dataSourceID string) (string, error)
     // Get notifications of updated values
-    Observe() (<-chan string, error)
+    Observe(dataSourceID string) (<-chan string, error)
     // registerDatasource is used by apps and drivers to register data sources in stores they
     // own.
     RegisterDatasource(metadata DataSourceMetadata) error
@@ -114,9 +114,9 @@ type KeyValue_0_2_0 interface {
 
 
 
-### <a name="NewKeyValueClient">func</a> [NewKeyValueClient](/src/target/store-core-kv.go?s=967:1074#L24)
+### <a name="NewKeyValueClient">func</a> [NewKeyValueClient](/src/target/store-core-kv.go?s=996:1082#L23)
 ``` go
-func NewKeyValueClient(reqEndpoint string, dataSourceID string, enableLogging bool) (KeyValue_0_2_0, error)
+func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValue_0_2_0, error)
 ```
 NewKeyValueClient returns a new KeyValueClient to enable reading and writing of key value data to the store
 reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
@@ -127,27 +127,27 @@ drivers are responsible for managing their dataSourceIDs
 
 
 
-## <a name="TimeSeries_0_2_0">type</a> [TimeSeries_0_2_0](/src/target/store-core-ts.go?s=120:1588#L2)
+## <a name="TimeSeries_0_2_0">type</a> [TimeSeries_0_2_0](/src/target/store-core-ts.go?s=120:1731#L2)
 ``` go
 type TimeSeries_0_2_0 interface {
     // Write  will be timstamed with write time in ms since the unix epoch by the store
-    Write(payload string) error
+    Write(dataSourceID string, payload string) error
     // WriteAt will be timstamed with timestamp provided in ms since the unix epoch
-    WriteAt(timestamp int64, payload string) error
+    WriteAt(dataSourceID string, timestamp int64, payload string) error
     // Read the latest value.
     // return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-    Latest() (string, error)
+    Latest(dataSourceID string) (string, error)
     // Read the last N values.
     // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-    LastN(n int) (string, error)
+    LastN(dataSourceID string, n int) (string, error)
     // Read values written after the provided timestamp in in ms since the unix epoch.
     // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-    Since(sinceTimeStamp int64) (string, error)
+    Since(dataSourceID string, sinceTimeStamp int64) (string, error)
     // Read values written between the start timestamp and end timestamp in in ms since the unix epoch.
     // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-    Range(formTimeStamp int64, toTimeStamp int64) (string, error)
+    Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) (string, error)
     // Get notifications when a new value is written
-    Observe() (<-chan string, error)
+    Observe(dataSourceID string) (<-chan string, error)
     // registerDatasource is used by apps and drivers to register data sources in stores they own.
     // the returned chan receives valuse of the form {"timestamp":213123123,"data":[data-written-by-driver]}
     RegisterDatasource(metadata DataSourceMetadata) error
@@ -159,9 +159,9 @@ type TimeSeries_0_2_0 interface {
 
 
 
-### <a name="NewTimeSeriesClient">func</a> [NewTimeSeriesClient](/src/target/store-core-ts.go?s=1930:2041#L35)
+### <a name="NewTimeSeriesClient">func</a> [NewTimeSeriesClient](/src/target/store-core-ts.go?s=2043:2133#L34)
 ``` go
-func NewTimeSeriesClient(reqEndpoint string, dataSourceID string, enableLogging bool) (TimeSeries_0_2_0, error)
+func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeries_0_2_0, error)
 ```
 NewTimeSeriesClient returns a new KeyTimeSeriesClient to enable interaction with a time series data store
 reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.

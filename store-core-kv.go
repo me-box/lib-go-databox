@@ -10,28 +10,27 @@ import (
 
 type KeyValue_0_2_0 interface {
 	// Write value.
-	Write(payload string) error
+	Write(dataSourceID string, payload string) error
 	// Read values.
-	Read() (string, error)
+	Read(dataSourceID string) (string, error)
 	// Get notifications of updated values
-	Observe() (<-chan string, error)
+	Observe(dataSourceID string) (<-chan string, error)
 	// registerDatasource is used by apps and drivers to register data sources in stores they
 	// own.
 	RegisterDatasource(metadata DataSourceMetadata) error
 }
 
 type keyValueClient struct {
-	zestC        zest.ZestClient
-	zEndpoint    string
-	dEndpoint    string
-	dataSourceID string
+	zestC     zest.ZestClient
+	zEndpoint string
+	dEndpoint string
 }
 
 // NewKeyValueClient returns a new KeyValueClient to enable reading and writing of key value data to the store
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
 // dataSourceID is passed in the to apps in the environment varable and can be extracted from the hypercat
 // drivers are responsible for managing their dataSourceIDs
-func NewKeyValueClient(reqEndpoint string, dataSourceID string, enableLogging bool) (KeyValue_0_2_0, error) {
+func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValue_0_2_0, error) {
 
 	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
 	if err != nil {
@@ -42,14 +41,13 @@ func NewKeyValueClient(reqEndpoint string, dataSourceID string, enableLogging bo
 	kvc.zEndpoint = reqEndpoint
 	kvc.dEndpoint = strings.Replace(reqEndpoint, ":5555", ":5556", 1)
 	kvc.zestC, err = zest.New(kvc.zEndpoint, kvc.dEndpoint, string(serverKey), enableLogging)
-	kvc.dataSourceID = dataSourceID
 
 	return kvc, err
 }
 
-func (kvc keyValueClient) Write(payload string) error {
+func (kvc keyValueClient) Write(dataSourceID string, payload string) error {
 
-	path := "/kv/" + kvc.dataSourceID
+	path := "/kv/" + dataSourceID
 
 	token, err := requestToken(kvc.zEndpoint+path, "POST")
 	if err != nil {
@@ -65,9 +63,9 @@ func (kvc keyValueClient) Write(payload string) error {
 
 }
 
-func (kvc keyValueClient) Read() (string, error) {
+func (kvc keyValueClient) Read(dataSourceID string) (string, error) {
 
-	path := "/kv/" + kvc.dataSourceID
+	path := "/kv/" + dataSourceID
 
 	token, err := requestToken(kvc.zEndpoint+path, "GET")
 	if err != nil {
@@ -83,9 +81,9 @@ func (kvc keyValueClient) Read() (string, error) {
 
 }
 
-func (kvc keyValueClient) Observe() (<-chan string, error) {
+func (kvc keyValueClient) Observe(dataSourceID string) (<-chan string, error) {
 
-	path := "/kv/" + kvc.dataSourceID
+	path := "/kv/" + dataSourceID
 
 	token, err := requestToken(kvc.zEndpoint+path, "GET")
 	if err != nil {
