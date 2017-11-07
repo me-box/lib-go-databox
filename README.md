@@ -21,27 +21,16 @@ Examples can be found in the samples directory
 * [func ExportLongpoll(destination string, payload string) (string, error)](#ExportLongpoll)
 * [func GetHttpsCredentials() string](#GetHttpsCredentials)
 * [func JsonUnmarshal(s string) (map[string]interface{}, error)](#JsonUnmarshal)
-* [type KeyValueClient](#KeyValueClient)
-  * [func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, error)](#NewKeyValueClient)
-  * [func (kvc KeyValueClient) Observe(dataSourceID string) (&lt;-chan string, error)](#KeyValueClient.Observe)
-  * [func (kvc KeyValueClient) Read(dataSourceID string) (string, error)](#KeyValueClient.Read)
-  * [func (kvc KeyValueClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error](#KeyValueClient.RegisterDatasource)
-  * [func (kvc KeyValueClient) Write(dataSourceID string, payload string) error](#KeyValueClient.Write)
-* [type StoreMetadata](#StoreMetadata)
-* [type TimeSeriesClient](#TimeSeriesClient)
-  * [func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeriesClient, error)](#NewTimeSeriesClient)
-  * [func (tsc TimeSeriesClient) LastN(dataSourceID string, n int) (string, error)](#TimeSeriesClient.LastN)
-  * [func (tsc TimeSeriesClient) Latest(dataSourceID string) (string, error)](#TimeSeriesClient.Latest)
-  * [func (tsc TimeSeriesClient) Observe(dataSourceID string) (&lt;-chan string, error)](#TimeSeriesClient.Observe)
-  * [func (tsc TimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) (string, error)](#TimeSeriesClient.Range)
-  * [func (tsc TimeSeriesClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error](#TimeSeriesClient.RegisterDatasource)
-  * [func (tsc TimeSeriesClient) Since(dataSourceID string, sinceTimeStamp int64) (string, error)](#TimeSeriesClient.Since)
-  * [func (tsc TimeSeriesClient) Write(dataSourceID string, payload string) error](#TimeSeriesClient.Write)
-  * [func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error](#TimeSeriesClient.WriteAt)
+* [type DataSourceMetadata](#DataSourceMetadata)
+  * [func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, error)](#HypercatToDataSourceMetadata)
+* [type KeyValue_0_2_0](#KeyValue_0_2_0)
+  * [func NewKeyValueClient(reqEndpoint string, dataSourceID string, enableLogging bool) (KeyValue_0_2_0, error)](#NewKeyValueClient)
+* [type TimeSeries_0_2_0](#TimeSeries_0_2_0)
+  * [func NewTimeSeriesClient(reqEndpoint string, dataSourceID string, enableLogging bool) (TimeSeries_0_2_0, error)](#NewTimeSeriesClient)
 
 
 #### <a name="pkg-files">Package files</a>
-[export.go](/src/target/export.go) [store-core.go](/src/target/store-core.go) [utils.go](/src/target/utils.go) 
+[export.go](/src/target/export.go) [store-core-kv.go](/src/target/store-core-kv.go) [store-core-ts.go](/src/target/store-core-ts.go) [utils.go](/src/target/utils.go) 
 
 
 
@@ -75,63 +64,9 @@ to go map[string]
 
 
 
-## <a name="KeyValueClient">type</a> [KeyValueClient](/src/target/store-core.go?s=137:230#L3)
+## <a name="DataSourceMetadata">type</a> [DataSourceMetadata](/src/target/utils.go?s=3842:4081#L155)
 ``` go
-type KeyValueClient struct {
-    // contains filtered or unexported fields
-}
-```
-
-
-
-
-
-
-### <a name="NewKeyValueClient">func</a> [NewKeyValueClient](/src/target/store-core.go?s=436:522#L11)
-``` go
-func NewKeyValueClient(reqEndpoint string, enableLogging bool) (KeyValueClient, error)
-```
-NewKeyValueClient returns a new KeyValueClient to enable interaction with a key value data store
-reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
-
-
-
-
-
-### <a name="KeyValueClient.Observe">func</a> (KeyValueClient) [Observe](/src/target/store-core.go?s=1559:1636#L62)
-``` go
-func (kvc KeyValueClient) Observe(dataSourceID string) (<-chan string, error)
-```
-
-
-
-### <a name="KeyValueClient.Read">func</a> (KeyValueClient) [Read](/src/target/store-core.go?s=1211:1278#L44)
-``` go
-func (kvc KeyValueClient) Read(dataSourceID string) (string, error)
-```
-
-
-
-### <a name="KeyValueClient.RegisterDatasource">func</a> (KeyValueClient) [RegisterDatasource](/src/target/store-core.go?s=2031:2126#L82)
-``` go
-func (kvc KeyValueClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error
-```
-RegisterDatasource is used by apps and drivers to register datasource in stores they
-own.
-
-
-
-
-### <a name="KeyValueClient.Write">func</a> (KeyValueClient) [Write](/src/target/store-core.go?s=872:946#L26)
-``` go
-func (kvc KeyValueClient) Write(dataSourceID string, payload string) error
-```
-
-
-
-## <a name="StoreMetadata">type</a> [StoreMetadata](/src/target/utils.go?s=3648:3882#L148)
-``` go
-type StoreMetadata struct {
+type DataSourceMetadata struct {
     Description    string
     ContentType    string
     Vendor         string
@@ -149,13 +84,28 @@ type StoreMetadata struct {
 
 
 
-
-
-
-## <a name="TimeSeriesClient">type</a> [TimeSeriesClient](/src/target/store-core.go?s=2497:2592#L100)
+### <a name="HypercatToDataSourceMetadata">func</a> [HypercatToDataSourceMetadata](/src/target/utils.go?s=6172:6271#L220)
 ``` go
-type TimeSeriesClient struct {
-    // contains filtered or unexported fields
+func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, error)
+```
+HypercatToDataSourceMetadata is a helper function to convert the hypercat description of a datasource to a DataSourceMetadata instance
+
+
+
+
+
+## <a name="KeyValue_0_2_0">type</a> [KeyValue_0_2_0](/src/target/store-core-kv.go?s=109:458#L1)
+``` go
+type KeyValue_0_2_0 interface {
+    // Write value.
+    Write(payload string) error
+    // Read values.
+    Read() (string, error)
+    // Get notifications of updated values
+    Observe() (<-chan string, error)
+    // registerDatasource is used by apps and drivers to register data sources in stores they
+    // own.
+    RegisterDatasource(metadata DataSourceMetadata) error
 }
 ```
 
@@ -164,89 +114,58 @@ type TimeSeriesClient struct {
 
 
 
-### <a name="NewTimeSeriesClient">func</a> [NewTimeSeriesClient](/src/target/store-core.go?s=2807:2897#L108)
+### <a name="NewKeyValueClient">func</a> [NewKeyValueClient](/src/target/store-core-kv.go?s=967:1074#L24)
 ``` go
-func NewTimeSeriesClient(reqEndpoint string, enableLogging bool) (TimeSeriesClient, error)
+func NewKeyValueClient(reqEndpoint string, dataSourceID string, enableLogging bool) (KeyValue_0_2_0, error)
+```
+NewKeyValueClient returns a new KeyValueClient to enable reading and writing of key value data to the store
+reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
+dataSourceID is passed in the to apps in the environment varable and can be extracted from the hypercat
+drivers are responsible for managing their dataSourceIDs
+
+
+
+
+
+## <a name="TimeSeries_0_2_0">type</a> [TimeSeries_0_2_0](/src/target/store-core-ts.go?s=120:1588#L2)
+``` go
+type TimeSeries_0_2_0 interface {
+    // Write  will be timstamed with write time in ms since the unix epoch by the store
+    Write(payload string) error
+    // WriteAt will be timstamed with timestamp provided in ms since the unix epoch
+    WriteAt(timestamp int64, payload string) error
+    // Read the latest value.
+    // return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+    Latest() (string, error)
+    // Read the last N values.
+    // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+    LastN(n int) (string, error)
+    // Read values written after the provided timestamp in in ms since the unix epoch.
+    // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+    Since(sinceTimeStamp int64) (string, error)
+    // Read values written between the start timestamp and end timestamp in in ms since the unix epoch.
+    // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+    Range(formTimeStamp int64, toTimeStamp int64) (string, error)
+    // Get notifications when a new value is written
+    Observe() (<-chan string, error)
+    // registerDatasource is used by apps and drivers to register data sources in stores they own.
+    // the returned chan receives valuse of the form {"timestamp":213123123,"data":[data-written-by-driver]}
+    RegisterDatasource(metadata DataSourceMetadata) error
+}
+```
+
+
+
+
+
+
+### <a name="NewTimeSeriesClient">func</a> [NewTimeSeriesClient](/src/target/store-core-ts.go?s=1930:2041#L35)
+``` go
+func NewTimeSeriesClient(reqEndpoint string, dataSourceID string, enableLogging bool) (TimeSeries_0_2_0, error)
 ```
 NewTimeSeriesClient returns a new KeyTimeSeriesClient to enable interaction with a time series data store
 reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
 
-
-
-
-
-### <a name="TimeSeriesClient.LastN">func</a> (TimeSeriesClient) [LastN](/src/target/store-core.go?s=5005:5082#L184)
-``` go
-func (tsc TimeSeriesClient) LastN(dataSourceID string, n int) (string, error)
-```
-LastN will retrieve the last N entries stored at the requested datasource ID
-return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="TimeSeriesClient.Latest">func</a> (TimeSeriesClient) [Latest](/src/target/store-core.go?s=4441:4512#L164)
-``` go
-func (tsc TimeSeriesClient) Latest(dataSourceID string) (string, error)
-```
-Latest will retrieve the last entry stored at the requested datasource ID
-return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="TimeSeriesClient.Observe">func</a> (TimeSeriesClient) [Observe](/src/target/store-core.go?s=6720:6799#L242)
-``` go
-func (tsc TimeSeriesClient) Observe(dataSourceID string) (<-chan string, error)
-```
-
-
-
-### <a name="TimeSeriesClient.Range">func</a> (TimeSeriesClient) [Range](/src/target/store-core.go?s=6228:6338#L224)
-``` go
-func (tsc TimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) (string, error)
-```
-Range will retrieve all entries between  formTimeStamp and toTimeStamp timestamp in ms since unix epoch
-return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="TimeSeriesClient.RegisterDatasource">func</a> (TimeSeriesClient) [RegisterDatasource](/src/target/store-core.go?s=7194:7291#L262)
-``` go
-func (tsc TimeSeriesClient) RegisterDatasource(dataSourceID string, metadata StoreMetadata) error
-```
-RegisterDatasource is used by apps and drivers to register datasource in stores they
-own.
-
-
-
-
-### <a name="TimeSeriesClient.Since">func</a> (TimeSeriesClient) [Since](/src/target/store-core.go?s=5587:5679#L204)
-``` go
-func (tsc TimeSeriesClient) Since(dataSourceID string, sinceTimeStamp int64) (string, error)
-```
-Since will retrieve all entries since the requested timestamp (ms since unix epoch)
-return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="TimeSeriesClient.Write">func</a> (TimeSeriesClient) [Write](/src/target/store-core.go?s=3368:3444#L124)
-``` go
-func (tsc TimeSeriesClient) Write(dataSourceID string, payload string) error
-```
-Write will add data to the times series data store. Data will be time stamped at insertion (format ms since 1970)
-
-
-
-
-### <a name="TimeSeriesClient.WriteAt">func</a> (TimeSeriesClient) [WriteAt](/src/target/store-core.go?s=3866:3960#L144)
-``` go
-func (tsc TimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload string) error
-```
-WriteAt will add data to the times series data store. Data will be time stamped with the timstamp provided in the
-timstamp paramiter (format ms since 1970)
 
 
 

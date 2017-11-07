@@ -162,7 +162,7 @@ func checkTokenCache(href string, method string) (string, error) {
 	return tokenCache[routeHash], nil
 }
 
-type StoreMetadata struct {
+type DataSourceMetadata struct {
 	Description    string
 	ContentType    string
 	Vendor         string
@@ -187,4 +187,95 @@ type relValPairBool struct {
 type hypercat struct {
 	ItemMetadata []interface{} `json:"item-metadata"`
 	Href         string        `json:"href"`
+}
+
+//dataSourceMetadataToHypercat converts a DataSourceMetadata instance to json for registering a data source
+func dataSourceMetadataToHypercat(metadata DataSourceMetadata) ([]byte, error) {
+
+	if metadata.Description == "" ||
+		metadata.ContentType == "" ||
+		metadata.Vendor == "" ||
+		metadata.DataSourceType == "" ||
+		metadata.DataSourceID == "" ||
+		metadata.StoreType == "" {
+
+		return nil, errors.New("Missing required metadata")
+	}
+
+	cat := hypercat{}
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-hypercat:rels:hasDescription:en", Val: metadata.Description})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-hypercat:rels:isContentType", Val: metadata.ContentType})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasVendor", Val: metadata.Vendor})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasType", Val: metadata.DataSourceType})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasDatasourceid", Val: metadata.DataSourceID})
+	cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasStoreType", Val: metadata.StoreType})
+
+	if metadata.IsActuator {
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPairBool{Rel: "urn:X-databox:rels:isActuator", Val: true})
+	}
+
+	if metadata.Location != "" {
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasLocation", Val: metadata.Location})
+	}
+
+	if metadata.Unit != "" {
+		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasUnit", Val: metadata.Unit})
+	}
+
+	return json.Marshal(cat)
+
+}
+
+// HypercatToDataSourceMetadata is a helper function to convert the hypercat description of a datasource to a DataSourceMetadata instance
+func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, error) {
+	dm := DataSourceMetadata{}
+
+	hc := hypercat{}
+	err := json.Unmarshal([]byte(hypercatDataSourceDescription), &hc)
+	if err != nil {
+		return dm, err
+	}
+
+	for _, pair := range hc.ItemMetadata {
+		vals := pair.(map[string]interface{})
+		if vals["rel"].(string) == "urn:X-hypercat:rels:hasDescription:en" {
+			dm.Description = vals["val"].(string)
+			continue
+		}
+		if vals["rel"].(string) == "urn:X-hypercat:rels:isContentType" {
+			dm.ContentType = vals["val"].(string)
+			continue
+		}
+		if vals["rel"].(string) == "urn:X-databox:rels:hasVendor" {
+			dm.Vendor = vals["val"].(string)
+			continue
+		}
+		if vals["rel"].(string) == "urn:X-databox:rels:hasType" {
+			dm.DataSourceType = vals["val"].(string)
+			continue
+		}
+		if vals["rel"].(string) == "urn:X-databox:rels:hasDatasourceid" {
+			dm.DataSourceID = vals["val"].(string)
+			continue
+		}
+		if vals["rel"].(string) == "urn:X-databox:rels:hasStoreType" {
+			dm.StoreType = vals["val"].(string)
+			continue
+		}
+		if vals["rel"].(string) == "urn:X-databox:rels:isActuator" {
+			dm.IsActuator = vals["val"].(bool)
+			continue
+		}
+		if vals["rel"].(string) == "urn:X-databox:rels:hasLocation" {
+			dm.Location = vals["val"].(string)
+			continue
+		}
+		if vals["rel"].(string) == "urn:X-databox:rels:hasUnit" {
+			dm.Unit = vals["val"].(string)
+			continue
+		}
+
+	}
+
+	return dm, err
 }
