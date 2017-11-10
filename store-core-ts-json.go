@@ -68,6 +68,7 @@ func (tsc jSONTimeSeriesClient) Write(dataSourceID string, payload []byte) error
 
 	err = tsc.zestC.Post(token, path, payload, "JSON")
 	if err != nil {
+		invalidateCache(tsc.zEndpoint+path, "POST")
 		return errors.New("Error writing: " + err.Error())
 	}
 
@@ -90,6 +91,7 @@ func (tsc jSONTimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, pay
 
 	err = tsc.zestC.Post(token, path, payload, "JSON")
 	if err != nil {
+		invalidateCache(tsc.zEndpoint+path+"*", "POST")
 		return errors.New("Error writing: " + err.Error())
 	}
 
@@ -110,6 +112,7 @@ func (tsc jSONTimeSeriesClient) Latest(dataSourceID string) ([]byte, error) {
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "GET")
 		return []byte{}, errors.New("Error getting latest data: " + err.Error())
 	}
 
@@ -130,6 +133,7 @@ func (tsc jSONTimeSeriesClient) LastN(dataSourceID string, n int) ([]byte, error
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "GET")
 		return []byte{}, errors.New("Error getting latest data: " + err.Error())
 	}
 
@@ -150,6 +154,7 @@ func (tsc jSONTimeSeriesClient) Since(dataSourceID string, sinceTimeStamp int64)
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "GET")
 		return []byte{}, errors.New("Error getting latest data: " + err.Error())
 	}
 
@@ -170,6 +175,7 @@ func (tsc jSONTimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, 
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "GET")
 		return []byte{}, errors.New("Error getting latest data: " + err.Error())
 	}
 
@@ -188,6 +194,7 @@ func (tsc jSONTimeSeriesClient) Observe(dataSourceID string) (<-chan []byte, err
 
 	payloadChan, getErr := tsc.zestC.Observe(token, path, "JSON")
 	if getErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "GET")
 		return nil, errors.New("Error observing: " + err.Error())
 	}
 
@@ -209,6 +216,7 @@ func (tsc jSONTimeSeriesClient) RegisterDatasource(metadata DataSourceMetadata) 
 
 	writeErr := tsc.zestC.Post(token, path, hypercatJSON, "JSON")
 	if writeErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "POST")
 		return errors.New("Error writing: " + writeErr.Error())
 	}
 

@@ -54,6 +54,7 @@ func (kvc jsonKeyValueClient) Write(dataSourceID string, payload []byte) error {
 
 	err = kvc.zestClient.Post(token, path, payload, "JSON")
 	if err != nil {
+		invalidateCache(kvc.zestEndpoint+path, "POST")
 		return errors.New("Error writing data: " + err.Error())
 	}
 
@@ -70,6 +71,7 @@ func (kvc jsonKeyValueClient) Read(dataSourceID string) ([]byte, error) {
 
 	data, getErr := kvc.zestClient.Get(token, path, "JSON")
 	if getErr != nil {
+		invalidateCache(kvc.zestEndpoint+path, "POST")
 		return []byte{}, errors.New("Error reading data: " + err.Error())
 	}
 
@@ -86,6 +88,7 @@ func (kvc jsonKeyValueClient) Observe(dataSourceID string) (<-chan []byte, error
 
 	payloadChan, getErr := kvc.zestClient.Observe(token, path, "JSON")
 	if getErr != nil {
+		invalidateCache(kvc.zestEndpoint+path, "GET")
 		return nil, errors.New("Error observing: " + err.Error())
 	}
 
@@ -104,6 +107,7 @@ func (kvc jsonKeyValueClient) RegisterDatasource(metadata DataSourceMetadata) er
 
 	writeErr := kvc.zestClient.Post(token, path, hypercatJSON, "JSON")
 	if writeErr != nil {
+		invalidateCache(kvc.zestEndpoint+path, "POST")
 		return errors.New("Error writing: " + writeErr.Error())
 	}
 

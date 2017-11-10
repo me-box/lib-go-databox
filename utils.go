@@ -115,7 +115,7 @@ func requestToken(href string, method string) (string, error) {
 	if err != nil {
 		return href, err1
 	}
-	//TODO invalidate the cache
+
 	routeHash := s.ToUpper(href) + method
 	token, exists := tokenCache[routeHash]
 	if !exists {
@@ -130,6 +130,13 @@ func requestToken(href string, method string) (string, error) {
 	}
 
 	return token, err
+}
+
+func invalidateCache(href string, method string) {
+
+	routeHash := s.ToUpper(href) + method
+	delete(tokenCache, routeHash)
+
 }
 
 func checkTokenCache(href string, method string) (string, error) {
