@@ -79,19 +79,6 @@ func GetHttpsCredentials() string {
 	return string("/run/secrets/DATABOX.pem")
 }
 
-//JsonUnmarshal is a helper function to translate JSON stringified environment variable
-//to go map[string]
-func JsonUnmarshal(s string) (map[string]interface{}, error) {
-
-	byt := []byte(s)
-	var dat map[string]interface{}
-	if err := json.Unmarshal(byt, &dat); err != nil {
-		return nil, err
-	}
-
-	return dat, nil
-}
-
 func makeArbiterRequest(arbMethod string, path string, hostname string, endpoint string, method string) (string, int) {
 
 	var jsonStr = []byte(`{"target":"` + hostname + `","path":"` + endpoint + `","method":"` + method + `"}`)
