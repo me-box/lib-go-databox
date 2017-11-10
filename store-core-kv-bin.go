@@ -64,13 +64,13 @@ func (kvc binaryKeyValueClient) Read(dataSourceID string) ([]byte, error) {
 
 	token, err := requestToken(kvc.zestEndpoint+path, "POST")
 	if err != nil {
-		return []byte{}, err
+		return []byte(""), err
 	}
 
 	data, getErr := kvc.zestClient.Get(token, path, "BINARY")
 	if getErr != nil {
 		invalidateCache(kvc.zestEndpoint+path, "POST")
-		return []byte{}, errors.New("Error reading data: " + err.Error())
+		return []byte(""), errors.New("Error reading data: " + err.Error())
 	}
 
 	return data, nil

@@ -107,13 +107,13 @@ func (tsc jSONTimeSeriesClient) Latest(dataSourceID string) ([]byte, error) {
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
-		return []byte{}, err
+		return []byte(""), err
 	}
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(tsc.zEndpoint+path, "GET")
-		return []byte{}, errors.New("Error getting latest data: " + err.Error())
+		return []byte(""), errors.New("Error getting latest data: " + err.Error())
 	}
 
 	return resp, nil
@@ -128,13 +128,13 @@ func (tsc jSONTimeSeriesClient) LastN(dataSourceID string, n int) ([]byte, error
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
-		return []byte{}, err
+		return []byte(""), err
 	}
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(tsc.zEndpoint+path, "GET")
-		return []byte{}, errors.New("Error getting latest data: " + err.Error())
+		return []byte(""), errors.New("Error getting latest data: " + err.Error())
 	}
 
 	return resp, nil
@@ -149,13 +149,13 @@ func (tsc jSONTimeSeriesClient) Since(dataSourceID string, sinceTimeStamp int64)
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
-		return []byte{}, err
+		return []byte(""), err
 	}
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(tsc.zEndpoint+path, "GET")
-		return []byte{}, errors.New("Error getting latest data: " + err.Error())
+		return []byte(""), errors.New("Error getting latest data: " + err.Error())
 	}
 
 	return resp, nil
@@ -170,13 +170,13 @@ func (tsc jSONTimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, 
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
-		return []byte{}, err
+		return []byte(""), err
 	}
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(tsc.zEndpoint+path, "GET")
-		return []byte{}, errors.New("Error getting latest data: " + err.Error())
+		return []byte(""), errors.New("Error getting latest data: " + err.Error())
 	}
 
 	return resp, nil
