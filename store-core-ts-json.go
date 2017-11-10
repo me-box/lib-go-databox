@@ -112,7 +112,7 @@ func (tsc jSONTimeSeriesClient) Latest(dataSourceID string) ([]byte, error) {
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
-		invalidateCache(tsc.zEndpoint+path, "GET")
+		//invalidateCache(tsc.zEndpoint+path, "GET")
 		return []byte(""), errors.New("Error getting latest data: " + err.Error())
 	}
 
