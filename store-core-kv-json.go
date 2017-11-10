@@ -70,7 +70,7 @@ func (kvc jsonKeyValueClient) Read(dataSourceID string) ([]byte, error) {
 	data, getErr := kvc.zestClient.Get(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(kvc.zestEndpoint+path, "POST")
-		return []byte(""), errors.New("Error reading data: " + err.Error())
+		return []byte(""), errors.New("Error reading data: " + getErr.Error())
 	}
 
 	return data, nil
@@ -87,7 +87,7 @@ func (kvc jsonKeyValueClient) Observe(dataSourceID string) (<-chan []byte, error
 	payloadChan, getErr := kvc.zestClient.Observe(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(kvc.zestEndpoint+path, "GET")
-		return nil, errors.New("Error observing: " + err.Error())
+		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
 	return payloadChan, nil

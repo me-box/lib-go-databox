@@ -70,7 +70,7 @@ func (kvc textKeyValueClient) Read(dataSourceID string) (string, error) {
 	data, getErr := kvc.zestClient.Get(token, path, "TEXT")
 	if getErr != nil {
 		invalidateCache(kvc.zestEndpoint+path, "POST")
-		return "", errors.New("Error reading data: " + err.Error())
+		return "", errors.New("Error reading data: " + getErr.Error())
 	}
 
 	return string(data), nil
@@ -87,7 +87,7 @@ func (kvc textKeyValueClient) Observe(dataSourceID string) (<-chan string, error
 	payloadChan, getErr := kvc.zestClient.Observe(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(kvc.zestEndpoint+path, "GET")
-		return nil, errors.New("Error observing: " + err.Error())
+		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
 	stringChan := make(chan string)

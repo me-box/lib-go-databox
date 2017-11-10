@@ -2,7 +2,6 @@ package libDatabox
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -113,9 +112,8 @@ func (tsc jSONTimeSeriesClient) Latest(dataSourceID string) ([]byte, error) {
 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
-		//invalidateCache(tsc.zEndpoint+path, "GET")
-		fmt.Println("TOSH::", err.Error())
-		return []byte(""), errors.New("Error getting latest data: " + err.Error())
+		invalidateCache(tsc.zEndpoint+path, "GET")
+		return []byte(""), errors.New("Error getting latest data: " + getErr.Error())
 	}
 
 	return resp, nil
@@ -136,7 +134,7 @@ func (tsc jSONTimeSeriesClient) LastN(dataSourceID string, n int) ([]byte, error
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(tsc.zEndpoint+path, "GET")
-		return []byte(""), errors.New("Error getting latest data: " + err.Error())
+		return []byte(""), errors.New("Error getting latest data: " + getErr.Error())
 	}
 
 	return resp, nil
@@ -157,7 +155,7 @@ func (tsc jSONTimeSeriesClient) Since(dataSourceID string, sinceTimeStamp int64)
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(tsc.zEndpoint+path, "GET")
-		return []byte(""), errors.New("Error getting latest data: " + err.Error())
+		return []byte(""), errors.New("Error getting latest data: " + getErr.Error())
 	}
 
 	return resp, nil
@@ -178,7 +176,7 @@ func (tsc jSONTimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, 
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(tsc.zEndpoint+path, "GET")
-		return []byte(""), errors.New("Error getting latest data: " + err.Error())
+		return []byte(""), errors.New("Error getting latest data: " + getErr.Error())
 	}
 
 	return resp, nil
@@ -197,7 +195,7 @@ func (tsc jSONTimeSeriesClient) Observe(dataSourceID string) (<-chan []byte, err
 	payloadChan, getErr := tsc.zestC.Observe(token, path, "JSON")
 	if getErr != nil {
 		invalidateCache(tsc.zEndpoint+path, "GET")
-		return nil, errors.New("Error observing: " + err.Error())
+		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
 	return payloadChan, nil
