@@ -27,8 +27,6 @@ type textKeyValueClient struct {
 
 // NewTextKeyValueClient returns a new TextKeyValue_0_2_0 to enable reading and writing of string data key value to the store
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
-// dataSourceID is passed in the to apps in the environment varable and can be extracted from the hypercat
-// drivers are responsible for managing their dataSourceIDs
 func NewTextKeyValueClient(reqEndpoint string, enableLogging bool) (TextKeyValue_0_2_0, error) {
 
 	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")

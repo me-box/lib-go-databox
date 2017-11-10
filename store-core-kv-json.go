@@ -27,8 +27,6 @@ type jsonKeyValueClient struct {
 
 // NewJSONKeyValueClient returns a new NewJSONKeyValueClient to enable reading and writing of JSON data key value to the store
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
-// dataSourceID is passed in the to apps in the environment varable and can be extracted from the hypercat
-// drivers are responsible for managing their dataSourceIDs
 func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_2_0, error) {
 
 	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
