@@ -2,6 +2,7 @@ package libDatabox
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -113,6 +114,7 @@ func (tsc jSONTimeSeriesClient) Latest(dataSourceID string) ([]byte, error) {
 	resp, getErr := tsc.zestC.Get(token, path, "JSON")
 	if getErr != nil {
 		//invalidateCache(tsc.zEndpoint+path, "GET")
+		fmt.Println("TOSH::", err.Error())
 		return []byte(""), errors.New("Error getting latest data: " + err.Error())
 	}
 
