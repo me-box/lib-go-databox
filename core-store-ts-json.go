@@ -16,9 +16,15 @@ type JSONTimeSeries_0_2_0 interface {
 	// Read the latest value.
 	// return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
 	Latest(dataSourceID string) ([]byte, error)
+	// Read the earliest value.
+	// return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+	Earliest(dataSourceID string) ([]byte, error)
 	// Read the last N values.
 	// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
 	LastN(dataSourceID string, n int) ([]byte, error)
+	// Read the first N values.
+	// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+	FirstN(dataSourceID string, n int) ([]byte, error)
 	// Read values written after the provided timestamp in in ms since the unix epoch.
 	// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
 	Since(dataSourceID string, sinceTimeStamp int64) ([]byte, error)
@@ -116,11 +122,53 @@ func (tsc jSONTimeSeriesClient) Latest(dataSourceID string) ([]byte, error) {
 
 }
 
+// Earliest will retrieve the first entry stored at the requested datasource ID
+// return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+func (tsc jSONTimeSeriesClient) Earliest(dataSourceID string) ([]byte, error) {
+
+	path := "/ts/" + dataSourceID + "/earliest"
+
+	token, err := requestToken(tsc.zEndpoint+path, "GET")
+	if err != nil {
+		return []byte(""), err
+	}
+
+	resp, getErr := tsc.zestC.Get(token, path, "JSON")
+	if getErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "GET")
+		return []byte(""), errors.New("Error getting earliest data: " + getErr.Error())
+	}
+
+	return resp, nil
+
+}
+
 // LastN will retrieve the last N entries stored at the requested datasource ID
 // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
 func (tsc jSONTimeSeriesClient) LastN(dataSourceID string, n int) ([]byte, error) {
 
 	path := "/ts/" + dataSourceID + "/last/" + strconv.Itoa(n)
+
+	token, err := requestToken(tsc.zEndpoint+path, "GET")
+	if err != nil {
+		return []byte(""), err
+	}
+
+	resp, getErr := tsc.zestC.Get(token, path, "JSON")
+	if getErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "GET")
+		return []byte(""), errors.New("Error getting latest data: " + getErr.Error())
+	}
+
+	return resp, nil
+
+}
+
+// FirstN will retrieve the first N entries stored at the requested datasource ID
+// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+func (tsc jSONTimeSeriesClient) FirstN(dataSourceID string, n int) ([]byte, error) {
+
+	path := "/ts/" + dataSourceID + "/first/" + strconv.Itoa(n)
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
