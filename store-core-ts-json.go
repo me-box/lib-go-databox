@@ -2,7 +2,6 @@ package libDatabox
 
 import (
 	"errors"
-	"io/ioutil"
 	"strconv"
 	"strings"
 
@@ -43,15 +42,12 @@ type jSONTimeSeriesClient struct {
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
 func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_2_0, error) {
 
-	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
-	if err != nil {
-		return jSONTimeSeriesClient{}, err
-	}
+	var err error
 
 	tsc := jSONTimeSeriesClient{}
 	tsc.zEndpoint = reqEndpoint
 	tsc.dEndpoint = strings.Replace(reqEndpoint, ":5555", ":5556", 1)
-	tsc.zestC, err = zest.New(tsc.zEndpoint, tsc.dEndpoint, string(serverKey), enableLogging)
+	tsc.zestC, err = zest.New(tsc.zEndpoint, tsc.dEndpoint, getServerKey(), enableLogging)
 
 	return tsc, err
 }
