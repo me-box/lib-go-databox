@@ -123,7 +123,6 @@ func TestLastN(t *testing.T) {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	//time.Sleep(time.Millisecond * 100)
 	result, err := tsc.LastN(dsID, 2)
 	if err != nil {
 		t.Errorf("Call to LastN failed with error %s", err.Error())
@@ -188,5 +187,40 @@ func TestFirstN(t *testing.T) {
 	cont = s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to FirstN failed expected %s but got %s", expected, result)
+	}
+}
+
+func TestWriteAtAndRange(t *testing.T) {
+
+	now := time.Now().UnixNano() / int64(time.Millisecond)
+	numRecords := 20
+	timeStepMs := 50
+
+	for i := 1; i <= numRecords; i++ {
+		err := tsc.WriteAt(dsID, now+int64(timeStepMs*i), []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
+		if err != nil {
+			t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
+		}
+	}
+
+	result, err := tsc.Range(dsID, now, now+int64(numRecords*timeStepMs))
+	if err != nil {
+		t.Errorf("Call to Range failed with error %s", err.Error())
+	}
+
+	expected := []byte(`{"test":"data1"}`)
+	cont := s.Contains(string(result), string(expected))
+	if cont != true {
+		t.Errorf("TestWriteAtAndRange failed expected %s but got %s", expected, result)
+	}
+	expected = []byte(`{"test":"data5"}`)
+	cont = s.Contains(string(result), string(expected))
+	if cont != true {
+		t.Errorf("TestWriteAtAndRange failed expected %s but got %s", expected, result)
+	}
+	expected = []byte(`{"test":"data` + strconv.Itoa(numRecords) + `"}`)
+	cont = s.Contains(string(result), string(expected))
+	if cont != true {
+		t.Errorf("TestWriteAtAndRange failed expected %s but got %s", expected, result)
 	}
 }
