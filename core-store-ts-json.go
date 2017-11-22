@@ -36,6 +36,8 @@ type JSONTimeSeries_0_2_0 interface {
 	Observe(dataSourceID string) (<-chan []byte, error)
 	// registerDatasource is used by apps and drivers to register data sources in stores they own.
 	RegisterDatasource(metadata DataSourceMetadata) error
+	// GetDatasourceCatalogue is used by drivers to get a list of registered data sources in stores they own.
+	GetDatasourceCatalogue() ([]byte, error)
 }
 
 type jSONTimeSeriesClient struct {
@@ -265,4 +267,21 @@ func (tsc jSONTimeSeriesClient) RegisterDatasource(metadata DataSourceMetadata) 
 	}
 
 	return nil
+}
+
+func (tsc jSONTimeSeriesClient) GetDatasourceCatalogue() ([]byte, error) {
+	path := "/cat"
+
+	token, err := requestToken(tsc.zEndpoint+path, "GET")
+	if err != nil {
+		return nil, err
+	}
+
+	hypercatJSON, getErr := tsc.zestC.Get(token, path, "JSON")
+	if getErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "GET")
+		return []byte{}, errors.New("Error reading: " + getErr.Error())
+	}
+
+	return hypercatJSON, nil
 }

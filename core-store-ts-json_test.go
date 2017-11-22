@@ -254,3 +254,31 @@ func TestWriteAtAndRange(t *testing.T) {
 		t.Errorf("TestWriteAtAndRange failed expected %s but got %s", expected, result)
 	}
 }
+
+func TestRegisterDatasource(t *testing.T) {
+
+	dsmd := DataSourceMetadata{
+		DataSourceID:   dsID,
+		Vendor:         "testing",
+		ContentType:    "application/json",
+		StoreType:      "ts",
+		Description:    "A test DS",
+		DataSourceType: "test",
+	}
+
+	err := tsc.RegisterDatasource(dsmd)
+	if err != nil {
+		t.Errorf("RegisterDatasource failed expected err to be nil got %s", err.Error())
+	}
+
+	catByteArray, getErr := tsc.GetDatasourceCatalogue()
+	if getErr != nil {
+		t.Errorf("GetDatasourceCatalogue failed expected err to be nil got %s", getErr.Error())
+	}
+
+	dsmdByteArray, _ := dataSourceMetadataToHypercat(dsmd)
+	cont := s.Contains(string(catByteArray), string(dsmdByteArray))
+	if cont != true {
+		t.Errorf("GetDatasourceCatalogue Error '%s' does not contain  %s", string(catByteArray), string(dsmdByteArray))
+	}
+}
