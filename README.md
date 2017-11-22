@@ -149,7 +149,7 @@ reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to datab
 
 
 
-## <a name="JSONTimeSeries_0_2_0">type</a> [JSONTimeSeries_0_2_0](/src/target/core-store-ts-json.go?s=107:1726#L1)
+## <a name="JSONTimeSeries_0_2_0">type</a> [JSONTimeSeries_0_2_0](/src/target/core-store-ts-json.go?s=107:2249#L1)
 ``` go
 type JSONTimeSeries_0_2_0 interface {
     // Write  will be timestamped with write time in ms since the unix epoch by the store
@@ -159,9 +159,15 @@ type JSONTimeSeries_0_2_0 interface {
     // Read the latest value.
     // return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
     Latest(dataSourceID string) ([]byte, error)
+    // Read the earliest value.
+    // return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+    Earliest(dataSourceID string) ([]byte, error)
     // Read the last N values.
     // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
     LastN(dataSourceID string, n int) ([]byte, error)
+    // Read the first N values.
+    // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+    FirstN(dataSourceID string, n int) ([]byte, error)
     // Read values written after the provided timestamp in in ms since the unix epoch.
     // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
     Since(dataSourceID string, sinceTimeStamp int64) ([]byte, error)
@@ -173,6 +179,8 @@ type JSONTimeSeries_0_2_0 interface {
     Observe(dataSourceID string) (<-chan []byte, error)
     // registerDatasource is used by apps and drivers to register data sources in stores they own.
     RegisterDatasource(metadata DataSourceMetadata) error
+    // GetDatasourceCatalogue is used by drivers to get a list of registered data sources in stores they own.
+    GetDatasourceCatalogue() ([]byte, error)
 }
 ```
 
@@ -181,7 +189,7 @@ type JSONTimeSeries_0_2_0 interface {
 
 
 
-### <a name="NewJSONTimeSeriesClient">func</a> [NewJSONTimeSeriesClient](/src/target/core-store-ts-json.go?s=2062:2160#L33)
+### <a name="NewJSONTimeSeriesClient">func</a> [NewJSONTimeSeriesClient](/src/target/core-store-ts-json.go?s=2585:2683#L41)
 ``` go
 func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_2_0, error)
 ```

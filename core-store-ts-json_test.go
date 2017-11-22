@@ -282,3 +282,55 @@ func TestRegisterDatasource(t *testing.T) {
 		t.Errorf("GetDatasourceCatalogue Error '%s' does not contain  %s", string(catByteArray), string(dsmdByteArray))
 	}
 }
+
+func TestConcurrentWriteAndRead(t *testing.T) {
+
+	doneChanWrite := make(chan int)
+	doneChanRead := make(chan int)
+	now := time.Now().UnixNano() / int64(time.Millisecond)
+	numRecords := 20
+	timeStepMs := 50
+
+	go func() {
+		for i := 1; i <= numRecords; i++ {
+			err := tsc.WriteAt(dsID, now+int64(timeStepMs*i), []byte("{\"TestConcurrentWriteAndRead\":\"data"+strconv.Itoa(i)+"\"}"))
+			if err != nil {
+				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
+			}
+			//fmt.Println(string("written " + strconv.Itoa(i)))
+		}
+		doneChanWrite <- 1
+	}()
+
+	go func() {
+		numRecords := 20
+		for i := 1; i <= numRecords; i++ {
+			_, err := tsc.Latest(dsID)
+			if err != nil {
+				t.Errorf("Latest failed expected err to be nil got %s", err.Error())
+			}
+			//fmt.Println(string(data))
+		}
+		doneChanRead <- 1
+	}()
+
+	<-doneChanWrite
+	<-doneChanRead
+
+	//Wait for store to catchup
+	//TODO talk to john about this
+	time.Sleep(time.Second * 1)
+
+	result, err := tsc.LastN(dsID, numRecords)
+	if err != nil {
+		t.Errorf("Call to LastN failed with error %s", err.Error())
+	}
+	for i := 1; i <= numRecords; i++ {
+		expected := []byte("{\"TestConcurrentWriteAndRead\":\"data" + strconv.Itoa(i) + "\"}")
+		cont := s.Contains(string(result), string(expected))
+		if cont != true {
+			t.Errorf("LastN Error '%s' does not contain  %s", string(result), string(expected))
+			break
+		}
+	}
+}
