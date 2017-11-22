@@ -103,7 +103,7 @@ func TestWriteLots(t *testing.T) {
 func TestWriteThenWriteAT(t *testing.T) {
 
 	for i := 1; i <= 10; i++ {
-		err := tsc.Write(dsID, []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
+		err := tsc.Write(dsID, []byte("{\"TestWriteThenWriteAT\":\"data"+strconv.Itoa(i)+"\"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 		}
@@ -111,12 +111,12 @@ func TestWriteThenWriteAT(t *testing.T) {
 
 	now := time.Now().UnixNano()
 
-	err := tsc.WriteAt(dsID, now+20, []byte("{\"test\":\"data11\"}"))
+	err := tsc.WriteAt(dsID, now+20, []byte("{\"TestWriteThenWriteAT\":\"data11\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	err = tsc.WriteAt(dsID, now+40, []byte("{\"test\":\"data12\"}"))
+	err = tsc.WriteAt(dsID, now+40, []byte("{\"TestWriteThenWriteAT\":\"data12\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
@@ -126,13 +126,13 @@ func TestWriteThenWriteAT(t *testing.T) {
 		t.Errorf("Call to LastN failed with error %s", err.Error())
 	}
 
-	expected := []byte(`{"test":"data11"}`)
+	expected := []byte(`{"TestWriteThenWriteAT":"data11"}`)
 	cont := s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to LastN failed expected %s but got %s", expected, result)
 	}
 
-	expected = []byte(`{"test":"data12"}`)
+	expected = []byte(`{"TestWriteThenWriteAT":"data12"}`)
 	cont = s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to LastN failed expected %s but got %s", expected, result)
@@ -227,6 +227,7 @@ func TestWriteAtAndRange(t *testing.T) {
 	timeStepMs := 50
 
 	for i := 1; i <= numRecords; i++ {
+
 		err := tsc.WriteAt(dsID, now+int64(timeStepMs*i), []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
 		if err != nil {
 			t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
@@ -287,13 +288,12 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 
 	doneChanWrite := make(chan int)
 	doneChanRead := make(chan int)
-	now := time.Now().UnixNano() / int64(time.Millisecond)
+	//now := time.Now().UnixNano() / int64(time.Millisecond)
 	numRecords := 20
-	timeStepMs := 50
 
 	go func() {
 		for i := 1; i <= numRecords; i++ {
-			err := tsc.WriteAt(dsID, now+int64(timeStepMs*i), []byte("{\"TestConcurrentWriteAndRead\":\"data"+strconv.Itoa(i)+"\"}"))
+			err := tsc.Write(dsID, []byte("{\"TestConcurrentWriteAndRead\":\"data"+strconv.Itoa(i)+"\"}"))
 			if err != nil {
 				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 			}
