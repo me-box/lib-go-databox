@@ -22,6 +22,7 @@ import (
 	"os"
 	"strconv"
 	s "strings"
+	"sync"
 	"time"
 )
 
@@ -131,6 +132,7 @@ func makeArbiterRequest(arbMethod string, path string, hostname string, endpoint
 }
 
 var tokenCache = make(map[string]string)
+var tokenCacheMutex = &sync.Mutex{}
 
 func requestToken(href string, method string) (string, error) {
 
@@ -154,7 +156,9 @@ func requestToken(href string, method string) (string, error) {
 			err = errors.New(strconv.Itoa(status) + ": " + token)
 			return "", err
 		}
+		tokenCacheMutex.Lock()
 		tokenCache[routeHash] = token
+		tokenCacheMutex.Unlock()
 	}
 
 	return token, err
@@ -162,8 +166,10 @@ func requestToken(href string, method string) (string, error) {
 
 func invalidateCache(href string, method string) {
 
+	tokenCacheMutex.Lock()
 	routeHash := s.ToUpper(href) + method
 	delete(tokenCache, routeHash)
+	tokenCacheMutex.Unlock()
 
 }
 
@@ -179,7 +185,10 @@ func checkTokenCache(href string, method string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		tokenCacheMutex.Lock()
 		tokenCache[routeHash] = newToken
+		tokenCacheMutex.Unlock()
+
 	}
 	return tokenCache[routeHash], nil
 }

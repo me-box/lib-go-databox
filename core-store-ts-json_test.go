@@ -1,6 +1,7 @@
 package libDatabox
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	s "strings"
@@ -102,24 +103,33 @@ func TestWriteLots(t *testing.T) {
 
 func TestWriteThenWriteAT(t *testing.T) {
 
+	now := time.Now().UnixNano() / int64(time.Millisecond)
+
 	for i := 1; i <= 10; i++ {
+		//err := tsc.WriteAt(dsID, now+int64(i), []byte("{\"TestWriteThenWriteAT\":\"data"+strconv.Itoa(i)+"\"}"))
 		err := tsc.Write(dsID, []byte("{\"TestWriteThenWriteAT\":\"data"+strconv.Itoa(i)+"\"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 		}
 	}
 
-	now := time.Now().UnixNano()
+	//time.Sleep(time.Second * 2)
 
-	err := tsc.WriteAt(dsID, now+20, []byte("{\"TestWriteThenWriteAT\":\"data11\"}"))
+	now = time.Now().UnixNano() / int64(time.Millisecond)
+	fmt.Println(now + 1000)
+	err := tsc.WriteAt(dsID, now+1000, []byte("{\"TestWriteThenWriteAT\":\"data11\"}"))
+	//err := tsc.Write(dsID, []byte("{\"TestWriteThenWriteAT\":\"data11\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	err = tsc.WriteAt(dsID, now+40, []byte("{\"TestWriteThenWriteAT\":\"data12\"}"))
+	err = tsc.WriteAt(dsID, now+1001, []byte("{\"TestWriteThenWriteAT\":\"data12\"}"))
+	//err = tsc.Write(dsID, []byte("{\"TestWriteThenWriteAT\":\"data12\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
+
+	//time.Sleep(time.Second * 5)
 
 	result, err := tsc.LastN(dsID, 2)
 	if err != nil {
@@ -144,11 +154,11 @@ func TestLastN(t *testing.T) {
 
 	now := time.Now().UnixNano() / int64(time.Millisecond)
 
-	err := tsc.WriteAt(dsID, now+20, []byte("{\"test\":\"data11\"}"))
+	err := tsc.WriteAt(dsID, now+20, []byte("{\"TestLastN\":\"data11\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.WriteAt(dsID, now+40, []byte("{\"test\":\"data12\"}"))
+	err = tsc.WriteAt(dsID, now+40, []byte("{\"TestLastN\":\"data12\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
@@ -158,13 +168,13 @@ func TestLastN(t *testing.T) {
 		t.Errorf("Call to LastN failed with error %s", err.Error())
 	}
 
-	expected := []byte(`{"test":"data11"}`)
+	expected := []byte(`{"TestLastN":"data11"}`)
 	cont := s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to LastN failed expected %s but got %s", expected, result)
 	}
 
-	expected = []byte(`{"test":"data12"}`)
+	expected = []byte(`{"TestLastN":"data12"}`)
 	cont = s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to LastN failed expected %s but got %s", expected, result)
@@ -174,7 +184,7 @@ func TestLastN(t *testing.T) {
 func TestEarliest(t *testing.T) {
 
 	for i := 1; i <= 10; i++ {
-		err := tsc.Write(dsID+"TestEarliest", []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
+		err := tsc.Write(dsID+"TestEarliest", []byte("{\"TestEarliest\":\"data"+strconv.Itoa(i)+"\"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestEarliest", err.Error())
 		}
@@ -185,7 +195,7 @@ func TestEarliest(t *testing.T) {
 		t.Errorf("Call to Earliest failed with error %s", err.Error())
 	}
 
-	expected := []byte(`{"test":"data1"}`)
+	expected := []byte(`{"TestEarliest":"data1"}`)
 	cont := s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to Earliest failed expected %s but got %s", expected, result)
@@ -196,7 +206,7 @@ func TestEarliest(t *testing.T) {
 func TestFirstN(t *testing.T) {
 
 	for i := 1; i <= 10; i++ {
-		err := tsc.Write(dsID+"TestFirstN", []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
+		err := tsc.Write(dsID+"TestFirstN", []byte("{\"TestFirstN\":\"data"+strconv.Itoa(i)+"\"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestFirstN", err.Error())
 		}
@@ -207,13 +217,13 @@ func TestFirstN(t *testing.T) {
 		t.Errorf("Call to FirstN failed with error %s", err.Error())
 	}
 
-	expected := []byte(`{"test":"data1"}`)
+	expected := []byte(`{"TestFirstN":"data1"}`)
 	cont := s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to FirstN failed expected %s but got %s", expected, result)
 	}
 
-	expected = []byte(`{"test":"data2"}`)
+	expected = []byte(`{"TestFirstN":"data2"}`)
 	cont = s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to FirstN failed expected %s but got %s", expected, result)
@@ -289,7 +299,7 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 	doneChanWrite := make(chan int)
 	doneChanRead := make(chan int)
 	//now := time.Now().UnixNano() / int64(time.Millisecond)
-	numRecords := 20
+	numRecords := 100
 
 	go func() {
 		for i := 1; i <= numRecords; i++ {
@@ -297,29 +307,24 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 			if err != nil {
 				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 			}
-			//fmt.Println(string("written " + strconv.Itoa(i)))
+			//fmt.Println(string("written:: " + strconv.Itoa(i)))
 		}
 		doneChanWrite <- 1
 	}()
 
 	go func() {
-		numRecords := 20
 		for i := 1; i <= numRecords; i++ {
 			_, err := tsc.Latest(dsID)
 			if err != nil {
 				t.Errorf("Latest failed expected err to be nil got %s", err.Error())
 			}
-			//fmt.Println(string(data))
+			//fmt.Println("Got:: ", string(data))
 		}
 		doneChanRead <- 1
 	}()
 
 	<-doneChanWrite
 	<-doneChanRead
-
-	//Wait for store to catchup
-	//TODO talk to john about this
-	time.Sleep(time.Second * 1)
 
 	result, err := tsc.LastN(dsID, numRecords)
 	if err != nil {
