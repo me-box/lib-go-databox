@@ -84,7 +84,7 @@ func (kvc jsonKeyValueClient) Observe(dataSourceID string) (<-chan []byte, error
 		return nil, err
 	}
 
-	payloadChan, getErr := kvc.zestClient.Observe(token, path, "JSON")
+	payloadChan, getErr := kvc.zestClient.Observe(token, path, "JSON", 0)
 	if getErr != nil {
 		invalidateCache(kvc.zestEndpoint+path, "GET")
 		return nil, errors.New("Error observing: " + getErr.Error())

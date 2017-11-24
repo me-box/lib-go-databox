@@ -238,7 +238,7 @@ func (tsc jSONTimeSeriesClient) Observe(dataSourceID string) (<-chan []byte, err
 		return nil, err
 	}
 
-	payloadChan, getErr := tsc.zestC.Observe(token, path, "JSON")
+	payloadChan, getErr := tsc.zestC.Observe(token, path, "JSON", 0)
 	if getErr != nil {
 		invalidateCache(tsc.zEndpoint+path, "GET")
 		return nil, errors.New("Error observing: " + getErr.Error())

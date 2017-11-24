@@ -84,7 +84,7 @@ func (kvc binaryKeyValueClient) Observe(dataSourceID string) (<-chan []byte, err
 		return nil, err
 	}
 
-	payloadChan, getErr := kvc.zestClient.Observe(token, path, "BINARY")
+	payloadChan, getErr := kvc.zestClient.Observe(token, path, "BINARY", 0)
 	if getErr != nil {
 		invalidateCache(kvc.zestEndpoint+path, "GET")
 		return nil, errors.New("Error observing: " + getErr.Error())
