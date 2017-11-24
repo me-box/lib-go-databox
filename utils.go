@@ -309,5 +309,19 @@ func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSou
 
 	}
 
-	return dm, hc.Href, err
+	url, getStoreURLErr := getStoreURLFromDsHref(hc.Href)
+
+	return dm, url, getStoreURLErr
+}
+
+// GetStoreURLFromDsHref extracts the base store url from the href provied in the hypercat descriptions.
+func getStoreURLFromDsHref(href string) (string, error) {
+
+	u, err := url.Parse(href)
+	if err != nil {
+		return "", err
+	}
+
+	return u.Scheme + "://" + u.Host, nil
+
 }
