@@ -258,13 +258,14 @@ func dataSourceMetadataToHypercat(metadata DataSourceMetadata) ([]byte, error) {
 }
 
 // HypercatToDataSourceMetadata is a helper function to convert the hypercat description of a datasource to a DataSourceMetadata instance
-func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, error) {
+// Also returns the store url for this data source.
+func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error) {
 	dm := DataSourceMetadata{}
 
 	hc := hypercat{}
 	err := json.Unmarshal([]byte(hypercatDataSourceDescription), &hc)
 	if err != nil {
-		return dm, err
+		return dm, "", err
 	}
 
 	for _, pair := range hc.ItemMetadata {
@@ -308,5 +309,5 @@ func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSou
 
 	}
 
-	return dm, err
+	return dm, hc.Href, err
 }
