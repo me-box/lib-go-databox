@@ -1,2 +1,10 @@
 
 \.DS_Store
+
+cpu\.out
+
+mem\.out
+
+trace\.out
+
+lib-go-databox\.test

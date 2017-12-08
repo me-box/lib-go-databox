@@ -8,32 +8,32 @@ import (
 	"os"
 	"time"
 
-	databox "github.com/me-box/lib-go-databox"
+	databox "github.com/toshbrown/lib-go-databox"
 )
 
-var dataStoreHref = os.Getenv("DATABOX_STORE_ENDPOINT")
+var storeEndPoint = os.Getenv("DATABOX_ZMQ_ENDPOINT")
 
 func main() {
 
-	//Wait for your store to be created. Then you can read and write values into it.
-	databox.WaitForStoreStatus(dataStoreHref)
+	tsClient, err := databox.NewJSONTimeSeriesClient(storeEndPoint, false)
+	if err != nil {
+		panic("Can't connect to databox store at " + storeEndPoint)
+	}
 
 	//Register your data source so apps can find it
-	_, err := databox.RegisterDatasource(dataStoreHref, databox.StoreMetadata{
+	testDataSource := databox.DataSourceMetadata{
 		Description:    "Hello world test data",
 		ContentType:    "application/json",
 		Vendor:         "databox",
 		DataSourceType: "test",
 		DataSourceID:   "test",
-		StoreType:      "ts",
+		StoreType:      "timseries",
 		IsActuator:     false,
-	})
-
-	if err != nil {
-		panic(err)
 	}
-
-	var dataSourceHref = dataStoreHref + "/test"
+	err = tsClient.RegisterDatasource(testDataSource)
+	if err != nil {
+		panic("Can't register data source with store: " + err.Error())
+	}
 
 	//write in some data
 	go func() {
@@ -41,7 +41,7 @@ func main() {
 		for {
 			var data = map[string]string{"data": "Hello World " + time.Now().Format(time.RFC850) + " !"}
 			res, _ := json.Marshal(data)
-			databox.StoreJSONWriteTS(dataSourceHref, string(res[:]))
+			tsClient.Write(testDataSource.DataSourceID, res)
 			time.Sleep(1000 * time.Millisecond)
 		}
 
