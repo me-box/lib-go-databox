@@ -101,7 +101,7 @@ func (kvc jsonKeyValueClient) RegisterDatasource(metadata DataSourceMetadata) er
 	if err != nil {
 		return errors.New("Error getting token: " + err.Error())
 	}
-	hypercatJSON, err := dataSourceMetadataToHypercat(metadata, kvc.zestEndpoint)
+	hypercatJSON, err := dataSourceMetadataToHypercat(metadata, kvc.zestEndpoint+"/kv/")
 
 	writeErr := kvc.zestClient.Post(token, path, hypercatJSON, "JSON")
 	if writeErr != nil {
