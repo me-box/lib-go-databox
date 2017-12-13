@@ -221,7 +221,7 @@ type hypercat struct {
 }
 
 //dataSourceMetadataToHypercat converts a DataSourceMetadata instance to json for registering a data source
-func dataSourceMetadataToHypercat(metadata DataSourceMetadata) ([]byte, error) {
+func dataSourceMetadataToHypercat(metadata DataSourceMetadata, endPoint string) ([]byte, error) {
 
 	if metadata.Description == "" ||
 		metadata.ContentType == "" ||
@@ -252,6 +252,8 @@ func dataSourceMetadataToHypercat(metadata DataSourceMetadata) ([]byte, error) {
 	if metadata.Unit != "" {
 		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasUnit", Val: metadata.Unit})
 	}
+
+	cat.Href = endPoint + "/" + metadata.DataSourceType + "/" + metadata.DataSourceID
 
 	return json.Marshal(cat)
 

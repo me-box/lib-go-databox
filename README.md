@@ -23,7 +23,7 @@ Examples can be found in the samples directory
 * [type BinaryKeyValue_0_2_0](#BinaryKeyValue_0_2_0)
   * [func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_2_0, error)](#NewBinaryKeyValueClient)
 * [type DataSourceMetadata](#DataSourceMetadata)
-  * [func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, error)](#HypercatToDataSourceMetadata)
+  * [func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error)](#HypercatToDataSourceMetadata)
 * [type JSONKeyValue_0_2_0](#JSONKeyValue_0_2_0)
   * [func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_2_0, error)](#NewJSONKeyValueClient)
 * [type JSONTimeSeries_0_2_0](#JSONTimeSeries_0_2_0)
@@ -48,7 +48,7 @@ permissions must be requested in the app manifest (drivers dont need to use the 
 
 
 
-## <a name="GetHttpsCredentials">func</a> [GetHttpsCredentials](/src/target/utils.go?s=2418:2451#L92)
+## <a name="GetHttpsCredentials">func</a> [GetHttpsCredentials](/src/target/utils.go?s=2426:2459#L93)
 ``` go
 func GetHttpsCredentials() string
 ```
@@ -89,7 +89,7 @@ reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to datab
 
 
 
-## <a name="DataSourceMetadata">type</a> [DataSourceMetadata](/src/target/utils.go?s=4361:4600#L177)
+## <a name="DataSourceMetadata">type</a> [DataSourceMetadata](/src/target/utils.go?s=4560:4799#L186)
 ``` go
 type DataSourceMetadata struct {
     Description    string
@@ -109,11 +109,12 @@ type DataSourceMetadata struct {
 
 
 
-### <a name="HypercatToDataSourceMetadata">func</a> [HypercatToDataSourceMetadata](/src/target/utils.go?s=6691:6790#L242)
+### <a name="HypercatToDataSourceMetadata">func</a> [HypercatToDataSourceMetadata](/src/target/utils.go?s=7043:7150#L254)
 ``` go
-func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, error)
+func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error)
 ```
 HypercatToDataSourceMetadata is a helper function to convert the hypercat description of a datasource to a DataSourceMetadata instance
+Also returns the store url for this data source.
 
 
 
