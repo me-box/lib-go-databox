@@ -253,7 +253,7 @@ func dataSourceMetadataToHypercat(metadata DataSourceMetadata, endPoint string) 
 		cat.ItemMetadata = append(cat.ItemMetadata, relValPair{Rel: "urn:X-databox:rels:hasUnit", Val: metadata.Unit})
 	}
 
-	cat.Href = endPoint + "/" + metadata.DataSourceType + "/" + metadata.DataSourceID
+	cat.Href = endPoint + metadata.DataSourceID
 
 	return json.Marshal(cat)
 
