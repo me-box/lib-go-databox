@@ -2,7 +2,6 @@ package libDatabox
 
 import (
 	"errors"
-	"io/ioutil"
 	"strings"
 
 	zest "github.com/toshbrown/goZestClient"
@@ -10,11 +9,11 @@ import (
 
 type JSONKeyValue_0_2_0 interface {
 	// Write JSON value
-	Write(dataSourceID string, payload []byte) error
+	Write(dataSourceID string, key string, payload []byte) error
 	// Read JSON values. Returns a []bytes containing a JSON string.
-	Read(dataSourceID string) ([]byte, error)
+	Read(dataSourceID string, key string) ([]byte, error)
 	// Get notifications of updated values Returns a channel that receives []bytes containing a JSON string when a new value is added.
-	Observe(dataSourceID string) (<-chan []byte, error)
+	Observe(dataSourceID string, key string) (<-chan []byte, error)
 	// RegisterDatasource make a new data source for available to the rest of datbox. This can only be used on stores that you have requested in your manifest.
 	RegisterDatasource(metadata DataSourceMetadata) error
 }
@@ -29,21 +28,16 @@ type jsonKeyValueClient struct {
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
 func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_2_0, error) {
 
-	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
-	if err != nil {
-		return jsonKeyValueClient{}, err
-	}
-
 	kvc := jsonKeyValueClient{}
 	kvc.zestEndpoint = reqEndpoint
 	kvc.zestDealerEndpoint = strings.Replace(reqEndpoint, ":5555", ":5556", 1)
-	thisKVC, err := zest.New(kvc.zestEndpoint, kvc.zestDealerEndpoint, string(serverKey), enableLogging)
+	thisKVC, err := zest.New(kvc.zestEndpoint, kvc.zestDealerEndpoint, getServerKey(), enableLogging)
 	kvc.zestClient = thisKVC
 	return kvc, err
 }
 
-func (kvc jsonKeyValueClient) Write(dataSourceID string, payload []byte) error {
-	path := "/kv/" + dataSourceID
+func (kvc jsonKeyValueClient) Write(dataSourceID string, key string, payload []byte) error {
+	path := "/kv/" + dataSourceID + "/" + key
 
 	token, err := requestToken(kvc.zestEndpoint+path, "POST")
 	if err != nil {
@@ -59,8 +53,8 @@ func (kvc jsonKeyValueClient) Write(dataSourceID string, payload []byte) error {
 	return nil
 }
 
-func (kvc jsonKeyValueClient) Read(dataSourceID string) ([]byte, error) {
-	path := "/kv/" + dataSourceID
+func (kvc jsonKeyValueClient) Read(dataSourceID string, key string) ([]byte, error) {
+	path := "/kv/" + dataSourceID + "/" + key
 
 	token, err := requestToken(kvc.zestEndpoint+path, "POST")
 	if err != nil {
@@ -76,8 +70,8 @@ func (kvc jsonKeyValueClient) Read(dataSourceID string) ([]byte, error) {
 	return data, nil
 }
 
-func (kvc jsonKeyValueClient) Observe(dataSourceID string) (<-chan []byte, error) {
-	path := "/kv/" + dataSourceID
+func (kvc jsonKeyValueClient) Observe(dataSourceID string, key string) (<-chan []byte, error) {
+	path := "/kv/" + dataSourceID + "/" + key
 
 	token, err := requestToken(kvc.zestEndpoint+path, "GET")
 	if err != nil {

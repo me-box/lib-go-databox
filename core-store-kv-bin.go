@@ -2,20 +2,18 @@ package libDatabox
 
 import (
 	"errors"
-	"io/ioutil"
 	"strings"
 
 	zest "github.com/toshbrown/goZestClient"
 )
 
 type BinaryKeyValue_0_2_0 interface {
-	// Write text value
-	Write(dataSourceID string, payload []byte) error
-	// Read text values.
-	Read(dataSourceID string) ([]byte, error)
-	// Read JSON values.
+	// Write text value to key
+	Write(dataSourceID string, key string, payload []byte) error
+	// Read text values from key.
+	Read(dataSourceID string, key string) ([]byte, error)
 	// Get notifications of updated values
-	Observe(dataSourceID string) (<-chan []byte, error)
+	Observe(dataSourceID string, key string) (<-chan []byte, error)
 	// Get notifications of updated values
 	RegisterDatasource(metadata DataSourceMetadata) error
 }
@@ -30,20 +28,16 @@ type binaryKeyValueClient struct {
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
 func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_2_0, error) {
 
-	serverKey, err := ioutil.ReadFile("/run/secrets/ZMQ_PUBLIC_KEY")
-	if err != nil {
-		return binaryKeyValueClient{}, err
-	}
-
 	kvc := binaryKeyValueClient{}
 	kvc.zestEndpoint = reqEndpoint
 	kvc.zestDealerEndpoint = strings.Replace(reqEndpoint, ":5555", ":5556", 1)
-	kvc.zestClient, err = zest.New(kvc.zestEndpoint, kvc.zestDealerEndpoint, string(serverKey), enableLogging)
+	thisKVC, err := zest.New(kvc.zestEndpoint, kvc.zestDealerEndpoint, getServerKey(), enableLogging)
+	kvc.zestClient = thisKVC
 	return kvc, err
 }
 
-func (kvc binaryKeyValueClient) Write(dataSourceID string, payload []byte) error {
-	path := "/kv/" + dataSourceID
+func (kvc binaryKeyValueClient) Write(dataSourceID string, key string, payload []byte) error {
+	path := "/kv/" + dataSourceID + "/" + key
 
 	token, err := requestToken(kvc.zestEndpoint+path, "POST")
 	if err != nil {
@@ -59,8 +53,8 @@ func (kvc binaryKeyValueClient) Write(dataSourceID string, payload []byte) error
 	return nil
 }
 
-func (kvc binaryKeyValueClient) Read(dataSourceID string) ([]byte, error) {
-	path := "/kv/" + dataSourceID
+func (kvc binaryKeyValueClient) Read(dataSourceID string, key string) ([]byte, error) {
+	path := "/kv/" + dataSourceID + "/" + key
 
 	token, err := requestToken(kvc.zestEndpoint+path, "POST")
 	if err != nil {
@@ -76,8 +70,8 @@ func (kvc binaryKeyValueClient) Read(dataSourceID string) ([]byte, error) {
 	return data, nil
 }
 
-func (kvc binaryKeyValueClient) Observe(dataSourceID string) (<-chan []byte, error) {
-	path := "/kv/" + dataSourceID
+func (kvc binaryKeyValueClient) Observe(dataSourceID string, key string) (<-chan []byte, error) {
+	path := "/kv/" + dataSourceID + "/" + key
 
 	token, err := requestToken(kvc.zestEndpoint+path, "GET")
 	if err != nil {

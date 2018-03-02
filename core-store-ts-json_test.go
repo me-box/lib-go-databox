@@ -1,43 +1,11 @@
 package libDatabox
 
 import (
-	"os"
 	"strconv"
 	s "strings"
 	"testing"
 	"time"
 )
-
-func TestMain(m *testing.M) {
-	Setup()
-	retCode := m.Run()
-	Teardown()
-	os.Exit(retCode)
-}
-
-var tsbc JSONTimeSeriesBlob_0_2_0
-var tsc JSONTimeSeries_0_2_0
-var dsID string
-
-func Setup() {
-
-	var err error
-	tsbc, err = NewJSONTimeSeriesBlobClient("tcp://127.0.0.1:5555", false)
-	if err != nil {
-		panic("Cant connect to Zest server. Did you start one? " + err.Error())
-	}
-
-	tsc, err = NewJSONTimeSeriesClient("tcp://127.0.0.1:5555", false)
-	if err != nil {
-		panic("Cant connect to Zest server. Did you start one? " + err.Error())
-	}
-
-	dsID = "test" + strconv.Itoa(int(time.Now().UnixNano()/int64(time.Millisecond)))
-}
-
-func Teardown() {
-	//todo
-}
 
 func TestWrite(t *testing.T) {
 	err := tsc.Write(dsID, []byte("{\"value\":3.1415}"))
@@ -307,17 +275,18 @@ func TestLastNWithMean(t *testing.T) {
 func TestLastN(t *testing.T) {
 
 	now := time.Now().UnixNano() / int64(time.Millisecond)
+	thisDsID := dsID + "TestLastN"
 
-	err := tsc.WriteAt(dsID, now+20, []byte("{\"value\":11}"))
+	err := tsc.WriteAt(thisDsID, now+20, []byte("{\"value\":11}"))
 	if err != nil {
-		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
+		t.Errorf("Write to %s failed expected err to be nil got %s", thisDsID, err.Error())
 	}
-	err = tsc.WriteAt(dsID, now+40, []byte("{\"value\":12}"))
+	err = tsc.WriteAt(thisDsID, now+40, []byte("{\"value\":12}"))
 	if err != nil {
-		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
+		t.Errorf("Write to %s failed expected err to be nil got %s", thisDsID, err.Error())
 	}
 
-	result, err := tsc.LastN(dsID, 2, JSONTimeSeriesQueryOptions{})
+	result, err := tsc.LastN(thisDsID, 2, JSONTimeSeriesQueryOptions{})
 	if err != nil {
 		t.Errorf("Call to LastN failed with error %s", err.Error())
 	}
