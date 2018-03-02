@@ -12,7 +12,7 @@ type AggregationType string
 
 type FilterType string
 
-//allowed values for FilterType and AggregationFunction
+//Allowed values for FilterType and AggregationFunction
 const (
 	Equals            FilterType      = "equals"
 	Contains          FilterType      = "contains"
@@ -25,17 +25,20 @@ const (
 	StandardDeviation AggregationType = "sd"
 )
 
+// Filter types to hold the required data to apply the filtering functions of the structured json API
 type Filter struct {
 	TagName    string
 	FilterType FilterType
 	Value      string
 }
 
+// JSONTimeSeriesQueryOptions described the options for the structured json API
 type JSONTimeSeriesQueryOptions struct {
 	AggregationFunction AggregationType
 	Filter              *Filter
 }
 
+// JSONTimeSeries_0_2_0 described the the structured json timeseries API
 type JSONTimeSeries_0_2_0 interface {
 	// Write  will be timestamped with write time in ms since the unix epoch by the store
 	Write(dataSourceID string, payload []byte) error
@@ -74,7 +77,8 @@ type jSONTimeSeriesClient struct {
 	dEndpoint string
 }
 
-// NewJSONTimeSeriesClient returns a new jSONTimeSeriesClient to enable interaction with a structured time series data store in JSON format
+// NewJSONTimeSeriesClient returns a new jSONTimeSeriesClient to enable interaction with a structured timeseries data store in JSON format.
+// The data written must contain at least {"value":[any numeric value]}. This is used in the aggregation functions. Other data can be store and used at KV pairs to filter the data but it can not be processed.
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
 func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_2_0, error) {
 
