@@ -423,7 +423,7 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 	doneChanRead := make(chan int)
 	//now := time.Now().UnixNano() / int64(time.Millisecond)
 	startAt := 1000
-	numRecords := 100
+	numRecords := 1100
 
 	go func() {
 		for i := startAt; i <= numRecords; i++ {
@@ -462,4 +462,56 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 			break
 		}
 	}
+}
+
+func TestObserve(t *testing.T) {
+
+	t.Log("Hello !")
+	doneChanWrite := make(chan int)
+	//doneChanRead := make(chan int)
+	//now := time.Now().UnixNano() / int64(time.Millisecond)
+	startAt := 0
+	numRecords := 100
+
+	receivedData := []string{}
+
+	go func() {
+		dataChan, err := tsc.Observe(dsID)
+		if err != nil {
+			t.Errorf("Observing %s failed expected err to be nil got %s", dsID, err.Error())
+		}
+
+		for data := range dataChan {
+			receivedData = append(receivedData, string(data))
+			t.Log("received:: " + string(data))
+		}
+
+	}()
+
+	//Observe take a bit of time to register
+	time.Sleep(time.Second)
+
+	go func() {
+		for i := startAt; i <= numRecords; i++ {
+			err := tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+			if err != nil {
+				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
+			}
+			t.Log(string("written:: " + strconv.Itoa(i)))
+		}
+		doneChanWrite <- 1
+	}()
+
+	<-doneChanWrite
+
+	for i := startAt; i <= numRecords; i++ {
+		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
+		cont := s.Contains(receivedData[i], string(expected))
+		t.Log(receivedData[i])
+		if cont != true {
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i]), string(expected))
+			break
+		}
+	}
+
 }
