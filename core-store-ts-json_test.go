@@ -488,7 +488,7 @@ func TestObserve(t *testing.T) {
 
 	}()
 
-	//Observe take a bit of time to register
+	//Observe take a bit of time to register we miss some values if we dont wait before writing
 	time.Sleep(time.Second)
 
 	go func() {
