@@ -258,7 +258,7 @@ func (tsc jSONTimeSeriesBlobClient) RegisterDatasource(metadata DataSourceMetada
 	if err != nil {
 		return err
 	}
-	hypercatJSON, err := dataSourceMetadataToHypercat(metadata, tsc.zEndpoint+"/ts/")
+	hypercatJSON, err := dataSourceMetadataToHypercat(metadata, tsc.zEndpoint+"/ts/blob/")
 
 	writeErr := tsc.zestC.Post(token, path, hypercatJSON, "JSON")
 	if writeErr != nil {
