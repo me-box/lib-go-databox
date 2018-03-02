@@ -22,21 +22,21 @@ Examples can be found in the samples directory
 * [func ExportLongpoll(destination string, payload string) (string, error)](#ExportLongpoll)
 * [func GetHttpsCredentials() string](#GetHttpsCredentials)
 * [type AggregationType](#AggregationType)
-* [type BinaryKeyValue_0_2_0](#BinaryKeyValue_0_2_0)
-  * [func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_2_0, error)](#NewBinaryKeyValueClient)
+* [type BinaryKeyValue_0_3_0](#BinaryKeyValue_0_3_0)
+  * [func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_3_0, error)](#NewBinaryKeyValueClient)
 * [type DataSourceMetadata](#DataSourceMetadata)
   * [func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error)](#HypercatToDataSourceMetadata)
 * [type Filter](#Filter)
 * [type FilterType](#FilterType)
-* [type JSONKeyValue_0_2_0](#JSONKeyValue_0_2_0)
-  * [func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_2_0, error)](#NewJSONKeyValueClient)
-* [type JSONTimeSeriesBlob_0_2_0](#JSONTimeSeriesBlob_0_2_0)
-  * [func NewJSONTimeSeriesBlobClient(reqEndpoint string, enableLogging bool) (JSONTimeSeriesBlob_0_2_0, error)](#NewJSONTimeSeriesBlobClient)
+* [type JSONKeyValue_0_3_0](#JSONKeyValue_0_3_0)
+  * [func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_3_0, error)](#NewJSONKeyValueClient)
+* [type JSONTimeSeriesBlob_0_3_0](#JSONTimeSeriesBlob_0_3_0)
+  * [func NewJSONTimeSeriesBlobClient(reqEndpoint string, enableLogging bool) (JSONTimeSeriesBlob_0_3_0, error)](#NewJSONTimeSeriesBlobClient)
 * [type JSONTimeSeriesQueryOptions](#JSONTimeSeriesQueryOptions)
-* [type JSONTimeSeries_0_2_0](#JSONTimeSeries_0_2_0)
-  * [func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_2_0, error)](#NewJSONTimeSeriesClient)
-* [type TextKeyValue_0_2_0](#TextKeyValue_0_2_0)
-  * [func NewTextKeyValueClient(reqEndpoint string, enableLogging bool) (TextKeyValue_0_2_0, error)](#NewTextKeyValueClient)
+* [type JSONTimeSeries_0_3_0](#JSONTimeSeries_0_3_0)
+  * [func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_3_0, error)](#NewJSONTimeSeriesClient)
+* [type TextKeyValue_0_3_0](#TextKeyValue_0_3_0)
+  * [func NewTextKeyValueClient(reqEndpoint string, enableLogging bool) (TextKeyValue_0_3_0, error)](#NewTextKeyValueClient)
 
 
 #### <a name="pkg-files">Package files</a>
@@ -94,9 +94,9 @@ type AggregationType string
 
 
 
-## <a name="BinaryKeyValue_0_2_0">type</a> [BinaryKeyValue_0_2_0](/src/target/core-store-kv-bin.go?s=96:511#L1)
+## <a name="BinaryKeyValue_0_3_0">type</a> [BinaryKeyValue_0_3_0](/src/target/core-store-kv-bin.go?s=96:511#L1)
 ``` go
-type BinaryKeyValue_0_2_0 interface {
+type BinaryKeyValue_0_3_0 interface {
     // Write text value to key
     Write(dataSourceID string, key string, payload []byte) error
     // Read text values from key.
@@ -115,7 +115,7 @@ type BinaryKeyValue_0_2_0 interface {
 
 ### <a name="NewBinaryKeyValueClient">func</a> [NewBinaryKeyValueClient](/src/target/core-store-kv-bin.go?s=878:976#L19)
 ``` go
-func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_2_0, error)
+func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_3_0, error)
 ```
 NewBinaryKeyValueClient returns a new NewBinaryKeyValueClient to enable reading and writing of binary data key value to the store
 reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
@@ -187,9 +187,9 @@ type FilterType string
 
 
 
-## <a name="JSONKeyValue_0_2_0">type</a> [JSONKeyValue_0_2_0](/src/target/core-store-kv-json.go?s=96:746#L1)
+## <a name="JSONKeyValue_0_3_0">type</a> [JSONKeyValue_0_3_0](/src/target/core-store-kv-json.go?s=96:746#L1)
 ``` go
-type JSONKeyValue_0_2_0 interface {
+type JSONKeyValue_0_3_0 interface {
     // Write JSON value
     Write(dataSourceID string, key string, payload []byte) error
     // Read JSON values. Returns a []bytes containing a JSON string.
@@ -208,7 +208,7 @@ type JSONKeyValue_0_2_0 interface {
 
 ### <a name="NewJSONKeyValueClient">func</a> [NewJSONKeyValueClient](/src/target/core-store-kv-json.go?s=1105:1199#L19)
 ``` go
-func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_2_0, error)
+func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_3_0, error)
 ```
 NewJSONKeyValueClient returns a new NewJSONKeyValueClient to enable reading and writing of JSON data key value to the store
 reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
@@ -217,9 +217,9 @@ reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to datab
 
 
 
-## <a name="JSONTimeSeriesBlob_0_2_0">type</a> [JSONTimeSeriesBlob_0_2_0](/src/target/core-store-ts-json-blob.go?s=107:2253#L1)
+## <a name="JSONTimeSeriesBlob_0_3_0">type</a> [JSONTimeSeriesBlob_0_3_0](/src/target/core-store-ts-json-blob.go?s=107:2253#L1)
 ``` go
-type JSONTimeSeriesBlob_0_2_0 interface {
+type JSONTimeSeriesBlob_0_3_0 interface {
     // Write  will be timestamped with write time in ms since the unix epoch by the store
     Write(dataSourceID string, payload []byte) error
     // WriteAt will be timestamped with timestamp provided in ms since the unix epoch
@@ -259,7 +259,7 @@ type JSONTimeSeriesBlob_0_2_0 interface {
 
 ### <a name="NewJSONTimeSeriesBlobClient">func</a> [NewJSONTimeSeriesBlobClient](/src/target/core-store-ts-json-blob.go?s=2614:2720#L41)
 ``` go
-func NewJSONTimeSeriesBlobClient(reqEndpoint string, enableLogging bool) (JSONTimeSeriesBlob_0_2_0, error)
+func NewJSONTimeSeriesBlobClient(reqEndpoint string, enableLogging bool) (JSONTimeSeriesBlob_0_3_0, error)
 ```
 NewJSONTimeSeriesBlobClient returns a new jSONTimeSeriesBlobClient to enable interaction with a time series data store in unstructured JSON format
 reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
@@ -286,9 +286,9 @@ JSONTimeSeriesQueryOptions described the options for the structured json API
 
 
 
-## <a name="JSONTimeSeries_0_2_0">type</a> [JSONTimeSeries_0_2_0](/src/target/core-store-ts-json.go?s=1077:3379#L32)
+## <a name="JSONTimeSeries_0_3_0">type</a> [JSONTimeSeries_0_3_0](/src/target/core-store-ts-json.go?s=1077:3379#L32)
 ``` go
-type JSONTimeSeries_0_2_0 interface {
+type JSONTimeSeries_0_3_0 interface {
     // Write  will be timestamped with write time in ms since the unix epoch by the store
     Write(dataSourceID string, payload []byte) error
     // WriteAt will be timestamped with timestamp provided in ms since the unix epoch
@@ -320,7 +320,7 @@ type JSONTimeSeries_0_2_0 interface {
     GetDatasourceCatalogue() ([]byte, error)
 }
 ```
-JSONTimeSeries_0_2_0 described the the structured json timeseries API
+JSONTimeSeries_0_3_0 described the the structured json timeseries API
 
 
 
@@ -330,7 +330,7 @@ JSONTimeSeries_0_2_0 described the the structured json timeseries API
 
 ### <a name="NewJSONTimeSeriesClient">func</a> [NewJSONTimeSeriesClient](/src/target/core-store-ts-json.go?s=3935:4033#L73)
 ``` go
-func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_2_0, error)
+func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_3_0, error)
 ```
 NewJSONTimeSeriesClient returns a new jSONTimeSeriesClient to enable interaction with a structured timeseries data store in JSON format.
 The data written must contain at least {"value":[any numeric value]}. This is used in the aggregation functions. Other data can be store and used at KV pairs to filter the data but it can not be processed.
@@ -340,9 +340,9 @@ reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to datab
 
 
 
-## <a name="TextKeyValue_0_2_0">type</a> [TextKeyValue_0_2_0](/src/target/core-store-kv-text.go?s=96:759#L1)
+## <a name="TextKeyValue_0_3_0">type</a> [TextKeyValue_0_3_0](/src/target/core-store-kv-text.go?s=96:759#L1)
 ``` go
-type TextKeyValue_0_2_0 interface {
+type TextKeyValue_0_3_0 interface {
     // Write text value
     Write(dataSourceID string, key string, payload string) error
     // Read text values. Returns a string containing the text written to the key.
@@ -361,9 +361,9 @@ type TextKeyValue_0_2_0 interface {
 
 ### <a name="NewTextKeyValueClient">func</a> [NewTextKeyValueClient](/src/target/core-store-kv-text.go?s=1117:1211#L19)
 ``` go
-func NewTextKeyValueClient(reqEndpoint string, enableLogging bool) (TextKeyValue_0_2_0, error)
+func NewTextKeyValueClient(reqEndpoint string, enableLogging bool) (TextKeyValue_0_3_0, error)
 ```
-NewTextKeyValueClient returns a new TextKeyValue_0_2_0 to enable reading and writing of string data key value to the store
+NewTextKeyValueClient returns a new TextKeyValue_0_3_0 to enable reading and writing of string data key value to the store
 reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
 
 

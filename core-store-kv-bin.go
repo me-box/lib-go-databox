@@ -7,7 +7,7 @@ import (
 	zest "github.com/toshbrown/goZestClient"
 )
 
-type BinaryKeyValue_0_2_0 interface {
+type BinaryKeyValue_0_3_0 interface {
 	// Write text value to key
 	Write(dataSourceID string, key string, payload []byte) error
 	// Read text values from key.
@@ -26,7 +26,7 @@ type binaryKeyValueClient struct {
 
 // NewBinaryKeyValueClient returns a new NewBinaryKeyValueClient to enable reading and writing of binary data key value to the store
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
-func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_2_0, error) {
+func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_3_0, error) {
 
 	kvc := binaryKeyValueClient{}
 	kvc.zestEndpoint = reqEndpoint

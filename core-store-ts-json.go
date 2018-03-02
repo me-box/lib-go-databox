@@ -38,8 +38,8 @@ type JSONTimeSeriesQueryOptions struct {
 	Filter              *Filter
 }
 
-// JSONTimeSeries_0_2_0 described the the structured json timeseries API
-type JSONTimeSeries_0_2_0 interface {
+// JSONTimeSeries_0_3_0 described the the structured json timeseries API
+type JSONTimeSeries_0_3_0 interface {
 	// Write  will be timestamped with write time in ms since the unix epoch by the store
 	Write(dataSourceID string, payload []byte) error
 	// WriteAt will be timestamped with timestamp provided in ms since the unix epoch
@@ -80,7 +80,7 @@ type jSONTimeSeriesClient struct {
 // NewJSONTimeSeriesClient returns a new jSONTimeSeriesClient to enable interaction with a structured timeseries data store in JSON format.
 // The data written must contain at least {"value":[any numeric value]}. This is used in the aggregation functions. Other data can be store and used at KV pairs to filter the data but it can not be processed.
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
-func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_2_0, error) {
+func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_3_0, error) {
 
 	var err error
 

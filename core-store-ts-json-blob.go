@@ -8,7 +8,7 @@ import (
 	zest "github.com/toshbrown/goZestClient"
 )
 
-type JSONTimeSeriesBlob_0_2_0 interface {
+type JSONTimeSeriesBlob_0_3_0 interface {
 	// Write  will be timestamped with write time in ms since the unix epoch by the store
 	Write(dataSourceID string, payload []byte) error
 	// WriteAt will be timestamped with timestamp provided in ms since the unix epoch
@@ -48,7 +48,7 @@ type jSONTimeSeriesBlobClient struct {
 
 // NewJSONTimeSeriesBlobClient returns a new jSONTimeSeriesBlobClient to enable interaction with a time series data store in unstructured JSON format
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
-func NewJSONTimeSeriesBlobClient(reqEndpoint string, enableLogging bool) (JSONTimeSeriesBlob_0_2_0, error) {
+func NewJSONTimeSeriesBlobClient(reqEndpoint string, enableLogging bool) (JSONTimeSeriesBlob_0_3_0, error) {
 
 	var err error
 

@@ -7,7 +7,7 @@ import (
 	zest "github.com/toshbrown/goZestClient"
 )
 
-type JSONKeyValue_0_2_0 interface {
+type JSONKeyValue_0_3_0 interface {
 	// Write JSON value
 	Write(dataSourceID string, key string, payload []byte) error
 	// Read JSON values. Returns a []bytes containing a JSON string.
@@ -26,7 +26,7 @@ type jsonKeyValueClient struct {
 
 // NewJSONKeyValueClient returns a new NewJSONKeyValueClient to enable reading and writing of JSON data key value to the store
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
-func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_2_0, error) {
+func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_3_0, error) {
 
 	kvc := jsonKeyValueClient{}
 	kvc.zestEndpoint = reqEndpoint

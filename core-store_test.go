@@ -14,11 +14,11 @@ func TestMain(m *testing.M) {
 	os.Exit(retCode)
 }
 
-var tsbc JSONTimeSeriesBlob_0_2_0
-var tsc JSONTimeSeries_0_2_0
-var kvc JSONKeyValue_0_2_0
-var kvcBin BinaryKeyValue_0_2_0
-var kvcText TextKeyValue_0_2_0
+var tsbc JSONTimeSeriesBlob_0_3_0
+var tsc JSONTimeSeries_0_3_0
+var kvc JSONKeyValue_0_3_0
+var kvcBin BinaryKeyValue_0_3_0
+var kvcText TextKeyValue_0_3_0
 
 var dsID string
 

@@ -7,7 +7,7 @@ import (
 	zest "github.com/toshbrown/goZestClient"
 )
 
-type TextKeyValue_0_2_0 interface {
+type TextKeyValue_0_3_0 interface {
 	// Write text value
 	Write(dataSourceID string, key string, payload string) error
 	// Read text values. Returns a string containing the text written to the key.
@@ -24,9 +24,9 @@ type textKeyValueClient struct {
 	zestDealerEndpoint string
 }
 
-// NewTextKeyValueClient returns a new TextKeyValue_0_2_0 to enable reading and writing of string data key value to the store
+// NewTextKeyValueClient returns a new TextKeyValue_0_3_0 to enable reading and writing of string data key value to the store
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
-func NewTextKeyValueClient(reqEndpoint string, enableLogging bool) (TextKeyValue_0_2_0, error) {
+func NewTextKeyValueClient(reqEndpoint string, enableLogging bool) (TextKeyValue_0_3_0, error) {
 
 	kvc := textKeyValueClient{}
 	kvc.zestEndpoint = reqEndpoint
