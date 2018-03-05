@@ -12,8 +12,10 @@ type JSONKeyValue_0_3_0 interface {
 	Write(dataSourceID string, key string, payload []byte) error
 	// Read JSON values. Returns a []bytes containing a JSON string.
 	Read(dataSourceID string, key string) ([]byte, error)
-	// Get notifications of updated values Returns a channel that receives []bytes containing a JSON string when a new value is added.
-	Observe(dataSourceID string, key string) (<-chan []byte, error)
+	// Get notifications of updated values for a key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+	ObserveKey(dataSourceID string, key string) (<-chan []byte, error)
+	// Get notifications of updated values for any key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+	Observe(dataSourceID string) (<-chan []byte, error)
 	// RegisterDatasource make a new data source for available to the rest of datbox. This can only be used on stores that you have requested in your manifest.
 	RegisterDatasource(metadata DataSourceMetadata) error
 }
@@ -70,8 +72,25 @@ func (kvc jsonKeyValueClient) Read(dataSourceID string, key string) ([]byte, err
 	return data, nil
 }
 
-func (kvc jsonKeyValueClient) Observe(dataSourceID string, key string) (<-chan []byte, error) {
+func (kvc jsonKeyValueClient) ObserveKey(dataSourceID string, key string) (<-chan []byte, error) {
 	path := "/kv/" + dataSourceID + "/" + key
+
+	token, err := requestToken(kvc.zestEndpoint+path, "GET")
+	if err != nil {
+		return nil, err
+	}
+
+	payloadChan, getErr := kvc.zestClient.Observe(token, path, "JSON", 0)
+	if getErr != nil {
+		invalidateCache(kvc.zestEndpoint+path, "GET")
+		return nil, errors.New("Error observing: " + getErr.Error())
+	}
+
+	return payloadChan, nil
+}
+
+func (kvc jsonKeyValueClient) Observe(dataSourceID string) (<-chan []byte, error) {
+	path := "/kv/" + dataSourceID
 
 	token, err := requestToken(kvc.zestEndpoint+path, "GET")
 	if err != nil {

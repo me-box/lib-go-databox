@@ -156,18 +156,19 @@ func TestWriteLotsBlob(t *testing.T) {
 func TestEarliestBlob(t *testing.T) {
 
 	for i := 1; i <= 10; i++ {
-		err := tsbc.Write(dsID+"TestEarliest", []byte("{\"TestEarliest\":\"data"+strconv.Itoa(i)+"\"}"))
+		err := tsbc.Write(dsID+"TestEarliestBlob", []byte("{\"TestEarliestBlob\":\"data"+strconv.Itoa(i)+"\"}"))
 		if err != nil {
-			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestEarliest", err.Error())
+			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestEarliestBlob", err.Error())
 		}
+		time.Sleep(time.Millisecond * 10)
 	}
 
-	result, err := tsbc.Earliest(dsID + "TestEarliest")
+	result, err := tsbc.Earliest(dsID + "TestEarliestBlob")
 	if err != nil {
 		t.Errorf("Call to Earliest failed with error %s", err.Error())
 	}
 
-	expected := []byte(`{"TestEarliest":"data1"}`)
+	expected := []byte(`{"TestEarliestBlob":"data1"}`)
 	cont := s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to Earliest failed expected %s but got %s", expected, result)
@@ -178,27 +179,28 @@ func TestEarliestBlob(t *testing.T) {
 func TestFirstNBlob(t *testing.T) {
 
 	for i := 1; i <= 10; i++ {
-		err := tsbc.Write(dsID+"TestFirstN", []byte("{\"TestFirstN\":\"data"+strconv.Itoa(i)+"\"}"))
+		err := tsbc.Write(dsID+"TestFirstNBlob", []byte("{\"TestFirstNBlob\":\"data"+strconv.Itoa(i)+"\"}"))
 		if err != nil {
-			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestFirstN", err.Error())
+			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestFirstNBlob", err.Error())
 		}
+		time.Sleep(time.Millisecond * 10)
 	}
 
-	result, err := tsbc.FirstN(dsID+"TestFirstN", 2)
+	result, err := tsbc.FirstN(dsID+"TestFirstNBlob", 2)
 	if err != nil {
 		t.Errorf("Call to FirstN failed with error %s", err.Error())
 	}
 
-	expected := []byte(`{"TestFirstN":"data1"}`)
+	expected := []byte(`{"TestFirstNBlob":"data1"}`)
 	cont := s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to FirstN failed expected %s but got %s", expected, result)
 	}
 
-	expected = []byte(`{"TestFirstN":"data2"}`)
+	expected = []byte(`{"TestFirstNBlob":"data2"}`)
 	cont = s.Contains(string(result), string(expected))
 	if cont != true {
-		t.Errorf("Call to FirstN failed expected %s but got %s", expected, result)
+		t.Errorf("Call to TestFirstNBlob failed expected %s but got %s", expected, result)
 	}
 }
 
@@ -259,7 +261,7 @@ func TestRegisterDatasourceBlob(t *testing.T) {
 		t.Errorf("GetDatasourceCatalogue failed expected err to be nil got %s", getErr.Error())
 	}
 
-	dsmdByteArray, _ := dataSourceMetadataToHypercat(dsmd, "tcp://127.0.0.1:5555/ts/")
+	dsmdByteArray, _ := dataSourceMetadataToHypercat(dsmd, "tcp://127.0.0.1:5555/ts/blob/")
 	cont := s.Contains(string(catByteArray), string(dsmdByteArray))
 	if cont != true {
 		t.Errorf("GetDatasourceCatalogue Error '%s' does not contain  %s", string(catByteArray), string(dsmdByteArray))

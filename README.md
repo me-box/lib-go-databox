@@ -94,15 +94,17 @@ type AggregationType string
 
 
 
-## <a name="BinaryKeyValue_0_3_0">type</a> [BinaryKeyValue_0_3_0](/src/target/core-store-kv-bin.go?s=96:511#L1)
+## <a name="BinaryKeyValue_0_3_0">type</a> [BinaryKeyValue_0_3_0](/src/target/core-store-kv-bin.go?s=96:815#L1)
 ``` go
 type BinaryKeyValue_0_3_0 interface {
     // Write text value to key
     Write(dataSourceID string, key string, payload []byte) error
     // Read text values from key.
     Read(dataSourceID string, key string) ([]byte, error)
-    // Get notifications of updated values
-    Observe(dataSourceID string, key string) (<-chan []byte, error)
+    // Get notifications of updated values for a key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+    ObserveKey(dataSourceID string, key string) (<-chan []byte, error)
+    // Get notifications of updated values for any key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+    Observe(dataSourceID string) (<-chan []byte, error)
     // Get notifications of updated values
     RegisterDatasource(metadata DataSourceMetadata) error
 }
@@ -113,7 +115,7 @@ type BinaryKeyValue_0_3_0 interface {
 
 
 
-### <a name="NewBinaryKeyValueClient">func</a> [NewBinaryKeyValueClient](/src/target/core-store-kv-bin.go?s=878:976#L19)
+### <a name="NewBinaryKeyValueClient">func</a> [NewBinaryKeyValueClient](/src/target/core-store-kv-bin.go?s=1182:1280#L21)
 ``` go
 func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_3_0, error)
 ```
@@ -187,15 +189,17 @@ type FilterType string
 
 
 
-## <a name="JSONKeyValue_0_3_0">type</a> [JSONKeyValue_0_3_0](/src/target/core-store-kv-json.go?s=96:746#L1)
+## <a name="JSONKeyValue_0_3_0">type</a> [JSONKeyValue_0_3_0](/src/target/core-store-kv-json.go?s=96:958#L1)
 ``` go
 type JSONKeyValue_0_3_0 interface {
     // Write JSON value
     Write(dataSourceID string, key string, payload []byte) error
     // Read JSON values. Returns a []bytes containing a JSON string.
     Read(dataSourceID string, key string) ([]byte, error)
-    // Get notifications of updated values Returns a channel that receives []bytes containing a JSON string when a new value is added.
-    Observe(dataSourceID string, key string) (<-chan []byte, error)
+    // Get notifications of updated values for a key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+    ObserveKey(dataSourceID string, key string) (<-chan []byte, error)
+    // Get notifications of updated values for any key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+    Observe(dataSourceID string) (<-chan []byte, error)
     // RegisterDatasource make a new data source for available to the rest of datbox. This can only be used on stores that you have requested in your manifest.
     RegisterDatasource(metadata DataSourceMetadata) error
 }
@@ -206,7 +210,7 @@ type JSONKeyValue_0_3_0 interface {
 
 
 
-### <a name="NewJSONKeyValueClient">func</a> [NewJSONKeyValueClient](/src/target/core-store-kv-json.go?s=1105:1199#L19)
+### <a name="NewJSONKeyValueClient">func</a> [NewJSONKeyValueClient](/src/target/core-store-kv-json.go?s=1317:1411#L21)
 ``` go
 func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_3_0, error)
 ```
@@ -340,15 +344,17 @@ reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to datab
 
 
 
-## <a name="TextKeyValue_0_3_0">type</a> [TextKeyValue_0_3_0](/src/target/core-store-kv-text.go?s=96:759#L1)
+## <a name="TextKeyValue_0_3_0">type</a> [TextKeyValue_0_3_0](/src/target/core-store-kv-text.go?s=96:971#L1)
 ``` go
 type TextKeyValue_0_3_0 interface {
     // Write text value
     Write(dataSourceID string, key string, payload string) error
     // Read text values. Returns a string containing the text written to the key.
     Read(dataSourceID string, key string) (string, error)
-    // Get notifications of updated values Returns a channel that receives strings containing a text string when a new value is added.
-    Observe(dataSourceID string, key string) (<-chan string, error)
+    // Get notifications of updated values for a key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+    ObserveKey(dataSourceID string, key string) (<-chan string, error)
+    // Get notifications of updated values for any key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+    Observe(dataSourceID string) (<-chan string, error)
     // RegisterDatasource make a new data source for available to the rest of datbox. This can only be used on stores that you have requested in your manifest.
     RegisterDatasource(metadata DataSourceMetadata) error
 }
@@ -359,7 +365,7 @@ type TextKeyValue_0_3_0 interface {
 
 
 
-### <a name="NewTextKeyValueClient">func</a> [NewTextKeyValueClient](/src/target/core-store-kv-text.go?s=1117:1211#L19)
+### <a name="NewTextKeyValueClient">func</a> [NewTextKeyValueClient](/src/target/core-store-kv-text.go?s=1329:1423#L21)
 ``` go
 func NewTextKeyValueClient(reqEndpoint string, enableLogging bool) (TextKeyValue_0_3_0, error)
 ```

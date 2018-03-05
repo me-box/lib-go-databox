@@ -311,6 +311,7 @@ func TestEarliest(t *testing.T) {
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestEarliest", err.Error())
 		}
+		time.Sleep(time.Millisecond * 10)
 	}
 
 	result, err := tsc.Earliest(dsID + "TestEarliest")
@@ -333,6 +334,7 @@ func TestFirstN(t *testing.T) {
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestFirstN", err.Error())
 		}
+		time.Sleep(time.Millisecond * 10)
 	}
 
 	result, err := tsc.FirstN(dsID+"TestFirstN", 2, JSONTimeSeriesQueryOptions{})

@@ -12,8 +12,10 @@ type TextKeyValue_0_3_0 interface {
 	Write(dataSourceID string, key string, payload string) error
 	// Read text values. Returns a string containing the text written to the key.
 	Read(dataSourceID string, key string) (string, error)
-	// Get notifications of updated values Returns a channel that receives strings containing a text string when a new value is added.
-	Observe(dataSourceID string, key string) (<-chan string, error)
+	// Get notifications of updated values for a key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+	ObserveKey(dataSourceID string, key string) (<-chan string, error)
+	// Get notifications of updated values for any key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
+	Observe(dataSourceID string) (<-chan string, error)
 	// RegisterDatasource make a new data source for available to the rest of datbox. This can only be used on stores that you have requested in your manifest.
 	RegisterDatasource(metadata DataSourceMetadata) error
 }
@@ -70,7 +72,30 @@ func (kvc textKeyValueClient) Read(dataSourceID string, key string) (string, err
 	return string(data), nil
 }
 
-func (kvc textKeyValueClient) Observe(dataSourceID string, key string) (<-chan string, error) {
+func (kvc textKeyValueClient) Observe(dataSourceID string) (<-chan string, error) {
+	path := "/kv/" + dataSourceID
+
+	token, err := requestToken(kvc.zestEndpoint+path, "GET")
+	if err != nil {
+		return nil, err
+	}
+
+	payloadChan, getErr := kvc.zestClient.Observe(token, path, "JSON", 0)
+	if getErr != nil {
+		invalidateCache(kvc.zestEndpoint+path, "GET")
+		return nil, errors.New("Error observing: " + getErr.Error())
+	}
+
+	stringChan := make(chan string)
+	go func(byteChan <-chan []byte, outputChan chan string) {
+		for {
+			outputChan <- string(<-byteChan)
+		}
+	}(payloadChan, stringChan)
+	return stringChan, nil
+}
+
+func (kvc textKeyValueClient) ObserveKey(dataSourceID string, key string) (<-chan string, error) {
 	path := "/kv/" + dataSourceID + "/" + key
 
 	token, err := requestToken(kvc.zestEndpoint+path, "GET")
