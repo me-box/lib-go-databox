@@ -78,15 +78,16 @@ func TestWriteLotsBlob(t *testing.T) {
 func TestWriteLengthBlob(t *testing.T) {
 
 	numRecToWrite := 50
-
+	_dsID := dsID + "TestWriteLengthBlob"
 	for i := 1; i <= numRecToWrite; i++ {
-		err := tsbc.Write(dsID, []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
+		err := tsbc.Write(_dsID, []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
 		if err != nil {
-			t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
+			t.Errorf("Write to %s failed expected err to be nil got %s", _dsID, err.Error())
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 
-	result, err := tsbc.Length(dsID)
+	result, err := tsbc.Length(_dsID)
 	if err != nil {
 		t.Errorf("Call to Latest failed with error %s", err.Error())
 	}
@@ -142,20 +143,20 @@ func TestWriteLengthBlob(t *testing.T) {
 
 } */
 
-/*func TestLastN(t *testing.T) {
+func TestLastNBlob(t *testing.T) {
 
 	now := time.Now().UnixNano() / int64(time.Millisecond)
 
-	err := tsbc.WriteAt(dsID, now+20, []byte("{\"TestLastN\":\"data11\"}"))
+	err := tsbc.WriteAt(dsID+"TestLastN", now+20, []byte("{\"TestLastN\":\"data11\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsbc.WriteAt(dsID, now+40, []byte("{\"TestLastN\":\"data12\"}"))
+	err = tsbc.WriteAt(dsID+"TestLastN", now+40, []byte("{\"TestLastN\":\"data12\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	result, err := tsbc.LastN(dsID, 2)
+	result, err := tsbc.LastN(dsID+"TestLastN", 2)
 	if err != nil {
 		t.Errorf("Call to LastN failed with error %s", err.Error())
 	}
@@ -171,7 +172,7 @@ func TestWriteLengthBlob(t *testing.T) {
 	if cont != true {
 		t.Errorf("Call to LastN failed expected %s but got %s", expected, result)
 	}
-}*/
+}
 
 func TestEarliestBlob(t *testing.T) {
 
@@ -224,21 +225,23 @@ func TestFirstNBlob(t *testing.T) {
 	}
 }
 
-/*func TestWriteAtAndRange(t *testing.T) {
+func TestWriteAtAndRangeBlob(t *testing.T) {
 
 	now := time.Now().UnixNano() / int64(time.Millisecond)
 	numRecords := 20
 	timeStepMs := 50
 
+	_dsID := dsID + "TestWriteAtAndRangeBlob"
+
 	for i := 1; i <= numRecords; i++ {
 
-		err := tsbc.WriteAt(dsID, now+int64(timeStepMs*i), []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
+		err := tsbc.WriteAt(_dsID, now+int64(timeStepMs*i), []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
 		if err != nil {
-			t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
+			t.Errorf("WriteAt to %s failed expected err to be nil got %s", _dsID, err.Error())
 		}
 	}
 
-	result, err := tsbc.Range(dsID, now, now+int64(numRecords*timeStepMs))
+	result, err := tsbc.Range(_dsID, now, now+int64(numRecords*timeStepMs))
 	if err != nil {
 		t.Errorf("Call to Range failed with error %s", err.Error())
 	}
@@ -258,7 +261,7 @@ func TestFirstNBlob(t *testing.T) {
 	if cont != true {
 		t.Errorf("TestWriteAtAndRange failed expected %s but got %s", expected, result)
 	}
-}*/
+}
 
 func TestRegisterDatasourceBlob(t *testing.T) {
 
@@ -288,8 +291,7 @@ func TestRegisterDatasourceBlob(t *testing.T) {
 	}
 }
 
-/*
-func TestConcurrentWriteAndRead(t *testing.T) {
+func TestConcurrentWriteAndReadBlob(t *testing.T) {
 
 	doneChanWrite := make(chan int)
 	doneChanRead := make(chan int)
@@ -334,4 +336,3 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 		}
 	}
 }
-*/

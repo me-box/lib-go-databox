@@ -183,15 +183,16 @@ func TestWriteLots(t *testing.T) {
 func TestWriteLength(t *testing.T) {
 
 	numRecToWrite := 50
+	_dsID := dsID + "TestWriteLength"
 
 	for i := 1; i <= numRecToWrite; i++ {
-		err := tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		err := tsc.Write(_dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 		if err != nil {
-			t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
+			t.Errorf("Write to %s failed expected err to be nil got %s", _dsID, err.Error())
 		}
 	}
 
-	result, err := tsc.Length(dsID)
+	result, err := tsc.Length(_dsID)
 	if err != nil {
 		t.Errorf("Call to Latest failed with error %s", err.Error())
 	}
