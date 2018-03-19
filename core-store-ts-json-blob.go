@@ -1,6 +1,7 @@
 package libDatabox
 
 import (
+	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -31,6 +32,8 @@ type JSONTimeSeriesBlob_0_3_0 interface {
 	// Read values written between the start timestamp and end timestamp in in ms since the unix epoch.
 	// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
 	Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) ([]byte, error)
+	//Length retruns the number of records stored for that dataSourceID
+	Length(dataSourceID string) (int, error)
 	// Get notifications when a new value is written
 	// the returned chan receives valuse of the form {"timestamp":213123123,"data":[data-written-by-driver]}
 	Observe(dataSourceID string) (<-chan []byte, error)
@@ -227,6 +230,35 @@ func (tsc jSONTimeSeriesBlobClient) Range(dataSourceID string, formTimeStamp int
 
 	return resp, nil
 
+}
+
+//Length retruns the number of records stored for that dataSourceID
+func (tsc jSONTimeSeriesBlobClient) Length(dataSourceID string) (int, error) {
+
+	path := "/ts/blob/" + dataSourceID + "/length"
+
+	token, err := requestToken(tsc.zEndpoint+path, "GET")
+	if err != nil {
+		return 0, err
+	}
+
+	resp, getErr := tsc.zestC.Get(token, path, "JSON")
+	if getErr != nil {
+		invalidateCache(tsc.zEndpoint+path, "GET")
+		return 0, errors.New("Error getting latest data: " + getErr.Error())
+	}
+
+	type legnthResult struct {
+		Length int `json:"length"`
+	}
+
+	var val legnthResult
+	err = json.Unmarshal(resp, &val)
+	if err != nil {
+		return 0, err
+	}
+
+	return val.Length, nil
 }
 
 func (tsc jSONTimeSeriesBlobClient) Observe(dataSourceID string) (<-chan []byte, error) {

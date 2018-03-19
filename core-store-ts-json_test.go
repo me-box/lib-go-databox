@@ -7,6 +7,50 @@ import (
 	"time"
 )
 
+func TestAggregationFunctionMinOnEmptyDS(t *testing.T) {
+
+	_, err := tsc.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, JSONTimeSeriesQueryOptions{
+		AggregationFunction: Min,
+	})
+	if err != nil {
+		t.Errorf("Call to LastN failed with error %s", err.Error())
+	}
+
+}
+
+func TestAggregationFunctionMaxOnEmptyDS(t *testing.T) {
+
+	_, err := tsc.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, JSONTimeSeriesQueryOptions{
+		AggregationFunction: Max,
+	})
+	if err != nil {
+		t.Errorf("Call to LastN failed with error %s", err.Error())
+	}
+
+}
+
+func TestAggregationFunctionSumOnEmptyDS(t *testing.T) {
+
+	_, err := tsc.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, JSONTimeSeriesQueryOptions{
+		AggregationFunction: Sum,
+	})
+	if err != nil {
+		t.Errorf("Call to LastN failed with error %s", err.Error())
+	}
+
+}
+
+func TestAggregationFunctionSDOnEmptyDS(t *testing.T) {
+
+	_, err := tsc.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, JSONTimeSeriesQueryOptions{
+		AggregationFunction: StandardDeviation,
+	})
+	if err != nil {
+		t.Errorf("Call to LastN failed with error %s", err.Error())
+	}
+
+}
+
 func TestWrite(t *testing.T) {
 	err := tsc.Write(dsID, []byte("{\"value\":3.1415}"))
 	if err != nil {
@@ -14,30 +58,87 @@ func TestWrite(t *testing.T) {
 	}
 }
 
-func BenchmarkWrite(b *testing.B) {
-	// run the Fib function b.N times
+func benchmarkWrite(num int, b *testing.B) {
+	// write b.N times
 	for n := 0; n < b.N; n++ {
-		tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(n)+"}"))
+		for i := 0; i < num; i++ {
+			tsc.Write(dsID+"benchmarkWrite"+strconv.Itoa(num), []byte("{\"value\":"+strconv.Itoa(n)+"}"))
+		}
 	}
 }
 
-func BenchmarkWriteThenRead(b *testing.B) {
+func BenchmarkWrite1(b *testing.B)     { benchmarkWrite(1, b) }
+func BenchmarkWrite10(b *testing.B)    { benchmarkWrite(10, b) }
+func BenchmarkWrite100(b *testing.B)   { benchmarkWrite(100, b) }
+func BenchmarkWrite1000(b *testing.B)  { benchmarkWrite(1000, b) }
+func BenchmarkWrite10000(b *testing.B) { benchmarkWrite(10000, b) }
 
-	now := time.Now().UnixNano() / int64(time.Millisecond)
+func benchmarkLastN(num int, b *testing.B) {
 
-	// run the Fib function b.N times
+	// write then read b.N times
 	for n := 0; n < b.N; n++ {
-		tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(n)+"}"))
-	}
-	for n := 0; n < b.N-10; n++ {
-		tsc.Range(dsID, now, int64(n)+now, JSONTimeSeriesQueryOptions{})
+		tsc.LastN(dsID+"benchmarkLastN", num, JSONTimeSeriesQueryOptions{})
 	}
 }
+
+//BenchmarkLastNWrite Not part of the benchmark just writes some data in to the store
+func BenchmarkLastNWrite(b *testing.B) {
+	for i := 0; i < 50000; i++ {
+		tsc.Write(dsID+"benchmarkLastN", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+	}
+}
+func BenchmarkLastN1(b *testing.B)     { benchmarkLastN(1, b) }
+func BenchmarkLastN50(b *testing.B)    { benchmarkLastN(50, b) }
+func BenchmarkLastN500(b *testing.B)   { benchmarkLastN(500, b) }
+func BenchmarkLastN5000(b *testing.B)  { benchmarkLastN(5000, b) }
+func BenchmarkLastN50000(b *testing.B) { benchmarkLastN(50000, b) }
+
+func benchmarkLastNSum(num int, b *testing.B) {
+
+	// write then read b.N times
+	for n := 0; n < b.N; n++ {
+		tsc.LastN(dsID+"benchmarkLastNSum", num, JSONTimeSeriesQueryOptions{AggregationFunction: Sum})
+	}
+}
+
+//BenchmarkLastNSumWrite Not part of the benchmark just writes some data in to the store
+func BenchmarkLastNSumWrite(b *testing.B) {
+	for i := 0; i < 50000; i++ {
+		tsc.Write(dsID+"benchmarkLastNSum", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+	}
+}
+
+func BenchmarkLastNSum1(b *testing.B)     { benchmarkLastNSum(1, b) }
+func BenchmarkLastNSum50(b *testing.B)    { benchmarkLastNSum(50, b) }
+func BenchmarkLastNSum500(b *testing.B)   { benchmarkLastNSum(500, b) }
+func BenchmarkLastNSum5000(b *testing.B)  { benchmarkLastNSum(5000, b) }
+func BenchmarkLastNSum50000(b *testing.B) { benchmarkLastNSum(50000, b) }
+
+func benchmarkLastNMean(num int, b *testing.B) {
+
+	// write then read b.N times
+	for n := 0; n < b.N; n++ {
+		tsc.LastN(dsID+"benchmarkLastNMean", num, JSONTimeSeriesQueryOptions{AggregationFunction: Mean})
+	}
+}
+
+//BenchmarkLastNMeanWrite Not part of the benchmark just writes some data in to the store
+func BenchmarkLastNMeanWrite(b *testing.B) {
+	for i := 0; i < 50000; i++ {
+		tsc.Write(dsID+"benchmarkLastNMean", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+	}
+}
+
+func BenchmarkLastNMean1(b *testing.B)     { benchmarkLastNMean(1, b) }
+func BenchmarkLastNMean50(b *testing.B)    { benchmarkLastNMean(50, b) }
+func BenchmarkLastNMean500(b *testing.B)   { benchmarkLastNMean(500, b) }
+func BenchmarkLastNMean5000(b *testing.B)  { benchmarkLastNMean(5000, b) }
+func BenchmarkLastNMean50000(b *testing.B) { benchmarkLastNMean(50000, b) }
 
 func BenchmarkWriteReadMixed(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(n)+"}"))
-		tsc.Latest(dsID, JSONTimeSeriesQueryOptions{})
+		tsc.Latest(dsID)
 	}
 }
 
@@ -48,7 +149,7 @@ func TestLatest(t *testing.T) {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	result, err := tsc.Latest(dsID, JSONTimeSeriesQueryOptions{})
+	result, err := tsc.Latest(dsID)
 	if err != nil {
 		t.Errorf("Call to Latest failed with error %s", err.Error())
 	}
@@ -59,37 +160,6 @@ func TestLatest(t *testing.T) {
 	}
 }
 
-/*
-func TestLatestWithTag(t *testing.T) {
-
-	err := tsc.Write(dsID, []byte("{\"value\":1,\"myTag\":\"one\"}"))
-	if err != nil {
-		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
-	}
-
-	tsc.Write(dsID, []byte("{\"value\":2,\"myTag\":\"two\"}"))
-	tsc.Write(dsID, []byte("{\"value\":3,\"myTag\":\"three\"}"))
-	tsc.Write(dsID, []byte("{\"value\":4,\"myTag\":\"four\"}"))
-	tsc.Write(dsID, []byte("{\"value\":5,\"myTag\":\"five\"}"))
-
-	result, err := tsc.Latest(dsID, JSONTimeSeriesQueryOptions{
-		Filter: &Filter{
-			TagName:    "myTag",
-			FilterType: Equals,
-			Value:      "three",
-		},
-	})
-	if err != nil {
-		t.Errorf("Call to Latest failed with error %s", err.Error())
-	}
-	expected := []byte(`{"value":3,"myTag":"three"}`)
-	cont := s.Contains(string(result), string(expected))
-	if cont != true {
-		t.Errorf("Write to %s failed expected %s but got %s", dsID, expected, result)
-	}
-}
-*/
-
 func TestWriteLots(t *testing.T) {
 
 	for i := 1; i <= 10; i++ {
@@ -99,7 +169,7 @@ func TestWriteLots(t *testing.T) {
 		}
 	}
 
-	result, err := tsc.Latest(dsID, JSONTimeSeriesQueryOptions{})
+	result, err := tsc.Latest(dsID)
 	if err != nil {
 		t.Errorf("Call to Latest failed with error %s", err.Error())
 	}
@@ -107,6 +177,26 @@ func TestWriteLots(t *testing.T) {
 	cont := s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("TestWriteLots failed expected %s but got %s", expected, result)
+	}
+}
+
+func TestWriteLength(t *testing.T) {
+
+	numRecToWrite := 50
+
+	for i := 1; i <= numRecToWrite; i++ {
+		err := tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		if err != nil {
+			t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
+		}
+	}
+
+	result, err := tsc.Length(dsID)
+	if err != nil {
+		t.Errorf("Call to Latest failed with error %s", err.Error())
+	}
+	if numRecToWrite != result {
+		t.Errorf("TestWriteLots failed expected %d but got %d", numRecToWrite, result)
 	}
 }
 
@@ -311,7 +401,7 @@ func TestEarliest(t *testing.T) {
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestEarliest", err.Error())
 		}
-		time.Sleep(time.Millisecond * 10)
+		//time.Sleep(time.Millisecond * 10)
 	}
 
 	result, err := tsc.Earliest(dsID + "TestEarliest")
@@ -329,7 +419,7 @@ func TestEarliest(t *testing.T) {
 
 func TestFirstN(t *testing.T) {
 
-	for i := 1; i <= 10; i++ {
+	for i := 1; i <= 100; i++ {
 		err := tsc.Write(dsID+"TestFirstN", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestFirstN", err.Error())
@@ -337,7 +427,7 @@ func TestFirstN(t *testing.T) {
 		time.Sleep(time.Millisecond * 10)
 	}
 
-	result, err := tsc.FirstN(dsID+"TestFirstN", 2, JSONTimeSeriesQueryOptions{})
+	result, err := tsc.FirstN(dsID+"TestFirstN", 20, JSONTimeSeriesQueryOptions{})
 	if err != nil {
 		t.Errorf("Call to FirstN failed with error %s", err.Error())
 	}
@@ -348,7 +438,38 @@ func TestFirstN(t *testing.T) {
 		t.Errorf("Call to FirstN failed expected %s but got %s", expected, result)
 	}
 
-	expected = []byte(`{"value":2}`)
+	expected = []byte(`{"value":20}`)
+	cont = s.Contains(string(result), string(expected))
+	if cont != true {
+		t.Errorf("Call to FirstN failed expected %s but got %s", expected, result)
+	}
+}
+
+func TestFirstNPastInternalBuffer(t *testing.T) {
+
+	for i := 1; i <= 1000; i++ {
+		err := tsc.Write(dsID+"TestFirstN", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		if err != nil {
+			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestFirstN", err.Error())
+		}
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	startTime := time.Now().Unix()
+	result, err := tsc.FirstN(dsID+"TestFirstN", 20, JSONTimeSeriesQueryOptions{})
+	if err != nil {
+		t.Errorf("Call to FirstN failed with error %s", err.Error())
+	}
+	queryTime := time.Now().Unix() - startTime
+	t.Log("query took :: ", queryTime)
+
+	expected := []byte(`{"value":1}`)
+	cont := s.Contains(string(result), string(expected))
+	if cont != true {
+		t.Errorf("Call to FirstN failed expected %s but got %s", expected, result)
+	}
+
+	expected = []byte(`{"value":20}`)
 	cont = s.Contains(string(result), string(expected))
 	if cont != true {
 		t.Errorf("Call to FirstN failed expected %s but got %s", expected, result)
@@ -440,7 +561,7 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 
 	go func() {
 		for i := 1; i <= numRecords; i++ {
-			_, err := tsc.Latest(dsID, JSONTimeSeriesQueryOptions{})
+			_, err := tsc.Latest(dsID)
 			if err != nil {
 				t.Errorf("Latest failed expected err to be nil got %s", err.Error())
 			}

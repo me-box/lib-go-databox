@@ -75,6 +75,26 @@ func TestWriteLotsBlob(t *testing.T) {
 	}
 }
 
+func TestWriteLengthBlob(t *testing.T) {
+
+	numRecToWrite := 50
+
+	for i := 1; i <= numRecToWrite; i++ {
+		err := tsbc.Write(dsID, []byte("{\"test\":\"data"+strconv.Itoa(i)+"\"}"))
+		if err != nil {
+			t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
+		}
+	}
+
+	result, err := tsbc.Length(dsID)
+	if err != nil {
+		t.Errorf("Call to Latest failed with error %s", err.Error())
+	}
+	if numRecToWrite != result {
+		t.Errorf("TestWriteLots failed expected %d but got %d", numRecToWrite, result)
+	}
+}
+
 //TODO this fails looks like a timing thing
 /*func TestWriteThenWriteAT(t *testing.T) {
 
