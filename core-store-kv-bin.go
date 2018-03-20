@@ -12,10 +12,10 @@ type BinaryKeyValue_0_3_0 interface {
 	Write(dataSourceID string, key string, payload []byte) error
 	// Read text values from key.
 	Read(dataSourceID string, key string) ([]byte, error)
-	// Get notifications of updated values for a key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
-	ObserveKey(dataSourceID string, key string) (<-chan []byte, error)
-	// Get notifications of updated values for any key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
-	Observe(dataSourceID string) (<-chan []byte, error)
+	// Get notifications of updated values for a key. Returns a channel that receives BinaryObserveResponse containing a JSON string when a new value is added.
+	ObserveKey(dataSourceID string, key string) (<-chan BinaryObserveResponse, error)
+	// Get notifications of updated values for any key. Returns a channel that receives BinaryObserveResponse containing a JSON string when a new value is added.
+	Observe(dataSourceID string) (<-chan BinaryObserveResponse, error)
 	// Get notifications of updated values
 	RegisterDatasource(metadata DataSourceMetadata) error
 }
@@ -72,7 +72,7 @@ func (kvc binaryKeyValueClient) Read(dataSourceID string, key string) ([]byte, e
 	return data, nil
 }
 
-func (kvc binaryKeyValueClient) ObserveKey(dataSourceID string, key string) (<-chan []byte, error) {
+func (kvc binaryKeyValueClient) ObserveKey(dataSourceID string, key string) (<-chan BinaryObserveResponse, error) {
 	path := "/kv/" + dataSourceID + "/" + key
 
 	token, err := requestToken(kvc.zestEndpoint+path, "GET")
@@ -86,24 +86,64 @@ func (kvc binaryKeyValueClient) ObserveKey(dataSourceID string, key string) (<-c
 		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
-	return payloadChan, nil
+	objectChan := make(chan BinaryObserveResponse)
+
+	go func() {
+		for data := range payloadChan {
+
+			ts, dsid, key, payload := parseRawObserveResponse(data)
+			resp := BinaryObserveResponse{
+				TimestampMS:  ts,
+				DataSourceID: dsid,
+				Key:          key,
+				Data:         payload,
+			}
+
+			objectChan <- resp
+		}
+
+		//if we get here then payloadChan has been closed so close objectChan
+		close(objectChan)
+	}()
+
+	return objectChan, nil
 }
 
-func (kvc binaryKeyValueClient) Observe(dataSourceID string) (<-chan []byte, error) {
-	path := "/kv/" + dataSourceID
+func (kvc binaryKeyValueClient) Observe(dataSourceID string) (<-chan BinaryObserveResponse, error) {
+	path := "/kv/" + dataSourceID + "/*"
 
 	token, err := requestToken(kvc.zestEndpoint+path, "GET")
 	if err != nil {
 		return nil, err
 	}
 
-	payloadChan, getErr := kvc.zestClient.Observe(token, path, "BINARY", 0)
+	payloadChan, getErr := kvc.zestClient.Observe(token, path, "JSON", 0)
 	if getErr != nil {
 		invalidateCache(kvc.zestEndpoint+path, "GET")
 		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
-	return payloadChan, nil
+	objectChan := make(chan BinaryObserveResponse)
+
+	go func() {
+		for data := range payloadChan {
+
+			ts, dsid, key, payload := parseRawObserveResponse(data)
+			resp := BinaryObserveResponse{
+				TimestampMS:  ts,
+				DataSourceID: dsid,
+				Key:          key,
+				Data:         payload,
+			}
+
+			objectChan <- resp
+		}
+
+		//if we get here then payloadChan has been closed so close objectChan
+		close(objectChan)
+	}()
+
+	return objectChan, nil
 }
 
 func (kvc binaryKeyValueClient) RegisterDatasource(metadata DataSourceMetadata) error {

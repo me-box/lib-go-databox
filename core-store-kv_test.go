@@ -75,7 +75,7 @@ func TestObserveKeyKV(t *testing.T) {
 	startAt := 0
 	numRecords := 100
 
-	receivedData := []string{}
+	receivedData := []JsonObserveResponse{}
 
 	go func() {
 		dataChan, err := kvc.ObserveKey(dsID, "observeTest")
@@ -84,8 +84,8 @@ func TestObserveKeyKV(t *testing.T) {
 		}
 
 		for data := range dataChan {
-			receivedData = append(receivedData, string(data))
-			t.Log("received:: " + string(data))
+			receivedData = append(receivedData, data)
+			t.Log("received:: ", string(data.Json), data.TimestampMS)
 		}
 
 	}()
@@ -108,25 +108,25 @@ func TestObserveKeyKV(t *testing.T) {
 
 	for i := startAt; i <= numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
-		cont := s.Contains(receivedData[i], string(expected))
-		t.Log(receivedData[i])
+		cont := s.Contains(string(receivedData[i].Json), string(expected))
+		t.Log(string(receivedData[i].Json))
 		if cont != true {
-			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i]), string(expected))
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Json), string(expected))
 			break
 		}
 	}
 
 }
 
-/*func TestObserveKV(t *testing.T) {
+func TestObserveKV(t *testing.T) {
 
 	doneChanWrite := make(chan int)
 	//doneChanRead := make(chan int)
 	//now := time.Now().UnixNano() / int64(time.Millisecond)
 	startAt := 0
-	numRecords := 100
+	numRecords := 50
 
-	receivedData := []string{}
+	receivedData := []JsonObserveResponse{}
 
 	go func() {
 		dataChan, err := kvc.Observe(dsID)
@@ -135,22 +135,23 @@ func TestObserveKeyKV(t *testing.T) {
 		}
 
 		for data := range dataChan {
-			receivedData = append(receivedData, string(data))
-			t.Log("received:: " + string(data))
+			receivedData = append(receivedData, data)
+			t.Log("received:: ", string(data.Json), data.TimestampMS)
 		}
 
 	}()
 
 	//Observe take a bit of time to register we miss some values if we dont wait before writing
-	time.Sleep(time.Second)
+	time.Sleep(time.Second / 2)
 
 	go func() {
-		for i := startAt; i <= numRecords; i++ {
-			err := kvc.Write(dsID, "observeTest", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		for i := startAt; i < numRecords; i++ {
+			err := kvc.Write(dsID, "observeTest"+strconv.Itoa(i), []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 			if err != nil {
 				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 			}
 			t.Log(string("written:: " + strconv.Itoa(i)))
+			time.Sleep(time.Millisecond * 10)
 		}
 		doneChanWrite <- 1
 	}()
@@ -162,14 +163,14 @@ func TestObserveKeyKV(t *testing.T) {
 		return
 	}
 
-	for i := startAt; i <= numRecords; i++ {
+	for i := startAt; i < numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
-		cont := s.Contains(receivedData[i], string(expected))
-		t.Log(receivedData[i])
-		if cont != true {
-			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i]), string(expected))
+		cont := s.Contains(string(receivedData[i].Json), string(expected))
+		//t.Log("Data:: ", string(receivedData[i].Json), receivedData[i].Key)
+		if cont != true && receivedData[i].Key == "observeTest"+strconv.Itoa(i) {
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Json), string(expected))
 			break
 		}
 	}
 
-}*/
+}

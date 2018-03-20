@@ -66,8 +66,8 @@ type JSONTimeSeries_0_3_0 interface {
 	//Length retruns the number of records stored for that dataSourceID
 	Length(dataSourceID string) (int, error)
 	// Get notifications when a new value is written
-	// the returned chan receives valuse of the form {"timestamp":213123123,"data":[data-written-by-driver]}
-	Observe(dataSourceID string) (<-chan []byte, error)
+	// the returned chan receives JsonObserveResponse of the form {"TimestampMS":213123123,"Json":byte[]}
+	Observe(dataSourceID string) (<-chan JsonObserveResponse, error)
 	// registerDatasource is used by apps and drivers to register data sources in stores they own.
 	RegisterDatasource(metadata DataSourceMetadata) error
 	// GetDatasourceCatalogue is used by drivers to get a list of registered data sources in stores they own.
@@ -293,7 +293,7 @@ func (tsc jSONTimeSeriesClient) Length(dataSourceID string) (int, error) {
 	return val.Length, nil
 }
 
-func (tsc jSONTimeSeriesClient) Observe(dataSourceID string) (<-chan []byte, error) {
+func (tsc jSONTimeSeriesClient) Observe(dataSourceID string) (<-chan JsonObserveResponse, error) {
 
 	path := "/ts/" + dataSourceID
 
@@ -308,7 +308,27 @@ func (tsc jSONTimeSeriesClient) Observe(dataSourceID string) (<-chan []byte, err
 		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
-	return payloadChan, nil
+	objectChan := make(chan JsonObserveResponse)
+
+	go func() {
+		for data := range payloadChan {
+
+			ts, dsid, key, payload := parseRawObserveResponse(data)
+			resp := JsonObserveResponse{
+				TimestampMS:  ts,
+				DataSourceID: dsid,
+				Key:          key,
+				Json:         payload,
+			}
+
+			objectChan <- resp
+		}
+
+		//if we get here then payloadChan has been closed so close objectChan
+		close(objectChan)
+	}()
+
+	return objectChan, nil
 
 }
 

@@ -12,10 +12,10 @@ type TextKeyValue_0_3_0 interface {
 	Write(dataSourceID string, key string, payload string) error
 	// Read text values. Returns a string containing the text written to the key.
 	Read(dataSourceID string, key string) (string, error)
-	// Get notifications of updated values for a key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
-	ObserveKey(dataSourceID string, key string) (<-chan string, error)
-	// Get notifications of updated values for any key. Returns a channel that receives []bytes containing a JSON string when a new value is added.
-	Observe(dataSourceID string) (<-chan string, error)
+	// Get notifications of updated values for a key. Returns a channel that receives TextObserveResponse containing a JSON string when a new value is added.
+	ObserveKey(dataSourceID string, key string) (<-chan TextObserveResponse, error)
+	// Get notifications of updated values for any key. Returns a channel that receives TextObserveResponse containing a JSON string when a new value is added.
+	Observe(dataSourceID string) (<-chan TextObserveResponse, error)
 	// RegisterDatasource make a new data source for available to the rest of datbox. This can only be used on stores that you have requested in your manifest.
 	RegisterDatasource(metadata DataSourceMetadata) error
 }
@@ -72,8 +72,8 @@ func (kvc textKeyValueClient) Read(dataSourceID string, key string) (string, err
 	return string(data), nil
 }
 
-func (kvc textKeyValueClient) Observe(dataSourceID string) (<-chan string, error) {
-	path := "/kv/" + dataSourceID
+func (kvc textKeyValueClient) Observe(dataSourceID string) (<-chan TextObserveResponse, error) {
+	path := "/kv/" + dataSourceID + "/*"
 
 	token, err := requestToken(kvc.zestEndpoint+path, "GET")
 	if err != nil {
@@ -86,16 +86,30 @@ func (kvc textKeyValueClient) Observe(dataSourceID string) (<-chan string, error
 		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
-	stringChan := make(chan string)
-	go func(byteChan <-chan []byte, outputChan chan string) {
-		for {
-			outputChan <- string(<-byteChan)
+	objectChan := make(chan TextObserveResponse)
+
+	go func() {
+		for data := range payloadChan {
+
+			ts, dsid, key, payload := parseRawObserveResponse(data)
+			resp := TextObserveResponse{
+				TimestampMS:  ts,
+				DataSourceID: dsid,
+				Key:          key,
+				Text:         string(payload),
+			}
+
+			objectChan <- resp
 		}
-	}(payloadChan, stringChan)
-	return stringChan, nil
+
+		//if we get here then payloadChan has been closed so close objectChan
+		close(objectChan)
+	}()
+
+	return objectChan, nil
 }
 
-func (kvc textKeyValueClient) ObserveKey(dataSourceID string, key string) (<-chan string, error) {
+func (kvc textKeyValueClient) ObserveKey(dataSourceID string, key string) (<-chan TextObserveResponse, error) {
 	path := "/kv/" + dataSourceID + "/" + key
 
 	token, err := requestToken(kvc.zestEndpoint+path, "GET")
@@ -109,13 +123,27 @@ func (kvc textKeyValueClient) ObserveKey(dataSourceID string, key string) (<-cha
 		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
-	stringChan := make(chan string)
-	go func(byteChan <-chan []byte, outputChan chan string) {
-		for {
-			outputChan <- string(<-byteChan)
+	objectChan := make(chan TextObserveResponse)
+
+	go func() {
+		for data := range payloadChan {
+
+			ts, dsid, key, payload := parseRawObserveResponse(data)
+			resp := TextObserveResponse{
+				TimestampMS:  ts,
+				DataSourceID: dsid,
+				Key:          key,
+				Text:         string(payload),
+			}
+
+			objectChan <- resp
 		}
-	}(payloadChan, stringChan)
-	return stringChan, nil
+
+		//if we get here then payloadChan has been closed so close objectChan
+		close(objectChan)
+	}()
+
+	return objectChan, nil
 }
 
 func (kvc textKeyValueClient) RegisterDatasource(metadata DataSourceMetadata) error {

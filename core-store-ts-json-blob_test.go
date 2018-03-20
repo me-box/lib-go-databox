@@ -336,3 +336,55 @@ func TestConcurrentWriteAndReadBlob(t *testing.T) {
 		}
 	}
 }
+
+func TestObserveBlob(t *testing.T) {
+
+	t.Log("Hello !")
+	doneChanWrite := make(chan int)
+	//doneChanRead := make(chan int)
+	//now := time.Now().UnixNano() / int64(time.Millisecond)
+	startAt := 0
+	numRecords := 100
+
+	receivedData := []JsonObserveResponse{}
+
+	go func() {
+		dataChan, err := tsbc.Observe(dsID)
+		if err != nil {
+			t.Errorf("Observing %s failed expected err to be nil got %s", dsID, err.Error())
+		}
+
+		for data := range dataChan {
+			receivedData = append(receivedData, data)
+			t.Log("received:: " + string(data.Json))
+		}
+
+	}()
+
+	//Observe take a bit of time to register we miss some values if we dont wait before writing
+	time.Sleep(time.Second)
+
+	go func() {
+		for i := startAt; i <= numRecords; i++ {
+			err := tsbc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+			if err != nil {
+				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
+			}
+			t.Log(string("written:: " + strconv.Itoa(i)))
+		}
+		doneChanWrite <- 1
+	}()
+
+	<-doneChanWrite
+
+	for i := startAt; i <= numRecords; i++ {
+		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
+		cont := s.Contains(string(receivedData[i].Json), string(expected))
+		t.Log(receivedData[i])
+		if cont != true {
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Json), string(expected))
+			break
+		}
+	}
+
+}
