@@ -10,12 +10,12 @@ import (
 	databox "github.com/toshbrown/lib-go-databox"
 )
 
-var dataSourceTest, _ = databox.HypercatToDataSourceMetadata(os.Getenv("DATASOURCE_test"))
+var dataSourceTest, dataSourceStoreURL, _ = databox.HypercatToDataSourceMetadata(os.Getenv("DATASOURCE_test"))
 var storeEndPoint = os.Getenv("DATABOX_ZMQ_ENDPOINT")
 
 func main() {
 
-	tsClient, err := databox.NewJSONTimeSeriesClient(storeEndPoint, false)
+	tsClient, err := databox.NewJSONTimeSeriesBlobClient(storeEndPoint, false)
 	if err != nil {
 		panic("Can't connect to databox store at " + storeEndPoint)
 	}
