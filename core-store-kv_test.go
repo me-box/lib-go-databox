@@ -67,6 +67,40 @@ func TestKVMutiKeys(t *testing.T) {
 	}
 }
 
+func TestListKeysKV(t *testing.T) {
+	_dsID := dsID + "TestListKeysKV"
+	err := kvc.Write(_dsID, "key1", []byte("{\"value\":\"some random string\"}"))
+	if err != nil {
+		t.Errorf("Write to %s failed expected err to be nil got %s", _dsID, err.Error())
+	}
+	err = kvc.Write(_dsID, "key2", []byte("{\"value\":\"some random string\"}"))
+	if err != nil {
+		t.Errorf("Write to %s failed expected err to be nil got %s", _dsID, err.Error())
+	}
+	err = kvc.Write(_dsID, "key3", []byte("{\"value\":\"some random string\"}"))
+	if err != nil {
+		t.Errorf("Write to %s failed expected err to be nil got %s", _dsID, err.Error())
+	}
+
+	keys, err := kvc.ListKeys(_dsID)
+	if err != nil {
+		t.Errorf("ListKeys from %s failed expected err to be nil got %s", _dsID, err.Error())
+	}
+
+	if keys[0] != "key3" {
+		t.Errorf("ListKeys error expected %s got %s", "key1", keys[0])
+	}
+
+	if keys[1] != "key2" {
+		t.Errorf("ListKeys error expected %s got %s", "key2", keys[1])
+	}
+
+	if keys[2] != "key1" {
+		t.Errorf("ListKeys error expected %s got %s", "key3", keys[2])
+	}
+
+}
+
 func TestObserveKeyKV(t *testing.T) {
 
 	doneChanWrite := make(chan int)

@@ -2,6 +2,7 @@ package libDatabox
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -14,6 +15,8 @@ type JSONKeyValue_0_3_0 interface {
 	Write(dataSourceID string, key string, payload []byte) error
 	// Read JSON values. Returns a []bytes containing a JSON string.
 	Read(dataSourceID string, key string) ([]byte, error)
+	//ListKeys returns an array of key registed under the dataSourceID
+	ListKeys(dataSourceID string) ([]string, error)
 	// Get notifications of updated values for a key. Returns a channel that receives JsonObserveResponse containing a JSON string when a new value is added.
 	ObserveKey(dataSourceID string, key string) (<-chan JsonObserveResponse, error)
 	// Get notifications of updated values for any key. Returns a channel that receives JsonObserveResponse containing a JSON string when a new value is added.
@@ -60,7 +63,7 @@ func (kvc jsonKeyValueClient) Write(dataSourceID string, key string, payload []b
 func (kvc jsonKeyValueClient) Read(dataSourceID string, key string) ([]byte, error) {
 	path := "/kv/" + dataSourceID + "/" + key
 
-	token, err := requestToken(kvc.zestEndpoint+path, "POST")
+	token, err := requestToken(kvc.zestEndpoint+path, "GET")
 	if err != nil {
 		return []byte(""), err
 	}
@@ -72,6 +75,29 @@ func (kvc jsonKeyValueClient) Read(dataSourceID string, key string) ([]byte, err
 	}
 
 	return data, nil
+}
+
+func (kvc jsonKeyValueClient) ListKeys(dataSourceID string) ([]string, error) {
+	path := "/kv/" + dataSourceID + "/keys"
+
+	token, err := requestToken(kvc.zestEndpoint+path, "GET")
+	if err != nil {
+		return []string{}, err
+	}
+
+	data, getErr := kvc.zestClient.Get(token, path, "JSON")
+	if getErr != nil {
+		invalidateCache(kvc.zestEndpoint+path, "POST")
+		return []string{}, errors.New("Error reading data: " + getErr.Error())
+	}
+
+	var keysArray []string
+
+	err = json.Unmarshal(data, &keysArray)
+	if err != nil {
+		return []string{}, errors.New("Error decoding data: " + err.Error())
+	}
+	return keysArray, nil
 }
 
 func (kvc jsonKeyValueClient) ObserveKey(dataSourceID string, key string) (<-chan JsonObserveResponse, error) {

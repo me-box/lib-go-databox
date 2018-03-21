@@ -1,6 +1,7 @@
 package libDatabox
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 
@@ -12,6 +13,8 @@ type TextKeyValue_0_3_0 interface {
 	Write(dataSourceID string, key string, payload string) error
 	// Read text values. Returns a string containing the text written to the key.
 	Read(dataSourceID string, key string) (string, error)
+	//ListKeys returns an array of key registed under the dataSourceID
+	ListKeys(dataSourceID string) ([]string, error)
 	// Get notifications of updated values for a key. Returns a channel that receives TextObserveResponse containing a JSON string when a new value is added.
 	ObserveKey(dataSourceID string, key string) (<-chan TextObserveResponse, error)
 	// Get notifications of updated values for any key. Returns a channel that receives TextObserveResponse containing a JSON string when a new value is added.
@@ -70,6 +73,29 @@ func (kvc textKeyValueClient) Read(dataSourceID string, key string) (string, err
 	}
 
 	return string(data), nil
+}
+
+func (kvc textKeyValueClient) ListKeys(dataSourceID string) ([]string, error) {
+	path := "/kv/" + dataSourceID + "/keys"
+
+	token, err := requestToken(kvc.zestEndpoint+path, "GET")
+	if err != nil {
+		return []string{}, err
+	}
+
+	data, getErr := kvc.zestClient.Get(token, path, "JSON")
+	if getErr != nil {
+		invalidateCache(kvc.zestEndpoint+path, "POST")
+		return []string{}, errors.New("Error reading data: " + getErr.Error())
+	}
+
+	var keysArray []string
+
+	err = json.Unmarshal(data, &keysArray)
+	if err != nil {
+		return []string{}, errors.New("Error decoding data: " + err.Error())
+	}
+	return keysArray, nil
 }
 
 func (kvc textKeyValueClient) Observe(dataSourceID string) (<-chan TextObserveResponse, error) {

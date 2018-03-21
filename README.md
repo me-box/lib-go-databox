@@ -97,13 +97,15 @@ type AggregationType string
 
 
 
-## <a name="BinaryKeyValue_0_3_0">type</a> [BinaryKeyValue_0_3_0](/src/target/core-store-kv-bin.go?s=96:873#L1)
+## <a name="BinaryKeyValue_0_3_0">type</a> [BinaryKeyValue_0_3_0](/src/target/core-store-kv-bin.go?s=113:1007#L1)
 ``` go
 type BinaryKeyValue_0_3_0 interface {
     // Write text value to key
     Write(dataSourceID string, key string, payload []byte) error
     // Read text values from key.
     Read(dataSourceID string, key string) ([]byte, error)
+    //ListKeys returns an array of key registed under the dataSourceID
+    ListKeys(dataSourceID string) ([]string, error)
     // Get notifications of updated values for a key. Returns a channel that receives BinaryObserveResponse containing a JSON string when a new value is added.
     ObserveKey(dataSourceID string, key string) (<-chan BinaryObserveResponse, error)
     // Get notifications of updated values for any key. Returns a channel that receives BinaryObserveResponse containing a JSON string when a new value is added.
@@ -118,7 +120,7 @@ type BinaryKeyValue_0_3_0 interface {
 
 
 
-### <a name="NewBinaryKeyValueClient">func</a> [NewBinaryKeyValueClient](/src/target/core-store-kv-bin.go?s=1240:1338#L21)
+### <a name="NewBinaryKeyValueClient">func</a> [NewBinaryKeyValueClient](/src/target/core-store-kv-bin.go?s=1374:1472#L24)
 ``` go
 func NewBinaryKeyValueClient(reqEndpoint string, enableLogging bool) (BinaryKeyValue_0_3_0, error)
 ```
@@ -210,13 +212,15 @@ type FilterType string
 
 
 
-## <a name="JSONKeyValue_0_3_0">type</a> [JSONKeyValue_0_3_0](/src/target/core-store-kv-json.go?s=116:1028#L2)
+## <a name="JSONKeyValue_0_3_0">type</a> [JSONKeyValue_0_3_0](/src/target/core-store-kv-json.go?s=133:1162#L3)
 ``` go
 type JSONKeyValue_0_3_0 interface {
     // Write JSON value
     Write(dataSourceID string, key string, payload []byte) error
     // Read JSON values. Returns a []bytes containing a JSON string.
     Read(dataSourceID string, key string) ([]byte, error)
+    //ListKeys returns an array of key registed under the dataSourceID
+    ListKeys(dataSourceID string) ([]string, error)
     // Get notifications of updated values for a key. Returns a channel that receives JsonObserveResponse containing a JSON string when a new value is added.
     ObserveKey(dataSourceID string, key string) (<-chan JsonObserveResponse, error)
     // Get notifications of updated values for any key. Returns a channel that receives JsonObserveResponse containing a JSON string when a new value is added.
@@ -231,7 +235,7 @@ type JSONKeyValue_0_3_0 interface {
 
 
 
-### <a name="NewJSONKeyValueClient">func</a> [NewJSONKeyValueClient](/src/target/core-store-kv-json.go?s=1387:1481#L23)
+### <a name="NewJSONKeyValueClient">func</a> [NewJSONKeyValueClient](/src/target/core-store-kv-json.go?s=1521:1615#L26)
 ``` go
 func NewJSONKeyValueClient(reqEndpoint string, enableLogging bool) (JSONKeyValue_0_3_0, error)
 ```
@@ -387,13 +391,15 @@ type JsonObserveResponse struct {
 
 
 
-## <a name="TextKeyValue_0_3_0">type</a> [TextKeyValue_0_3_0](/src/target/core-store-kv-text.go?s=96:1021#L1)
+## <a name="TextKeyValue_0_3_0">type</a> [TextKeyValue_0_3_0](/src/target/core-store-kv-text.go?s=113:1155#L1)
 ``` go
 type TextKeyValue_0_3_0 interface {
     // Write text value
     Write(dataSourceID string, key string, payload string) error
     // Read text values. Returns a string containing the text written to the key.
     Read(dataSourceID string, key string) (string, error)
+    //ListKeys returns an array of key registed under the dataSourceID
+    ListKeys(dataSourceID string) ([]string, error)
     // Get notifications of updated values for a key. Returns a channel that receives TextObserveResponse containing a JSON string when a new value is added.
     ObserveKey(dataSourceID string, key string) (<-chan TextObserveResponse, error)
     // Get notifications of updated values for any key. Returns a channel that receives TextObserveResponse containing a JSON string when a new value is added.
@@ -408,7 +414,7 @@ type TextKeyValue_0_3_0 interface {
 
 
 
-### <a name="NewTextKeyValueClient">func</a> [NewTextKeyValueClient](/src/target/core-store-kv-text.go?s=1379:1473#L21)
+### <a name="NewTextKeyValueClient">func</a> [NewTextKeyValueClient](/src/target/core-store-kv-text.go?s=1513:1607#L24)
 ``` go
 func NewTextKeyValueClient(reqEndpoint string, enableLogging bool) (TextKeyValue_0_3_0, error)
 ```
