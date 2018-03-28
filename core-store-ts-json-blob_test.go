@@ -339,7 +339,6 @@ func TestConcurrentWriteAndReadBlob(t *testing.T) {
 
 func TestObserveBlob(t *testing.T) {
 
-	t.Log("Hello !")
 	doneChanWrite := make(chan int)
 	//doneChanRead := make(chan int)
 	//now := time.Now().UnixNano() / int64(time.Millisecond)
@@ -366,7 +365,7 @@ func TestObserveBlob(t *testing.T) {
 
 	go func() {
 		for i := startAt; i <= numRecords; i++ {
-			err := tsbc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+			err := tsbc.Write(dsID, []byte("{\"test\":"+strconv.Itoa(i)+", \"data\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}"))
 			if err != nil {
 				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 			}
@@ -378,7 +377,7 @@ func TestObserveBlob(t *testing.T) {
 	<-doneChanWrite
 
 	for i := startAt; i <= numRecords; i++ {
-		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
+		expected := []byte("{\"test\":" + strconv.Itoa(i) + ", \"data\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}")
 		cont := s.Contains(string(receivedData[i].Json), string(expected))
 		t.Log(receivedData[i])
 		if cont != true {

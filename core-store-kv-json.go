@@ -176,7 +176,7 @@ func (kvc jsonKeyValueClient) Observe(dataSourceID string) (<-chan JsonObserveRe
 
 func parseRawObserveResponse(data []byte) (int64, string, string, []byte) {
 
-	parts := bytes.Split(data, []byte(" "))
+	parts := bytes.SplitN(data, []byte(" "), 4)
 
 	_timestamp, _ := strconv.ParseInt(string(parts[0]), 10, 64)
 
