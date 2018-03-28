@@ -56,6 +56,6 @@ type relValPairBool struct {
 }
 
 type hypercat struct {
-	ItemMetadata []interface{} `json:"item-metadata"`
 	Href         string        `json:"href"`
+	ItemMetadata []interface{} `json:"item-metadata"`
 }
