@@ -193,33 +193,6 @@ func checkTokenCache(href string, method string) (string, error) {
 	return tokenCache[routeHash], nil
 }
 
-type DataSourceMetadata struct {
-	Description    string
-	ContentType    string
-	Vendor         string
-	DataSourceType string
-	DataSourceID   string
-	StoreType      string
-	IsActuator     bool
-	Unit           string
-	Location       string
-}
-
-type relValPair struct {
-	Rel string `json:"rel"`
-	Val string `json:"val"`
-}
-
-type relValPairBool struct {
-	Rel string `json:"rel"`
-	Val bool   `json:"val"`
-}
-
-type hypercat struct {
-	ItemMetadata []interface{} `json:"item-metadata"`
-	Href         string        `json:"href"`
-}
-
 //dataSourceMetadataToHypercat converts a DataSourceMetadata instance to json for registering a data source
 func dataSourceMetadataToHypercat(metadata DataSourceMetadata, endPoint string) ([]byte, error) {
 

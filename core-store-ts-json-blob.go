@@ -9,38 +9,7 @@ import (
 	zest "github.com/toshbrown/goZestClient"
 )
 
-type AggregationType string
-
-type FilterType string
-
-//Allowed values for FilterType and AggregationFunction
-const (
-	Equals            FilterType      = "equals"
-	Contains          FilterType      = "contains"
-	Sum               AggregationType = "sum"
-	Count             AggregationType = "count"
-	Min               AggregationType = "min"
-	Max               AggregationType = "max"
-	Mean              AggregationType = "mean"
-	Median            AggregationType = "median"
-	StandardDeviation AggregationType = "sd"
-)
-
-// Filter types to hold the required data to apply the filtering functions of the structured json API
-type Filter struct {
-	TagName    string
-	FilterType FilterType
-	Value      string
-}
-
-// JSONTimeSeriesQueryOptions described the options for the structured json API
-type JSONTimeSeriesQueryOptions struct {
-	AggregationFunction AggregationType
-	Filter              *Filter
-}
-
-// JSONTimeSeries_0_3_0 described the the structured json timeseries API
-type JSONTimeSeries_0_3_0 interface {
+type JSONTimeSeriesBlob_0_3_0 interface {
 	// Write  will be timestamped with write time in ms since the unix epoch by the store
 	Write(dataSourceID string, payload []byte) error
 	// WriteAt will be timestamped with timestamp provided in ms since the unix epoch
@@ -53,16 +22,16 @@ type JSONTimeSeries_0_3_0 interface {
 	Earliest(dataSourceID string) ([]byte, error)
 	// Read the last N values.
 	// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-	LastN(dataSourceID string, n int, opt JSONTimeSeriesQueryOptions) ([]byte, error)
+	LastN(dataSourceID string, n int) ([]byte, error)
 	// Read the first N values.
 	// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-	FirstN(dataSourceID string, n int, opt JSONTimeSeriesQueryOptions) ([]byte, error)
+	FirstN(dataSourceID string, n int) ([]byte, error)
 	// Read values written after the provided timestamp in in ms since the unix epoch.
 	// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-	Since(dataSourceID string, sinceTimeStamp int64, opt JSONTimeSeriesQueryOptions) ([]byte, error)
+	Since(dataSourceID string, sinceTimeStamp int64) ([]byte, error)
 	// Read values written between the start timestamp and end timestamp in in ms since the unix epoch.
 	// return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-	Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64, opt JSONTimeSeriesQueryOptions) ([]byte, error)
+	Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) ([]byte, error)
 	//Length retruns the number of records stored for that dataSourceID
 	Length(dataSourceID string) (int, error)
 	// Get notifications when a new value is written
@@ -74,20 +43,19 @@ type JSONTimeSeries_0_3_0 interface {
 	GetDatasourceCatalogue() ([]byte, error)
 }
 
-type jSONTimeSeriesClient struct {
+type jSONTimeSeriesBlobClient struct {
 	zestC     zest.ZestClient
 	zEndpoint string
 	dEndpoint string
 }
 
-// NewJSONTimeSeriesClient returns a new jSONTimeSeriesClient to enable interaction with a structured timeseries data store in JSON format.
-// The data written must contain at least {"value":[any numeric value]}. This is used in the aggregation functions. Other data can be store and used at KV pairs to filter the data but it can not be processed.
+// NewJSONTimeSeriesBlobClient returns a new jSONTimeSeriesBlobClient to enable interaction with a time series data store in unstructured JSON format
 // reqEndpoint is provided in the DATABOX_ZMQ_ENDPOINT environment varable to databox apps and drivers.
-func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSeries_0_3_0, error) {
+func NewJSONTimeSeriesBlobClient(reqEndpoint string, enableLogging bool) (JSONTimeSeriesBlob_0_3_0, error) {
 
 	var err error
 
-	tsc := jSONTimeSeriesClient{}
+	tsc := jSONTimeSeriesBlobClient{}
 	tsc.zEndpoint = reqEndpoint
 	tsc.dEndpoint = strings.Replace(reqEndpoint, ":5555", ":5556", 1)
 	tsc.zestC, err = zest.New(tsc.zEndpoint, tsc.dEndpoint, getServerKey(), enableLogging)
@@ -96,9 +64,9 @@ func NewJSONTimeSeriesClient(reqEndpoint string, enableLogging bool) (JSONTimeSe
 }
 
 // Write will add data to the times series data store. Data will be time stamped at insertion (format ms since 1970)
-func (tsc jSONTimeSeriesClient) Write(dataSourceID string, payload []byte) error {
+func (tsc jSONTimeSeriesBlobClient) Write(dataSourceID string, payload []byte) error {
 
-	path := "/ts/" + dataSourceID
+	path := "/ts/blob/" + dataSourceID
 
 	token, err := requestToken(tsc.zEndpoint+path, "POST")
 	if err != nil {
@@ -117,9 +85,9 @@ func (tsc jSONTimeSeriesClient) Write(dataSourceID string, payload []byte) error
 
 // WriteAt will add data to the times series data store. Data will be time stamped with the timstamp provided in the
 // timstamp paramiter (format ms since 1970)
-func (tsc jSONTimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, payload []byte) error {
+func (tsc jSONTimeSeriesBlobClient) WriteAt(dataSourceID string, timstamp int64, payload []byte) error {
 
-	path := "/ts/" + dataSourceID + "/at/"
+	path := "/ts/blob/" + dataSourceID + "/at/"
 
 	token, err := requestToken(tsc.zEndpoint+path+"*", "POST")
 	if err != nil {
@@ -140,9 +108,9 @@ func (tsc jSONTimeSeriesClient) WriteAt(dataSourceID string, timstamp int64, pay
 
 //Latest will retrieve the last entry stored at the requested datasource ID
 // return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-func (tsc jSONTimeSeriesClient) Latest(dataSourceID string) ([]byte, error) {
+func (tsc jSONTimeSeriesBlobClient) Latest(dataSourceID string) ([]byte, error) {
 
-	path := "/ts/" + dataSourceID + "/latest"
+	path := "/ts/blob/" + dataSourceID + "/latest"
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
@@ -161,9 +129,9 @@ func (tsc jSONTimeSeriesClient) Latest(dataSourceID string) ([]byte, error) {
 
 // Earliest will retrieve the first entry stored at the requested datasource ID
 // return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-func (tsc jSONTimeSeriesClient) Earliest(dataSourceID string) ([]byte, error) {
+func (tsc jSONTimeSeriesBlobClient) Earliest(dataSourceID string) ([]byte, error) {
 
-	path := "/ts/" + dataSourceID + "/earliest"
+	path := "/ts/blob/" + dataSourceID + "/earliest"
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
@@ -182,9 +150,9 @@ func (tsc jSONTimeSeriesClient) Earliest(dataSourceID string) ([]byte, error) {
 
 // LastN will retrieve the last N entries stored at the requested datasource ID
 // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-func (tsc jSONTimeSeriesClient) LastN(dataSourceID string, n int, opt JSONTimeSeriesQueryOptions) ([]byte, error) {
+func (tsc jSONTimeSeriesBlobClient) LastN(dataSourceID string, n int) ([]byte, error) {
 
-	path := "/ts/" + dataSourceID + "/last/" + strconv.Itoa(n) + tsc.calculatePath(opt)
+	path := "/ts/blob/" + dataSourceID + "/last/" + strconv.Itoa(n)
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
@@ -203,9 +171,9 @@ func (tsc jSONTimeSeriesClient) LastN(dataSourceID string, n int, opt JSONTimeSe
 
 // FirstN will retrieve the first N entries stored at the requested datasource ID
 // return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-func (tsc jSONTimeSeriesClient) FirstN(dataSourceID string, n int, opt JSONTimeSeriesQueryOptions) ([]byte, error) {
+func (tsc jSONTimeSeriesBlobClient) FirstN(dataSourceID string, n int) ([]byte, error) {
 
-	path := "/ts/" + dataSourceID + "/first/" + strconv.Itoa(n) + tsc.calculatePath(opt)
+	path := "/ts/blob/" + dataSourceID + "/first/" + strconv.Itoa(n)
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
@@ -224,9 +192,9 @@ func (tsc jSONTimeSeriesClient) FirstN(dataSourceID string, n int, opt JSONTimeS
 
 //Since will retrieve all entries since the requested timestamp (ms since unix epoch)
 // return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-func (tsc jSONTimeSeriesClient) Since(dataSourceID string, sinceTimeStamp int64, opt JSONTimeSeriesQueryOptions) ([]byte, error) {
+func (tsc jSONTimeSeriesBlobClient) Since(dataSourceID string, sinceTimeStamp int64) ([]byte, error) {
 
-	path := "/ts/" + dataSourceID + "/since/" + strconv.FormatInt(sinceTimeStamp, 10) + tsc.calculatePath(opt)
+	path := "/ts/blob/" + dataSourceID + "/since/" + strconv.FormatInt(sinceTimeStamp, 10)
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
@@ -245,9 +213,9 @@ func (tsc jSONTimeSeriesClient) Since(dataSourceID string, sinceTimeStamp int64,
 
 // Range will retrieve all entries between  formTimeStamp and toTimeStamp timestamp in ms since unix epoch
 // return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-func (tsc jSONTimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64, opt JSONTimeSeriesQueryOptions) ([]byte, error) {
+func (tsc jSONTimeSeriesBlobClient) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) ([]byte, error) {
 
-	path := "/ts/" + dataSourceID + "/range/" + strconv.FormatInt(formTimeStamp, 10) + "/" + strconv.FormatInt(toTimeStamp, 10) + tsc.calculatePath(opt)
+	path := "/ts/blob/" + dataSourceID + "/range/" + strconv.FormatInt(formTimeStamp, 10) + "/" + strconv.FormatInt(toTimeStamp, 10)
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
@@ -265,9 +233,9 @@ func (tsc jSONTimeSeriesClient) Range(dataSourceID string, formTimeStamp int64, 
 }
 
 //Length retruns the number of records stored for that dataSourceID
-func (tsc jSONTimeSeriesClient) Length(dataSourceID string) (int, error) {
+func (tsc jSONTimeSeriesBlobClient) Length(dataSourceID string) (int, error) {
 
-	path := "/ts/" + dataSourceID + "/length"
+	path := "/ts/blob/" + dataSourceID + "/length"
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
@@ -293,9 +261,9 @@ func (tsc jSONTimeSeriesClient) Length(dataSourceID string) (int, error) {
 	return val.Length, nil
 }
 
-func (tsc jSONTimeSeriesClient) Observe(dataSourceID string) (<-chan JsonObserveResponse, error) {
+func (tsc jSONTimeSeriesBlobClient) Observe(dataSourceID string) (<-chan JsonObserveResponse, error) {
 
-	path := "/ts/" + dataSourceID
+	path := "/ts/blob/" + dataSourceID
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
 	if err != nil {
@@ -334,7 +302,7 @@ func (tsc jSONTimeSeriesClient) Observe(dataSourceID string) (<-chan JsonObserve
 
 // RegisterDatasource is used by apps and drivers to register datasource in stores they
 // own.
-func (tsc jSONTimeSeriesClient) RegisterDatasource(metadata DataSourceMetadata) error {
+func (tsc jSONTimeSeriesBlobClient) RegisterDatasource(metadata DataSourceMetadata) error {
 
 	path := "/cat"
 
@@ -342,7 +310,7 @@ func (tsc jSONTimeSeriesClient) RegisterDatasource(metadata DataSourceMetadata) 
 	if err != nil {
 		return err
 	}
-	hypercatJSON, err := dataSourceMetadataToHypercat(metadata, tsc.zEndpoint+"/ts/")
+	hypercatJSON, err := dataSourceMetadataToHypercat(metadata, tsc.zEndpoint+"/ts/blob/")
 
 	writeErr := tsc.zestC.Post(token, path, hypercatJSON, "JSON")
 	if writeErr != nil {
@@ -353,7 +321,7 @@ func (tsc jSONTimeSeriesClient) RegisterDatasource(metadata DataSourceMetadata) 
 	return nil
 }
 
-func (tsc jSONTimeSeriesClient) GetDatasourceCatalogue() ([]byte, error) {
+func (tsc jSONTimeSeriesBlobClient) GetDatasourceCatalogue() ([]byte, error) {
 	path := "/cat"
 
 	token, err := requestToken(tsc.zEndpoint+path, "GET")
@@ -368,17 +336,4 @@ func (tsc jSONTimeSeriesClient) GetDatasourceCatalogue() ([]byte, error) {
 	}
 
 	return hypercatJSON, nil
-}
-
-func (tsc jSONTimeSeriesClient) calculatePath(opt JSONTimeSeriesQueryOptions) string {
-	aggregationPath := ""
-	if opt.AggregationFunction != "" {
-		aggregationPath = "/" + string(opt.AggregationFunction)
-	}
-
-	if opt.Filter == nil || opt.Filter.TagName == "" || opt.Filter.FilterType == "" || opt.Filter.Value == "" {
-		return aggregationPath
-	}
-
-	return "/filter/" + string(opt.Filter.TagName) + "/" + string(opt.Filter.FilterType) + "/" + string(opt.Filter.Value) + aggregationPath
 }
