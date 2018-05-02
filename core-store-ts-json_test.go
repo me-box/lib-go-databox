@@ -402,9 +402,15 @@ func TestEarliest(t *testing.T) {
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestEarliest", err.Error())
 		}
+
+		// On a fast CPU its possible to write faster than the resolution of zestDBs timestamp!
+		// when this happens it can return records out of order causing this test to fail ;-(
+		// so lets just sleep for a while to make sure!!
+		// https://github.com/jptmoore/zestdb/issues/25
+		time.Sleep(time.Millisecond * 10)
 	}
 
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Second)
 
 	result, err := tsc.Earliest(dsID + "TestEarliest")
 	if err != nil {
@@ -426,6 +432,10 @@ func TestFirstN(t *testing.T) {
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestFirstN", err.Error())
 		}
+		// On a fast CPU its possible to write faster than the resolution of zestDBs timestamp!
+		// when this happens it can return records out of order causing this test to fail ;-(
+		// so lets just sleep for a while to make sure!!
+		// https://github.com/jptmoore/zestdb/issues/25
 		time.Sleep(time.Millisecond * 10)
 	}
 
@@ -490,6 +500,10 @@ func TestWriteAtAndRange(t *testing.T) {
 		if err != nil {
 			t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 		}
+		// On a fast CPU its possible to write faster than the resolution of zestDBs timestamp!
+		// when this happens it can return records out of order causing this test to fail ;-(
+		// so lets just sleep for a while to make sure!!
+		// https://github.com/jptmoore/zestdb/issues/25
 	}
 
 	result, err := tsc.Range(dsID, now, now+int64(numRecords*timeStepMs), JSONTimeSeriesQueryOptions{})
@@ -546,7 +560,6 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 
 	doneChanWrite := make(chan int)
 	doneChanRead := make(chan int)
-	//now := time.Now().UnixNano() / int64(time.Millisecond)
 	startAt := 1000
 	numRecords := 1100
 
@@ -556,7 +569,6 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 			if err != nil {
 				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 			}
-			//fmt.Println(string("written:: " + strconv.Itoa(i)))
 		}
 		doneChanWrite <- 1
 	}()
@@ -567,7 +579,6 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 			if err != nil {
 				t.Errorf("Latest failed expected err to be nil got %s", err.Error())
 			}
-			//fmt.Println("Got:: ", string(data))
 		}
 		doneChanRead <- 1
 	}()
@@ -625,15 +636,21 @@ func TestObserve(t *testing.T) {
 			}
 			t.Log(string("written:: " + strconv.Itoa(i)))
 		}
+
+		// we miss some values if we dont wait before saying we are done!
+		time.Sleep(time.Second * 2)
 		doneChanWrite <- 1
 	}()
 
 	<-doneChanWrite
 
+	if len(receivedData) < numRecords {
+		t.Errorf("receivedData Error:  receivedData should contain '%d' items but contains  %d", numRecords, len(receivedData))
+	}
 	for i := startAt; i <= numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
 		cont := s.Contains(string(receivedData[i].Json), string(expected))
-		t.Log(receivedData[i])
+		//t.Log(receivedData[i])
 		if cont != true {
 			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Json), string(expected))
 			break
