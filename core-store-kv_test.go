@@ -125,7 +125,7 @@ func TestObserveKeyKV(t *testing.T) {
 	}()
 
 	//Observe take a bit of time to register we miss some values if we dont wait before writing
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 2)
 
 	go func() {
 		for i := startAt; i <= numRecords; i++ {
@@ -135,11 +135,15 @@ func TestObserveKeyKV(t *testing.T) {
 			}
 			t.Log(string("written:: " + strconv.Itoa(i)))
 		}
+		// we miss some values if we dont wait before saying we are done!
+		time.Sleep(time.Second * 3)
 		doneChanWrite <- 1
 	}()
 
 	<-doneChanWrite
-
+	if len(receivedData) < numRecords {
+		t.Errorf("receivedData Error:  receivedData should contain '%d' items but contains  %d", numRecords, len(receivedData))
+	}
 	for i := startAt; i <= numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
 		cont := s.Contains(string(receivedData[i].Json), string(expected))
