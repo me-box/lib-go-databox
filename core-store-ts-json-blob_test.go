@@ -372,12 +372,14 @@ func TestObserveBlob(t *testing.T) {
 			t.Log(string("written:: " + strconv.Itoa(i)))
 		}
 		// we miss some values if we dont wait before saying we are done!
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Second * 3)
 		doneChanWrite <- 1
 	}()
 
 	<-doneChanWrite
-
+	if len(receivedData) < numRecords {
+		t.Errorf("receivedData Error:  receivedData should contain '%d' items but contains  %d", numRecords, len(receivedData))
+	}
 	for i := startAt; i <= numRecords; i++ {
 		expected := []byte("{\"test\":" + strconv.Itoa(i) + ", \"data\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}")
 		cont := s.Contains(string(receivedData[i].Json), string(expected))

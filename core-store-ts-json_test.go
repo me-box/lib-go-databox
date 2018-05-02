@@ -638,7 +638,7 @@ func TestObserve(t *testing.T) {
 		}
 
 		// we miss some values if we dont wait before saying we are done!
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Second * 3)
 		doneChanWrite <- 1
 	}()
 

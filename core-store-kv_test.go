@@ -188,7 +188,7 @@ func TestObserveKV(t *testing.T) {
 			time.Sleep(time.Millisecond * 10)
 		}
 		// we miss some values if we dont wait before saying we are done!
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Second * 3)
 		doneChanWrite <- 1
 	}()
 
@@ -199,6 +199,9 @@ func TestObserveKV(t *testing.T) {
 		return
 	}
 
+	if len(receivedData) < numRecords {
+		t.Errorf("receivedData Error:  receivedData should contain '%d' items but contains  %d", numRecords, len(receivedData))
+	}
 	for i := startAt; i < numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
 		cont := s.Contains(string(receivedData[i].Json), string(expected))
