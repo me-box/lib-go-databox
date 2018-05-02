@@ -402,8 +402,9 @@ func TestEarliest(t *testing.T) {
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestEarliest", err.Error())
 		}
-		//time.Sleep(time.Millisecond * 10)
 	}
+
+	time.Sleep(time.Millisecond * 100)
 
 	result, err := tsc.Earliest(dsID + "TestEarliest")
 	if err != nil {
@@ -612,8 +613,9 @@ func TestObserve(t *testing.T) {
 
 	}()
 
-	//Observe take a bit of time to register we miss some values if we dont wait before writing
-	time.Sleep(time.Second)
+	// Observe take a bit of time to register
+	// we miss some values if we dont wait before writing
+	time.Sleep(time.Second * 2)
 
 	go func() {
 		for i := startAt; i <= numRecords; i++ {
