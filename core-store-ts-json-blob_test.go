@@ -371,6 +371,8 @@ func TestObserveBlob(t *testing.T) {
 			}
 			t.Log(string("written:: " + strconv.Itoa(i)))
 		}
+		// we miss some values if we dont wait before saying we are done!
+		time.Sleep(time.Second * 2)
 		doneChanWrite <- 1
 	}()
 

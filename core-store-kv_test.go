@@ -176,7 +176,7 @@ func TestObserveKV(t *testing.T) {
 	}()
 
 	//Observe take a bit of time to register we miss some values if we dont wait before writing
-	time.Sleep(time.Second / 2)
+	time.Sleep(time.Second * 2)
 
 	go func() {
 		for i := startAt; i < numRecords; i++ {
@@ -187,6 +187,8 @@ func TestObserveKV(t *testing.T) {
 			t.Log(string("written:: " + strconv.Itoa(i)))
 			time.Sleep(time.Millisecond * 10)
 		}
+		// we miss some values if we dont wait before saying we are done!
+		time.Sleep(time.Second * 2)
 		doneChanWrite <- 1
 	}()
 
