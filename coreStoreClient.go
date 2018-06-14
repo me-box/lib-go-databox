@@ -13,11 +13,18 @@ import (
 )
 
 type CoreStoreClient struct {
-	ZestC     zest.ZestClient
-	Arbiter   *ArbiterClient
-	Request   *http.Client
-	ZEndpoint string
-	DEndpoint string
+	ZestC      zest.ZestClient
+	Arbiter    *ArbiterClient
+	Request    *http.Client
+	ZEndpoint  string
+	DEndpoint  string
+	KVJSON     *KVStore
+	KVText     *KVStore
+	KVBin      *KVStore
+	TSBlobJSON *TSBlobStore
+	TSBlobText *TSBlobStore
+	TSBlobBin  *TSBlobStore
+	TSJSON     *TSStore
 }
 
 func NewCoreStoreClient(databoxRequest *http.Client, arbiterClient *ArbiterClient, serverKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient {
@@ -40,6 +47,13 @@ func NewCoreStoreClient(databoxRequest *http.Client, arbiterClient *ArbiterClien
 		fmt.Println("[NewCoreStoreClient] Error zest.New ", err.Error())
 	}
 
+	csc.KVJSON = newKVStore(csc, ContentTypeJSON)
+	csc.KVText = newKVStore(csc, ContentTypeTEXT)
+	csc.KVBin = newKVStore(csc, ContentTypeBINARY)
+	csc.TSBlobJSON = newTSBlobStore(csc, ContentTypeJSON)
+	csc.TSBlobText = newTSBlobStore(csc, ContentTypeTEXT)
+	csc.TSBlobBin = newTSBlobStore(csc, ContentTypeBINARY)
+	csc.TSJSON = newTSStore(csc, ContentTypeBINARY)
 	return csc
 }
 

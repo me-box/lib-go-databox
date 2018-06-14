@@ -137,7 +137,7 @@ func (arb *ArbiterClient) makeArbiterRequest(arbMethod string, path string, host
 
 	if arb.arbiterURL == "" || arb.arbiterToken == "" {
 		//Arbiter not configured
-		fmt.Println("makeArbiterRequest Warning:: Arbiter not configured")
+		//fmt.Println("makeArbiterRequest Warning:: Arbiter not configured")
 		return []byte{}, 200
 	}
 	var jsonStr = []byte(`{"target":"` + hostname + `","path":"` + endpoint + `","method":"` + method + `"}`)

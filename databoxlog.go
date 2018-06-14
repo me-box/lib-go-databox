@@ -46,22 +46,22 @@ func New(store *CoreStoreClient, outputDebugLogs bool) (*Logger, error) {
 
 func (l Logger) Info(msg string) {
 	Info(msg)
-	err := l.Store.TSBlobWrite("cmlogs", []byte("{\"log\":"+strconv.Quote(msg)+",\"type\":\"INFO\"}"))
+	err := l.Store.TSBlobJSON.Write("cmlogs", []byte("{\"log\":"+strconv.Quote(msg)+",\"type\":\"INFO\"}"))
 	ChkErr(err)
 }
 func (l Logger) Warn(msg string) {
 	Warn(msg)
-	err := l.Store.TSBlobWrite("cmlogs", []byte("{\"log\":"+strconv.Quote(msg)+",\"type\":\"WARN\"}"))
+	err := l.Store.TSBlobJSON.Write("cmlogs", []byte("{\"log\":"+strconv.Quote(msg)+",\"type\":\"WARN\"}"))
 	ChkErr(err)
 }
 func (l Logger) Err(msg string) {
 	Err(msg)
-	err := l.Store.TSBlobWrite("cmlogs", []byte("{\"log\":"+strconv.Quote(msg)+",\"type\":\"ERROR\"}"))
+	err := l.Store.TSBlobJSON.Write("cmlogs", []byte("{\"log\":"+strconv.Quote(msg)+",\"type\":\"ERROR\"}"))
 	ChkErr(err)
 }
 func (l Logger) Debug(msg string) {
 	Debug(msg)
-	err := l.Store.TSBlobWrite("cmlogs", []byte("{\"log\":"+strconv.Quote(msg)+",\"type\":\"DEBUG\"}"))
+	err := l.Store.TSBlobJSON.Write("cmlogs", []byte("{\"log\":"+strconv.Quote(msg)+",\"type\":\"DEBUG\"}"))
 	ChkErr(err)
 }
 
@@ -77,7 +77,7 @@ func (l Logger) ChkErr(err error) {
 func (l Logger) GetLastNLogEntries(n int) Logs {
 
 	var logs Logs
-	data, err := l.Store.TSBlobLastN("cmlogs", n)
+	data, err := l.Store.TSBlobJSON.LastN("cmlogs", n)
 	l.ChkErr(err)
 	json.Unmarshal(data, &logs)
 
@@ -86,7 +86,7 @@ func (l Logger) GetLastNLogEntries(n int) Logs {
 
 func (l Logger) GetLastNLogEntriesRaw(n int) []byte {
 
-	data, err := l.Store.TSBlobLastN("cmlogs", n)
+	data, err := l.Store.TSBlobJSON.LastN("cmlogs", n)
 	l.ChkErr(err)
 	return data
 

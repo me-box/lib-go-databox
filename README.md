@@ -12,6 +12,7 @@
 
 
 ## <a name="pkg-index">Index</a>
+* [Constants](#pkg-constants)
 * [func ChkErr(err error)](#ChkErr)
 * [func ChkErrFatal(err error)](#ChkErrFatal)
 * [func Debug(msg string)](#Debug)
@@ -21,6 +22,7 @@
 * [func NewDataboxHTTPsAPI() *http.Client](#NewDataboxHTTPsAPI)
 * [func NewDataboxHTTPsAPIWithPaths(cmRootCaPath string) *http.Client](#NewDataboxHTTPsAPIWithPaths)
 * [func Warn(msg string)](#Warn)
+* [type AggregationType](#AggregationType)
 * [type ArbiterClient](#ArbiterClient)
   * [func NewArbiterClient(arbiterTokenPath string, databoxRequest *http.Client, arbiterURL string) ArbiterClient](#NewArbiterClient)
   * [func (arb *ArbiterClient) GetRootDataSourceCatalogue() (HypercatRoot, error)](#ArbiterClient.GetRootDataSourceCatalogue)
@@ -47,38 +49,24 @@
   * [func NewCoreStoreClient(databoxRequest *http.Client, arbiterClient *ArbiterClient, serverKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient](#NewCoreStoreClient)
   * [func (csc *CoreStoreClient) GetStoreDataSourceCatalogue(href string) (HypercatRoot, error)](#CoreStoreClient.GetStoreDataSourceCatalogue)
   * [func (csc *CoreStoreClient) HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error)](#CoreStoreClient.HypercatToDataSourceMetadata)
-  * [func (csc *CoreStoreClient) KVJSONDelete(dataSourceID string, key string) error](#CoreStoreClient.KVJSONDelete)
-  * [func (csc *CoreStoreClient) KVJSONDeleteAll(dataSourceID string) error](#CoreStoreClient.KVJSONDeleteAll)
-  * [func (csc *CoreStoreClient) KVJSONListKeys(dataSourceID string) ([]string, error)](#CoreStoreClient.KVJSONListKeys)
-  * [func (csc *CoreStoreClient) KVJSONObserve(dataSourceID string) (&lt;-chan []byte, error)](#CoreStoreClient.KVJSONObserve)
-  * [func (csc *CoreStoreClient) KVJSONObserveKey(dataSourceID string, key string) (&lt;-chan []byte, error)](#CoreStoreClient.KVJSONObserveKey)
-  * [func (csc *CoreStoreClient) KVJSONRead(dataSourceID string, key string) ([]byte, error)](#CoreStoreClient.KVJSONRead)
-  * [func (csc *CoreStoreClient) KVJSONWrite(dataSourceID string, key string, payload []byte) error](#CoreStoreClient.KVJSONWrite)
-  * [func (csc *CoreStoreClient) KVTextDelete(dataSourceID string, key string) error](#CoreStoreClient.KVTextDelete)
-  * [func (csc *CoreStoreClient) KVTextDeleteAll(dataSourceID string) error](#CoreStoreClient.KVTextDeleteAll)
-  * [func (csc *CoreStoreClient) KVTextListKeys(dataSourceID string) ([]string, error)](#CoreStoreClient.KVTextListKeys)
-  * [func (csc *CoreStoreClient) KVTextObserve(dataSourceID string) (&lt;-chan []byte, error)](#CoreStoreClient.KVTextObserve)
-  * [func (csc *CoreStoreClient) KVTextObserveKey(dataSourceID string, key string) (&lt;-chan []byte, error)](#CoreStoreClient.KVTextObserveKey)
-  * [func (csc *CoreStoreClient) KVTextRead(dataSourceID string, key string) ([]byte, error)](#CoreStoreClient.KVTextRead)
-  * [func (csc *CoreStoreClient) KVTextWrite(dataSourceID string, key string, payload []byte) error](#CoreStoreClient.KVTextWrite)
   * [func (csc *CoreStoreClient) RegisterDatasource(metadata DataSourceMetadata) error](#CoreStoreClient.RegisterDatasource)
-  * [func (csc *CoreStoreClient) TSBlobEarliest(dataSourceID string) ([]byte, error)](#CoreStoreClient.TSBlobEarliest)
-  * [func (csc *CoreStoreClient) TSBlobFirstN(dataSourceID string, n int) ([]byte, error)](#CoreStoreClient.TSBlobFirstN)
-  * [func (csc *CoreStoreClient) TSBlobLastN(dataSourceID string, n int) ([]byte, error)](#CoreStoreClient.TSBlobLastN)
-  * [func (csc *CoreStoreClient) TSBlobLatest(dataSourceID string) ([]byte, error)](#CoreStoreClient.TSBlobLatest)
-  * [func (csc *CoreStoreClient) TSBlobLength(dataSourceID string) (int, error)](#CoreStoreClient.TSBlobLength)
-  * [func (csc *CoreStoreClient) TSBlobObserve(dataSourceID string) (&lt;-chan []byte, error)](#CoreStoreClient.TSBlobObserve)
-  * [func (csc *CoreStoreClient) TSBlobRange(dataSourceID string, formTimeStamp int64, toTimeStamp int64) ([]byte, error)](#CoreStoreClient.TSBlobRange)
-  * [func (csc *CoreStoreClient) TSBlobSince(dataSourceID string, sinceTimeStamp int64) ([]byte, error)](#CoreStoreClient.TSBlobSince)
-  * [func (csc *CoreStoreClient) TSBlobWrite(dataSourceID string, payload []byte) error](#CoreStoreClient.TSBlobWrite)
-  * [func (csc *CoreStoreClient) TSBlobWriteAt(dataSourceID string, timstamp int64, payload []byte) error](#CoreStoreClient.TSBlobWriteAt)
 * [type DataSource](#DataSource)
 * [type DataSourceMetadata](#DataSourceMetadata)
 * [type DataboxType](#DataboxType)
 * [type ExportWhitelist](#ExportWhitelist)
 * [type ExternalWhitelist](#ExternalWhitelist)
+* [type Filter](#Filter)
+* [type FilterType](#FilterType)
 * [type HypercatItem](#HypercatItem)
 * [type HypercatRoot](#HypercatRoot)
+* [type KVStore](#KVStore)
+  * [func (kvj *KVStore) Delete(dataSourceID string, key string) error](#KVStore.Delete)
+  * [func (kvj *KVStore) DeleteAll(dataSourceID string) error](#KVStore.DeleteAll)
+  * [func (kvj *KVStore) ListKeys(dataSourceID string) ([]string, error)](#KVStore.ListKeys)
+  * [func (kvj *KVStore) Observe(dataSourceID string) (&lt;-chan []byte, error)](#KVStore.Observe)
+  * [func (kvj *KVStore) ObserveKey(dataSourceID string, key string) (&lt;-chan []byte, error)](#KVStore.ObserveKey)
+  * [func (kvj *KVStore) Read(dataSourceID string, key string) ([]byte, error)](#KVStore.Read)
+  * [func (kvj *KVStore) Write(dataSourceID string, key string, payload []byte) error](#KVStore.Write)
 * [type LogEntries](#LogEntries)
 * [type Logger](#Logger)
   * [func New(store *CoreStoreClient, outputDebugLogs bool) (*Logger, error)](#New)
@@ -103,40 +91,79 @@
 * [type SLA](#SLA)
 * [type StoreContentType](#StoreContentType)
 * [type StoreType](#StoreType)
+* [type TSBlobStore](#TSBlobStore)
+  * [func (tbs *TSBlobStore) Earliest(dataSourceID string) ([]byte, error)](#TSBlobStore.Earliest)
+  * [func (tbs *TSBlobStore) FirstN(dataSourceID string, n int) ([]byte, error)](#TSBlobStore.FirstN)
+  * [func (tbs *TSBlobStore) LastN(dataSourceID string, n int) ([]byte, error)](#TSBlobStore.LastN)
+  * [func (tbs *TSBlobStore) Latest(dataSourceID string) ([]byte, error)](#TSBlobStore.Latest)
+  * [func (tbs *TSBlobStore) Length(dataSourceID string) (int, error)](#TSBlobStore.Length)
+  * [func (tbs *TSBlobStore) Observe(dataSourceID string) (&lt;-chan []byte, error)](#TSBlobStore.Observe)
+  * [func (tbs *TSBlobStore) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) ([]byte, error)](#TSBlobStore.Range)
+  * [func (tbs *TSBlobStore) Since(dataSourceID string, sinceTimeStamp int64) ([]byte, error)](#TSBlobStore.Since)
+  * [func (tbs *TSBlobStore) Write(dataSourceID string, payload []byte) error](#TSBlobStore.Write)
+  * [func (tbs *TSBlobStore) WriteAt(dataSourceID string, timstamp int64, payload []byte) error](#TSBlobStore.WriteAt)
+* [type TSStore](#TSStore)
+  * [func (tsc TSStore) Earliest(dataSourceID string) ([]byte, error)](#TSStore.Earliest)
+  * [func (tsc TSStore) FirstN(dataSourceID string, n int, opt TimeSeriesQueryOptions) ([]byte, error)](#TSStore.FirstN)
+  * [func (tsc TSStore) LastN(dataSourceID string, n int, opt TimeSeriesQueryOptions) ([]byte, error)](#TSStore.LastN)
+  * [func (tsc TSStore) Latest(dataSourceID string) ([]byte, error)](#TSStore.Latest)
+  * [func (tsc TSStore) Length(dataSourceID string) (int, error)](#TSStore.Length)
+  * [func (tsc TSStore) Observe(dataSourceID string) (&lt;-chan []byte, error)](#TSStore.Observe)
+  * [func (tsc TSStore) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64, opt TimeSeriesQueryOptions) ([]byte, error)](#TSStore.Range)
+  * [func (tsc TSStore) Since(dataSourceID string, sinceTimeStamp int64, opt TimeSeriesQueryOptions) ([]byte, error)](#TSStore.Since)
+  * [func (tsc TSStore) Write(dataSourceID string, payload []byte) error](#TSStore.Write)
+  * [func (tsc TSStore) WriteAt(dataSourceID string, timstamp int64, payload []byte) error](#TSStore.WriteAt)
+* [type TimeSeriesQueryOptions](#TimeSeriesQueryOptions)
 
 
 #### <a name="pkg-files">Package files</a>
-[arbiterClient.go](/src/target/arbiterClient.go) [coreNetworkClient.go](/src/target/coreNetworkClient.go) [coreStoreClient.go](/src/target/coreStoreClient.go) [coreStoreKVJSON.go](/src/target/coreStoreKVJSON.go) [coreStoreKVText.go](/src/target/coreStoreKVText.go) [coreStoreTSBlob.go](/src/target/coreStoreTSBlob.go) [databoxRequest.go](/src/target/databoxRequest.go) [databoxlog.go](/src/target/databoxlog.go) [export.go](/src/target/export.go) [types.go](/src/target/types.go) 
+[arbiterClient.go](/src/target/arbiterClient.go) [coreNetworkClient.go](/src/target/coreNetworkClient.go) [coreStoreClient.go](/src/target/coreStoreClient.go) [coreStoreKV.go](/src/target/coreStoreKV.go) [coreStoreTS.go](/src/target/coreStoreTS.go) [coreStoreTSBlob.go](/src/target/coreStoreTSBlob.go) [databoxRequest.go](/src/target/databoxRequest.go) [databoxlog.go](/src/target/databoxlog.go) [export.go](/src/target/export.go) [types.go](/src/target/types.go) 
+
+
+## <a name="pkg-constants">Constants</a>
+``` go
+const (
+    Equals            FilterType      = "equals"
+    Contains          FilterType      = "contains"
+    Sum               AggregationType = "sum"
+    Count             AggregationType = "count"
+    Min               AggregationType = "min"
+    Max               AggregationType = "max"
+    Mean              AggregationType = "mean"
+    Median            AggregationType = "median"
+    StandardDeviation AggregationType = "sd"
+)
+```
+Allowed values for FilterType and AggregationFunction
 
 
 
 
-
-## <a name="ChkErr">func</a> [ChkErr](/src/target/databoxlog.go?s=1811:1833#L85)
+## <a name="ChkErr">func</a> [ChkErr](/src/target/databoxlog.go?s=1841:1863#L85)
 ``` go
 func ChkErr(err error)
 ```
 
 
-## <a name="ChkErrFatal">func</a> [ChkErrFatal](/src/target/databoxlog.go?s=1886:1913#L92)
+## <a name="ChkErrFatal">func</a> [ChkErrFatal](/src/target/databoxlog.go?s=1916:1943#L92)
 ``` go
 func ChkErrFatal(err error)
 ```
 
 
-## <a name="Debug">func</a> [Debug](/src/target/databoxlog.go?s=2571:2593#L129)
+## <a name="Debug">func</a> [Debug](/src/target/databoxlog.go?s=2601:2623#L129)
 ``` go
 func Debug(msg string)
 ```
 
 
-## <a name="Err">func</a> [Err](/src/target/databoxlog.go?s=2343:2363#L117)
+## <a name="Err">func</a> [Err](/src/target/databoxlog.go?s=2373:2393#L117)
 ``` go
 func Err(msg string)
 ```
 
 
-## <a name="GetStoreURLFromDsHref">func</a> [GetStoreURLFromDsHref](/src/target/coreStoreClient.go?s=6264:6319#L192)
+## <a name="GetStoreURLFromDsHref">func</a> [GetStoreURLFromDsHref](/src/target/coreStoreClient.go?s=6785:6840#L206)
 ``` go
 func GetStoreURLFromDsHref(href string) (string, error)
 ```
@@ -144,7 +171,7 @@ GetStoreURLFromDsHref extracts the base store url from the href provied in the h
 
 
 
-## <a name="Info">func</a> [Info](/src/target/databoxlog.go?s=2142:2163#L105)
+## <a name="Info">func</a> [Info](/src/target/databoxlog.go?s=2172:2193#L105)
 ``` go
 func Info(msg string)
 ```
@@ -162,10 +189,23 @@ func NewDataboxHTTPsAPIWithPaths(cmRootCaPath string) *http.Client
 ```
 
 
-## <a name="Warn">func</a> [Warn](/src/target/databoxlog.go?s=2241:2262#L111)
+## <a name="Warn">func</a> [Warn](/src/target/databoxlog.go?s=2271:2292#L111)
 ``` go
 func Warn(msg string)
 ```
+
+
+
+## <a name="AggregationType">type</a> [AggregationType](/src/target/coreStoreTS.go?s=70:97#L1)
+``` go
+type AggregationType string
+```
+
+
+
+
+
+
 
 
 
@@ -196,7 +236,7 @@ func (arb *ArbiterClient) GetRootDataSourceCatalogue() (HypercatRoot, error)
 
 
 
-### <a name="ArbiterClient.GrantComponentPermission">func</a> (\*ArbiterClient) [GrantComponentPermission](/src/target/arbiterClient.go?s=5682:5734#L227)
+### <a name="ArbiterClient.GrantComponentPermission">func</a> (\*ArbiterClient) [GrantComponentPermission](/src/target/arbiterClient.go?s=5684:5736#L227)
 ``` go
 func (arb *ArbiterClient) GrantComponentPermission()
 ```
@@ -210,35 +250,35 @@ func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermiss
 
 
 
-### <a name="ArbiterClient.InvalidateCache">func</a> (\*ArbiterClient) [InvalidateCache](/src/target/arbiterClient.go?s=4762:4831#L189)
+### <a name="ArbiterClient.InvalidateCache">func</a> (\*ArbiterClient) [InvalidateCache](/src/target/arbiterClient.go?s=4764:4833#L189)
 ``` go
 func (arb *ArbiterClient) InvalidateCache(href string, method string)
 ```
 
 
 
-### <a name="ArbiterClient.RegesterDataboxComponent">func</a> (\*ArbiterClient) [RegesterDataboxComponent](/src/target/arbiterClient.go?s=5485:5572#L219)
+### <a name="ArbiterClient.RegesterDataboxComponent">func</a> (\*ArbiterClient) [RegesterDataboxComponent](/src/target/arbiterClient.go?s=5487:5574#L219)
 ``` go
 func (arb *ArbiterClient) RegesterDataboxComponent(componentName, componenttype string)
 ```
 
 
 
-### <a name="ArbiterClient.RemoveDataboxComponent">func</a> (\*ArbiterClient) [RemoveDataboxComponent](/src/target/arbiterClient.go?s=5602:5652#L223)
+### <a name="ArbiterClient.RemoveDataboxComponent">func</a> (\*ArbiterClient) [RemoveDataboxComponent](/src/target/arbiterClient.go?s=5604:5654#L223)
 ``` go
 func (arb *ArbiterClient) RemoveDataboxComponent()
 ```
 
 
 
-### <a name="ArbiterClient.RequestToken">func</a> (\*ArbiterClient) [RequestToken](/src/target/arbiterClient.go?s=4020:4102#L157)
+### <a name="ArbiterClient.RequestToken">func</a> (\*ArbiterClient) [RequestToken](/src/target/arbiterClient.go?s=4022:4104#L157)
 ``` go
 func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, error)
 ```
 
 
 
-### <a name="ArbiterClient.RevokeComponentPermission">func</a> (\*ArbiterClient) [RevokeComponentPermission](/src/target/arbiterClient.go?s=5764:5817#L231)
+### <a name="ArbiterClient.RevokeComponentPermission">func</a> (\*ArbiterClient) [RevokeComponentPermission](/src/target/arbiterClient.go?s=5766:5819#L231)
 ``` go
 func (arb *ArbiterClient) RevokeComponentPermission()
 ```
@@ -373,14 +413,21 @@ func (cnc CoreNetworkClient) ServiceRestart(serviceName string, oldIP string, ne
 
 
 
-## <a name="CoreStoreClient">type</a> [CoreStoreClient](/src/target/coreStoreClient.go?s=153:297#L5)
+## <a name="CoreStoreClient">type</a> [CoreStoreClient](/src/target/coreStoreClient.go?s=153:461#L5)
 ``` go
 type CoreStoreClient struct {
-    ZestC     zest.ZestClient
-    Arbiter   *ArbiterClient
-    Request   *http.Client
-    ZEndpoint string
-    DEndpoint string
+    ZestC      zest.ZestClient
+    Arbiter    *ArbiterClient
+    Request    *http.Client
+    ZEndpoint  string
+    DEndpoint  string
+    KVJSON     *KVStore
+    KVText     *KVStore
+    KVBin      *KVStore
+    TSBlobJSON *TSBlobStore
+    TSBlobText *TSBlobStore
+    TSBlobBin  *TSBlobStore
+    TSJSON     *TSStore
 }
 ```
 
@@ -389,7 +436,7 @@ type CoreStoreClient struct {
 
 
 
-### <a name="NewCoreStoreClient">func</a> [NewCoreStoreClient](/src/target/coreStoreClient.go?s=299:462#L13)
+### <a name="NewCoreStoreClient">func</a> [NewCoreStoreClient](/src/target/coreStoreClient.go?s=463:626#L20)
 ``` go
 func NewCoreStoreClient(databoxRequest *http.Client, arbiterClient *ArbiterClient, serverKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient
 ```
@@ -397,14 +444,14 @@ func NewCoreStoreClient(databoxRequest *http.Client, arbiterClient *ArbiterClien
 
 
 
-### <a name="CoreStoreClient.GetStoreDataSourceCatalogue">func</a> (\*CoreStoreClient) [GetStoreDataSourceCatalogue](/src/target/coreStoreClient.go?s=1077:1167#L36)
+### <a name="CoreStoreClient.GetStoreDataSourceCatalogue">func</a> (\*CoreStoreClient) [GetStoreDataSourceCatalogue](/src/target/coreStoreClient.go?s=1598:1688#L50)
 ``` go
 func (csc *CoreStoreClient) GetStoreDataSourceCatalogue(href string) (HypercatRoot, error)
 ```
 
 
 
-### <a name="CoreStoreClient.HypercatToDataSourceMetadata">func</a> (\*CoreStoreClient) [HypercatToDataSourceMetadata](/src/target/coreStoreClient.go?s=4291:4421#L121)
+### <a name="CoreStoreClient.HypercatToDataSourceMetadata">func</a> (\*CoreStoreClient) [HypercatToDataSourceMetadata](/src/target/coreStoreClient.go?s=4812:4942#L135)
 ``` go
 func (csc *CoreStoreClient) HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error)
 ```
@@ -414,237 +461,12 @@ Also returns the store url for this data source.
 
 
 
-### <a name="CoreStoreClient.KVJSONDelete">func</a> (\*CoreStoreClient) [KVJSONDelete](/src/target/coreStoreKVJSON.go?s=700:779#L18)
-``` go
-func (csc *CoreStoreClient) KVJSONDelete(dataSourceID string, key string) error
-```
-KVJSONDelete deletes data under the key.
-
-
-
-
-### <a name="CoreStoreClient.KVJSONDeleteAll">func</a> (\*CoreStoreClient) [KVJSONDeleteAll](/src/target/coreStoreKVJSON.go?s=939:1009#L27)
-``` go
-func (csc *CoreStoreClient) KVJSONDeleteAll(dataSourceID string) error
-```
-KVJSONDeleteAll deletes all keys and data from the datasource.
-
-
-
-
-### <a name="CoreStoreClient.KVJSONListKeys">func</a> (\*CoreStoreClient) [KVJSONListKeys](/src/target/coreStoreKVJSON.go?s=1165:1246#L36)
-``` go
-func (csc *CoreStoreClient) KVJSONListKeys(dataSourceID string) ([]string, error)
-```
-KVJSONListKeys returns an array of key registed under the dataSourceID
-
-
-
-
-### <a name="CoreStoreClient.KVJSONObserve">func</a> (\*CoreStoreClient) [KVJSONObserve](/src/target/coreStoreKVJSON.go?s=1583:1668#L55)
-``` go
-func (csc *CoreStoreClient) KVJSONObserve(dataSourceID string) (<-chan []byte, error)
-```
-
-
-
-### <a name="CoreStoreClient.KVJSONObserveKey">func</a> (\*CoreStoreClient) [KVJSONObserveKey](/src/target/coreStoreKVJSON.go?s=1758:1858#L63)
-``` go
-func (csc *CoreStoreClient) KVJSONObserveKey(dataSourceID string, key string) (<-chan []byte, error)
-```
-
-
-
-### <a name="CoreStoreClient.KVJSONRead">func</a> (\*CoreStoreClient) [KVJSONRead](/src/target/coreStoreKVJSON.go?s=477:564#L9)
-``` go
-func (csc *CoreStoreClient) KVJSONRead(dataSourceID string, key string) ([]byte, error)
-```
-KVJSONRead will read the vale store at under tha key
-return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="CoreStoreClient.KVJSONWrite">func</a> (\*CoreStoreClient) [KVJSONWrite](/src/target/coreStoreKVJSON.go?s=123:217#L1)
-``` go
-func (csc *CoreStoreClient) KVJSONWrite(dataSourceID string, key string, payload []byte) error
-```
-KVJSONWrite Write will add data to the key value data store.
-
-
-
-
-### <a name="CoreStoreClient.KVTextDelete">func</a> (\*CoreStoreClient) [KVTextDelete](/src/target/coreStoreKVText.go?s=700:779#L18)
-``` go
-func (csc *CoreStoreClient) KVTextDelete(dataSourceID string, key string) error
-```
-KVTextDelete deletes data under the key.
-
-
-
-
-### <a name="CoreStoreClient.KVTextDeleteAll">func</a> (\*CoreStoreClient) [KVTextDeleteAll](/src/target/coreStoreKVText.go?s=939:1009#L27)
-``` go
-func (csc *CoreStoreClient) KVTextDeleteAll(dataSourceID string) error
-```
-KVTextDeleteAll deletes all keys and data from the datasource.
-
-
-
-
-### <a name="CoreStoreClient.KVTextListKeys">func</a> (\*CoreStoreClient) [KVTextListKeys](/src/target/coreStoreKVText.go?s=1165:1246#L36)
-``` go
-func (csc *CoreStoreClient) KVTextListKeys(dataSourceID string) ([]string, error)
-```
-KVTextListKeys returns an array of key registed under the dataSourceID
-
-
-
-
-### <a name="CoreStoreClient.KVTextObserve">func</a> (\*CoreStoreClient) [KVTextObserve](/src/target/coreStoreKVText.go?s=1583:1668#L55)
-``` go
-func (csc *CoreStoreClient) KVTextObserve(dataSourceID string) (<-chan []byte, error)
-```
-
-
-
-### <a name="CoreStoreClient.KVTextObserveKey">func</a> (\*CoreStoreClient) [KVTextObserveKey](/src/target/coreStoreKVText.go?s=1758:1858#L63)
-``` go
-func (csc *CoreStoreClient) KVTextObserveKey(dataSourceID string, key string) (<-chan []byte, error)
-```
-
-
-
-### <a name="CoreStoreClient.KVTextRead">func</a> (\*CoreStoreClient) [KVTextRead](/src/target/coreStoreKVText.go?s=477:564#L9)
-``` go
-func (csc *CoreStoreClient) KVTextRead(dataSourceID string, key string) ([]byte, error)
-```
-KVTextRead will read the vale store at under tha key
-return data is a Text object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="CoreStoreClient.KVTextWrite">func</a> (\*CoreStoreClient) [KVTextWrite](/src/target/coreStoreKVText.go?s=123:217#L1)
-``` go
-func (csc *CoreStoreClient) KVTextWrite(dataSourceID string, key string, payload []byte) error
-```
-KVTextWrite Write will add data to the key value data store.
-
-
-
-
-### <a name="CoreStoreClient.RegisterDatasource">func</a> (\*CoreStoreClient) [RegisterDatasource](/src/target/coreStoreClient.go?s=1778:1859#L61)
+### <a name="CoreStoreClient.RegisterDatasource">func</a> (\*CoreStoreClient) [RegisterDatasource](/src/target/coreStoreClient.go?s=2299:2380#L75)
 ``` go
 func (csc *CoreStoreClient) RegisterDatasource(metadata DataSourceMetadata) error
 ```
 RegisterDatasource is used by apps and drivers to register datasource in stores they
 own.
-
-
-
-
-### <a name="CoreStoreClient.TSBlobEarliest">func</a> (\*CoreStoreClient) [TSBlobEarliest](/src/target/coreStoreTSBlob.go?s=1651:1730#L45)
-``` go
-func (csc *CoreStoreClient) TSBlobEarliest(dataSourceID string) ([]byte, error)
-```
-TSBlobEarliest will retrieve the first entry stored at the requested datasource ID
-return data is a byte array contingin JSON of the format
-{"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="CoreStoreClient.TSBlobFirstN">func</a> (\*CoreStoreClient) [TSBlobFirstN](/src/target/coreStoreTSBlob.go?s=2426:2510#L67)
-``` go
-func (csc *CoreStoreClient) TSBlobFirstN(dataSourceID string, n int) ([]byte, error)
-```
-FirstN will retrieve the first N entries stored at the requested datasource ID
-return data is a byte array contingin JSON of the format
-{"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="CoreStoreClient.TSBlobLastN">func</a> (\*CoreStoreClient) [TSBlobLastN](/src/target/coreStoreTSBlob.go?s=2028:2111#L56)
-``` go
-func (csc *CoreStoreClient) TSBlobLastN(dataSourceID string, n int) ([]byte, error)
-```
-LastN will retrieve the last N entries stored at the requested datasource ID
-return data is a byte array contingin JSON of the format
-{"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="CoreStoreClient.TSBlobLatest">func</a> (\*CoreStoreClient) [TSBlobLatest](/src/target/coreStoreTSBlob.go?s=1272:1349#L34)
-``` go
-func (csc *CoreStoreClient) TSBlobLatest(dataSourceID string) ([]byte, error)
-```
-TSBlobLatest will retrieve the last entry stored at the requested datasource ID
-return data is a byte array contingin JSON of the format
-{"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="CoreStoreClient.TSBlobLength">func</a> (\*CoreStoreClient) [TSBlobLength](/src/target/coreStoreTSBlob.go?s=3668:3742#L98)
-``` go
-func (csc *CoreStoreClient) TSBlobLength(dataSourceID string) (int, error)
-```
-TSBlobLength returns then number of items stored in the timeseries
-
-
-
-
-### <a name="CoreStoreClient.TSBlobObserve">func</a> (\*CoreStoreClient) [TSBlobObserve](/src/target/coreStoreTSBlob.go?s=4270:4355#L122)
-``` go
-func (csc *CoreStoreClient) TSBlobObserve(dataSourceID string) (<-chan []byte, error)
-```
-TSBlobObserve allows you to get notifications when a new value is written by a driver
-the returned chan receives chan []byte continuing json of the
-form {"TimestampMS":213123123,"Json":byte[]}
-
-
-
-
-### <a name="CoreStoreClient.TSBlobRange">func</a> (\*CoreStoreClient) [TSBlobRange](/src/target/coreStoreTSBlob.go?s=3304:3420#L89)
-``` go
-func (csc *CoreStoreClient) TSBlobRange(dataSourceID string, formTimeStamp int64, toTimeStamp int64) ([]byte, error)
-```
-TSBlobRange will retrieve all entries between  formTimeStamp and toTimeStamp timestamp in ms since unix epoch
-return data is a byte array contingin JSON of the format
-{"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="CoreStoreClient.TSBlobSince">func</a> (\*CoreStoreClient) [TSBlobSince](/src/target/coreStoreTSBlob.go?s=2837:2935#L78)
-``` go
-func (csc *CoreStoreClient) TSBlobSince(dataSourceID string, sinceTimeStamp int64) ([]byte, error)
-```
-TSBlobSince will retrieve all entries since the requested timestamp (ms since unix epoch)
-return data is a byte array contingin JSON of the format
-{"timestamp":213123123,"data":[data-written-by-driver]}
-
-
-
-
-### <a name="CoreStoreClient.TSBlobWrite">func</a> (\*CoreStoreClient) [TSBlobWrite](/src/target/coreStoreTSBlob.go?s=193:275#L1)
-``` go
-func (csc *CoreStoreClient) TSBlobWrite(dataSourceID string, payload []byte) error
-```
-TSBlobWrite will add data to the times series data store. Data will be time stamped at insertion (format ms since 1970)
-
-
-
-
-### <a name="CoreStoreClient.TSBlobWriteAt">func</a> (\*CoreStoreClient) [TSBlobWriteAt](/src/target/coreStoreTSBlob.go?s=538:638#L10)
-``` go
-func (csc *CoreStoreClient) TSBlobWriteAt(dataSourceID string, timstamp int64, payload []byte) error
-```
-TSBlobWriteAt will add data to the times series data store. Data will be time stamped with the timstamp provided in the
-timstamp paramiter (format ms since 1970)
 
 
 
@@ -744,6 +566,38 @@ type ExternalWhitelist struct {
 
 
 
+## <a name="Filter">type</a> [Filter](/src/target/coreStoreTS.go?s=692:775#L17)
+``` go
+type Filter struct {
+    TagName    string
+    FilterType FilterType
+    Value      string
+}
+```
+Filter types to hold the required data to apply the filtering functions of the structured json API
+
+
+
+
+
+
+
+
+
+
+## <a name="FilterType">type</a> [FilterType](/src/target/coreStoreTS.go?s=99:121#L1)
+``` go
+type FilterType string
+```
+
+
+
+
+
+
+
+
+
 ## <a name="HypercatItem">type</a> [HypercatItem](/src/target/types.go?s=5009:5130#L136)
 ``` go
 type HypercatItem struct {
@@ -772,6 +626,81 @@ type HypercatRoot struct {
 
 
 
+
+
+
+
+## <a name="KVStore">type</a> [KVStore](/src/target/coreStoreKV.go?s=59:142#L1)
+``` go
+type KVStore struct {
+    // contains filtered or unexported fields
+}
+```
+
+
+
+
+
+
+
+
+
+### <a name="KVStore.Delete">func</a> (\*KVStore) [Delete](/src/target/coreStoreKV.go?s=894:959#L30)
+``` go
+func (kvj *KVStore) Delete(dataSourceID string, key string) error
+```
+Delete deletes data under the key.
+
+
+
+
+### <a name="KVStore.DeleteAll">func</a> (\*KVStore) [DeleteAll](/src/target/coreStoreKV.go?s=1117:1173#L39)
+``` go
+func (kvj *KVStore) DeleteAll(dataSourceID string) error
+```
+DeleteAll deletes all keys and data from the datasource.
+
+
+
+
+### <a name="KVStore.ListKeys">func</a> (\*KVStore) [ListKeys](/src/target/coreStoreKV.go?s=1327:1394#L48)
+``` go
+func (kvj *KVStore) ListKeys(dataSourceID string) ([]string, error)
+```
+ListKeys returns an array of key registed under the dataSourceID
+
+
+
+
+### <a name="KVStore.Observe">func</a> (\*KVStore) [Observe](/src/target/coreStoreKV.go?s=1731:1802#L67)
+``` go
+func (kvj *KVStore) Observe(dataSourceID string) (<-chan []byte, error)
+```
+
+
+
+### <a name="KVStore.ObserveKey">func</a> (\*KVStore) [ObserveKey](/src/target/coreStoreKV.go?s=1896:1982#L75)
+``` go
+func (kvj *KVStore) ObserveKey(dataSourceID string, key string) (<-chan []byte, error)
+```
+
+
+
+### <a name="KVStore.Read">func</a> (\*KVStore) [Read](/src/target/coreStoreKV.go?s=687:760#L21)
+``` go
+func (kvj *KVStore) Read(dataSourceID string, key string) ([]byte, error)
+```
+Read will read the vale store at under tha key
+return data is a  object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="KVStore.Write">func</a> (\*KVStore) [Write](/src/target/coreStoreKV.go?s=353:433#L11)
+``` go
+func (kvj *KVStore) Write(dataSourceID string, key string, payload []byte) error
+```
+Write Write will add data to the key value data store.
 
 
 
@@ -812,35 +741,35 @@ func New(store *CoreStoreClient, outputDebugLogs bool) (*Logger, error)
 
 
 
-### <a name="Logger.ChkErr">func</a> (Logger) [ChkErr](/src/target/databoxlog.go?s=1397:1430#L58)
+### <a name="Logger.ChkErr">func</a> (Logger) [ChkErr](/src/target/databoxlog.go?s=1417:1450#L58)
 ``` go
 func (l Logger) ChkErr(err error)
 ```
 
 
 
-### <a name="Logger.Debug">func</a> (Logger) [Debug](/src/target/databoxlog.go?s=1232:1265#L52)
+### <a name="Logger.Debug">func</a> (Logger) [Debug](/src/target/databoxlog.go?s=1247:1280#L52)
 ``` go
 func (l Logger) Debug(msg string)
 ```
 
 
 
-### <a name="Logger.Err">func</a> (Logger) [Err](/src/target/databoxlog.go?s=1072:1103#L47)
+### <a name="Logger.Err">func</a> (Logger) [Err](/src/target/databoxlog.go?s=1082:1113#L47)
 ``` go
 func (l Logger) Err(msg string)
 ```
 
 
 
-### <a name="Logger.GetLastNLogEntries">func</a> (Logger) [GetLastNLogEntries](/src/target/databoxlog.go?s=1504:1550#L67)
+### <a name="Logger.GetLastNLogEntries">func</a> (Logger) [GetLastNLogEntries](/src/target/databoxlog.go?s=1524:1570#L67)
 ``` go
 func (l Logger) GetLastNLogEntries(n int) Logs
 ```
 
 
 
-### <a name="Logger.GetLastNLogEntriesRaw">func</a> (Logger) [GetLastNLogEntriesRaw](/src/target/databoxlog.go?s=1677:1728#L77)
+### <a name="Logger.GetLastNLogEntriesRaw">func</a> (Logger) [GetLastNLogEntriesRaw](/src/target/databoxlog.go?s=1702:1753#L77)
 ``` go
 func (l Logger) GetLastNLogEntriesRaw(n int) []byte
 ```
@@ -854,7 +783,7 @@ func (l Logger) Info(msg string)
 
 
 
-### <a name="Logger.Warn">func</a> (Logger) [Warn](/src/target/databoxlog.go?s=911:943#L42)
+### <a name="Logger.Warn">func</a> (Logger) [Warn](/src/target/databoxlog.go?s=916:948#L42)
 ``` go
 func (l Logger) Warn(msg string)
 ```
@@ -1116,6 +1045,254 @@ const StoreTypeTS StoreType = "ts"
 ``` go
 const StoreTypeTSBlob StoreType = "ts/blob"
 ```
+
+
+
+
+
+
+
+
+
+## <a name="TSBlobStore">type</a> [TSBlobStore](/src/target/coreStoreTSBlob.go?s=70:157#L1)
+``` go
+type TSBlobStore struct {
+    // contains filtered or unexported fields
+}
+```
+
+
+
+
+
+
+
+
+
+### <a name="TSBlobStore.Earliest">func</a> (\*TSBlobStore) [Earliest](/src/target/coreStoreTSBlob.go?s=1875:1944#L57)
+``` go
+func (tbs *TSBlobStore) Earliest(dataSourceID string) ([]byte, error)
+```
+Earliest will retrieve the first entry stored at the requested datasource ID
+return data is a byte array contingin  of the format
+{"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSBlobStore.FirstN">func</a> (\*TSBlobStore) [FirstN](/src/target/coreStoreTSBlob.go?s=2630:2704#L79)
+``` go
+func (tbs *TSBlobStore) FirstN(dataSourceID string, n int) ([]byte, error)
+```
+FirstN will retrieve the first N entries stored at the requested datasource ID
+return data is a byte array contingin  of the format
+{"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSBlobStore.LastN">func</a> (\*TSBlobStore) [LastN](/src/target/coreStoreTSBlob.go?s=2242:2315#L68)
+``` go
+func (tbs *TSBlobStore) LastN(dataSourceID string, n int) ([]byte, error)
+```
+LastN will retrieve the last N entries stored at the requested datasource ID
+return data is a byte array contingin  of the format
+{"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSBlobStore.Latest">func</a> (\*TSBlobStore) [Latest](/src/target/coreStoreTSBlob.go?s=1512:1579#L46)
+``` go
+func (tbs *TSBlobStore) Latest(dataSourceID string) ([]byte, error)
+```
+TSBlobLatest will retrieve the last entry stored at the requested datasource ID
+return data is a byte array contingin  of the format
+{"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSBlobStore.Length">func</a> (\*TSBlobStore) [Length](/src/target/coreStoreTSBlob.go?s=3834:3898#L110)
+``` go
+func (tbs *TSBlobStore) Length(dataSourceID string) (int, error)
+```
+TSBlobLength returns then number of items stored in the timeseries
+
+
+
+
+### <a name="TSBlobStore.Observe">func</a> (\*TSBlobStore) [Observe](/src/target/coreStoreTSBlob.go?s=4424:4499#L134)
+``` go
+func (tbs *TSBlobStore) Observe(dataSourceID string) (<-chan []byte, error)
+```
+Observe allows you to get notifications when a new value is written by a driver
+the returned chan receives chan []byte continuing json of the
+form {"TimestampMS":213123123,"Json":byte[]}
+
+
+
+
+### <a name="TSBlobStore.Range">func</a> (\*TSBlobStore) [Range](/src/target/coreStoreTSBlob.go?s=3476:3582#L101)
+``` go
+func (tbs *TSBlobStore) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) ([]byte, error)
+```
+Range will retrieve all entries between  formTimeStamp and toTimeStamp timestamp in ms since unix epoch
+return data is a byte array contingin  of the format
+{"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSBlobStore.Since">func</a> (\*TSBlobStore) [Since](/src/target/coreStoreTSBlob.go?s=3025:3113#L90)
+``` go
+func (tbs *TSBlobStore) Since(dataSourceID string, sinceTimeStamp int64) ([]byte, error)
+```
+Since will retrieve all entries since the requested timestamp (ms since unix epoch)
+return data is a byte array contingin  of the format
+{"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSBlobStore.Write">func</a> (\*TSBlobStore) [Write](/src/target/coreStoreTSBlob.go?s=439:511#L12)
+``` go
+func (tbs *TSBlobStore) Write(dataSourceID string, payload []byte) error
+```
+Write will add data to the times series data store. Data will be time stamped at insertion (format ms since 1970)
+
+
+
+
+### <a name="TSBlobStore.WriteAt">func</a> (\*TSBlobStore) [WriteAt](/src/target/coreStoreTSBlob.go?s=772:862#L22)
+``` go
+func (tbs *TSBlobStore) WriteAt(dataSourceID string, timstamp int64, payload []byte) error
+```
+WriteAt will add data to the times series data store. Data will be time stamped with the timstamp provided in the
+timstamp paramiter (format ms since 1970)
+
+
+
+
+## <a name="TSStore">type</a> [TSStore](/src/target/coreStoreTS.go?s=965:1048#L29)
+``` go
+type TSStore struct {
+    // contains filtered or unexported fields
+}
+```
+
+
+
+
+
+
+
+
+
+### <a name="TSStore.Earliest">func</a> (TSStore) [Earliest](/src/target/coreStoreTS.go?s=2659:2723#L82)
+``` go
+func (tsc TSStore) Earliest(dataSourceID string) ([]byte, error)
+```
+Earliest will retrieve the first entry stored at the requested datasource ID
+return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSStore.FirstN">func</a> (TSStore) [FirstN](/src/target/coreStoreTS.go?s=3443:3540#L102)
+``` go
+func (tsc TSStore) FirstN(dataSourceID string, n int, opt TimeSeriesQueryOptions) ([]byte, error)
+```
+FirstN will retrieve the first N entries stored at the requested datasource ID
+return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSStore.LastN">func</a> (TSStore) [LastN](/src/target/coreStoreTS.go?s=3014:3110#L92)
+``` go
+func (tsc TSStore) LastN(dataSourceID string, n int, opt TimeSeriesQueryOptions) ([]byte, error)
+```
+LastN will retrieve the last N entries stored at the requested datasource ID
+return data is an array of JSON objects of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSStore.Latest">func</a> (TSStore) [Latest](/src/target/coreStoreTS.go?s=2319:2381#L72)
+``` go
+func (tsc TSStore) Latest(dataSourceID string) ([]byte, error)
+```
+Latest will retrieve the last entry stored at the requested datasource ID
+return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSStore.Length">func</a> (TSStore) [Length](/src/target/coreStoreTS.go?s=4748:4807#L131)
+``` go
+func (tsc TSStore) Length(dataSourceID string) (int, error)
+```
+Length retruns the number of records stored for that dataSourceID
+
+
+
+
+### <a name="TSStore.Observe">func</a> (TSStore) [Observe](/src/target/coreStoreTS.go?s=5133:5203#L153)
+``` go
+func (tsc TSStore) Observe(dataSourceID string) (<-chan []byte, error)
+```
+
+
+
+### <a name="TSStore.Range">func</a> (TSStore) [Range](/src/target/coreStoreTS.go?s=4348:4477#L122)
+``` go
+func (tsc TSStore) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64, opt TimeSeriesQueryOptions) ([]byte, error)
+```
+Range will retrieve all entries between  formTimeStamp and toTimeStamp timestamp in ms since unix epoch
+return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSStore.Since">func</a> (TSStore) [Since](/src/target/coreStoreTS.go?s=3867:3978#L112)
+``` go
+func (tsc TSStore) Since(dataSourceID string, sinceTimeStamp int64, opt TimeSeriesQueryOptions) ([]byte, error)
+```
+Since will retrieve all entries since the requested timestamp (ms since unix epoch)
+return data is a JSON object of the format {"timestamp":213123123,"data":[data-written-by-driver]}
+
+
+
+
+### <a name="TSStore.Write">func</a> (TSStore) [Write](/src/target/coreStoreTS.go?s=1318:1385#L42)
+``` go
+func (tsc TSStore) Write(dataSourceID string, payload []byte) error
+```
+Write will add data to the times series data store. Data will be time stamped at insertion (format ms since 1970)
+
+
+
+
+### <a name="TSStore.WriteAt">func</a> (TSStore) [WriteAt](/src/target/coreStoreTS.go?s=1641:1726#L52)
+``` go
+func (tsc TSStore) WriteAt(dataSourceID string, timstamp int64, payload []byte) error
+```
+WriteAt will add data to the times series data store. Data will be time stamped with the timstamp provided in the
+timstamp paramiter (format ms since 1970)
+
+
+
+
+## <a name="TimeSeriesQueryOptions">type</a> [TimeSeriesQueryOptions](/src/target/coreStoreTS.go?s=859:963#L24)
+``` go
+type TimeSeriesQueryOptions struct {
+    AggregationFunction AggregationType
+    Filter              *Filter
+}
+```
+TimeSeriesQueryOptions describes the query options for the structured json API
+
 
 
 
