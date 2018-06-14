@@ -17,7 +17,8 @@ type ContainerManagerOptions struct {
 	EnableDebugLogging    bool
 	ClearSLAs             bool
 	OverridePasword       string
-	InternalIP            string
+	Hostname              string
+	InternalIPs           []string
 	ExternalIP            string
 	HostPath              string
 }
