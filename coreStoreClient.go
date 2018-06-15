@@ -186,3 +186,19 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType) (
 
 	return payloadChan, err
 }
+
+func (csc *CoreStoreClient) write(path string, payload []byte, contentType StoreContentType) error {
+
+	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "POST")
+	if err != nil {
+		return err
+	}
+
+	err = csc.ZestC.Post(string(token), path, payload, string(contentType))
+	if err != nil {
+		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "POST")
+		return errors.New("Error writing: " + err.Error())
+	}
+
+	return nil
+}
