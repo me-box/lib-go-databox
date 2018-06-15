@@ -23,7 +23,7 @@ type ArbiterClient struct {
 	tokenCacheMutex *sync.Mutex
 }
 
-func NewArbiterClient(arbiterTokenPath string, databoxRequest *http.Client, arbiterURL string) ArbiterClient {
+func NewArbiterClient(arbiterTokenPath string, databoxRequest *http.Client, arbiterURL string) *ArbiterClient {
 
 	ac := ArbiterClient{
 		arbiterURL:      arbiterURL,
@@ -40,7 +40,7 @@ func NewArbiterClient(arbiterTokenPath string, databoxRequest *http.Client, arbi
 		ac.arbiterToken = b64.StdEncoding.EncodeToString([]byte(arbToken))
 	}
 
-	return ac
+	return &ac
 }
 
 func (arb *ArbiterClient) GetRootDataSourceCatalogue() (HypercatRoot, error) {

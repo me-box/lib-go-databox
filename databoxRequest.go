@@ -12,7 +12,7 @@ import (
 
 func NewDataboxHTTPsAPI() *http.Client {
 	//pass the default databox paths
-	return NewDataboxHTTPsAPIWithPaths("/run/secrets/DATABOX_ROOT_CA")
+	return NewDataboxHTTPsAPIWithPaths(DefaultHTTPSRootCertPath)
 }
 
 func NewDataboxHTTPsAPIWithPaths(cmRootCaPath string) *http.Client {

@@ -28,7 +28,7 @@ func Setup() {
 	ac := NewArbiterClient("", dr, "https://arbiter:8080/")
 
 	var err error
-	StoreClient = NewCoreStoreClient(dr, &ac, "", "tcp://127.0.0.1:5555", false)
+	StoreClient = NewCoreStoreClient(dr, ac, "", "tcp://127.0.0.1:5555", false)
 	if err != nil {
 		panic("Cant connect to Zest server. Did you start one? " + err.Error())
 	}
