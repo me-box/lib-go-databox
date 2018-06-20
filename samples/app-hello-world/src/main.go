@@ -14,9 +14,8 @@ func main() {
 
 	//Set up the needed databox components to communicate with other parts of the databox
 	var dataSourceTest, dataSourceStoreURL, _ = databox.HypercatToDataSourceMetadata(os.Getenv("DATASOURCE_test"))
-	databoxRequest := databox.NewDataboxHTTPsAPI()
-	arbiterClient := databox.NewArbiterClient(databox.DefaultArbiterKeyPath, databoxRequest, os.Getenv("DATABOX_ARBITER_ENDPOINT"))
-	coreStoreClient := databox.NewCoreStoreClient(databoxRequest, arbiterClient, databox.DefaultStorePublicKeyPath, dataSourceStoreURL, false)
+	arbiterClient := databox.NewArbiterClient(databox.DefaultArbiterKeyPath, databox.DefaultStorePublicKeyPath, os.Getenv("DATABOX_ARBITER_ENDPOINT"))
+	coreStoreClient := databox.NewCoreStoreClient(arbiterClient, databox.DefaultStorePublicKeyPath, dataSourceStoreURL, false)
 
 	//start the https server for the app UI
 	http.HandleFunc("/ui", func(w http.ResponseWriter, r *http.Request) {

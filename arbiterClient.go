@@ -1,7 +1,6 @@
 package libDatabox
 
 import (
-	"bytes"
 	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
@@ -13,39 +12,54 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	zest "github.com/me-box/goZestClient"
 )
 
 type ArbiterClient struct {
 	request         *http.Client
-	arbiterURL      string
+	arbiterZMQURI   string
 	arbiterToken    string
 	tokenCache      map[string][]byte
 	tokenCacheMutex *sync.Mutex
+	ZestC           zest.ZestClient
 }
 
-func NewArbiterClient(arbiterTokenPath string, databoxRequest *http.Client, arbiterURL string) *ArbiterClient {
+func NewArbiterClient(arbiterTokenPath string, zmqPublicKeyPath string, arbiterZMQURI string) (*ArbiterClient, error) {
 
 	ac := ArbiterClient{
-		arbiterURL:      arbiterURL,
-		request:         databoxRequest,
+		arbiterZMQURI:   arbiterZMQURI,
 		tokenCache:      make(map[string][]byte),
 		tokenCacheMutex: &sync.Mutex{},
 	}
 
 	arbToken, err := ioutil.ReadFile(arbiterTokenPath)
 	if err != nil {
-		fmt.Println("Warning:: failed to read ARBITER_TOKEN using empty string")
+		fmt.Println("Warning:: failed to read ARBITER_TOKEN using default value")
 		ac.arbiterToken = ""
 	} else {
 		ac.arbiterToken = b64.StdEncoding.EncodeToString([]byte(arbToken))
 	}
 
-	return &ac
+	//get the server public key
+	serverKey, err := ioutil.ReadFile(zmqPublicKeyPath)
+	if err != nil {
+		fmt.Println("Warning:: failed to read ZMQ_PUBLIC_KEY using default value")
+		serverKey = []byte("vl6wu0A@XP?}Or/&BR#LSxn>A+}L)p44/W[wXL3<")
+	}
+
+	DEndpoint := strings.Replace(arbiterZMQURI, ":4444", ":4445", 1)
+	ac.ZestC, err = zest.New(arbiterZMQURI, DEndpoint, string(serverKey), true)
+	if err != nil {
+		return &ArbiterClient{}, errors.New("Can't connect to Arbiter on " + arbiterZMQURI)
+	}
+
+	return &ac, nil
 }
 
 func (arb *ArbiterClient) GetRootDataSourceCatalogue() (HypercatRoot, error) {
 
-	cat, status := arb.makeArbiterRequest("GET", "/cat", arb.arbiterURL, "/cat", "GET")
+	cat, status := arb.makeArbiterGETRequest("/cat", arb.arbiterZMQURI, "/cat", "GET")
 	if status != 200 {
 		err := errors.New(strconv.Itoa(status) + ": " + " GET " + " /cat Failed")
 		return HypercatRoot{}, err
@@ -57,6 +71,7 @@ func (arb *ArbiterClient) GetRootDataSourceCatalogue() (HypercatRoot, error) {
 	if err != nil {
 		fmt.Println("[GetRootDataSourceCatalogue] ", err)
 	}
+
 	return rootCat, nil
 }
 
@@ -76,17 +91,7 @@ func (arb *ArbiterClient) UpdateArbiter(name string, tokenString string, databox
 
 	jsonPostData, _ := json.Marshal(postData)
 
-	req, err := http.NewRequest("POST", arb.arbiterURL+"/cm/upsert-container-info", bytes.NewBuffer(jsonPostData))
-	if err != nil {
-		fmt.Println("[UpdateArbiter] Error:: ", err)
-		return err
-	}
-	req.Header.Set("X-Api-Key", arb.arbiterToken)
-	req.Header.Set("Content-Type", "application/json")
-	req.Close = true
-
-	//TODO check response
-	_, err = arb.request.Do(req)
+	_, err := arb.ZestC.Post(arb.arbiterToken, "/cm/upsert-container-info", jsonPostData, string(ContentTypeJSON))
 	if err != nil {
 		fmt.Println("[UpdateArbiter] Error:: ", err)
 		return err
@@ -115,17 +120,7 @@ func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermiss
 
 	jsonPostData, _ := json.Marshal(permissions)
 
-	req, err := http.NewRequest("POST", arb.arbiterURL+"/cm/grant-container-permissions", bytes.NewBuffer(jsonPostData))
-	if err != nil {
-		fmt.Println("[GrantContainerPermissions] Error:: ", err)
-		return err
-	}
-	req.Header.Set("X-Api-Key", arb.arbiterToken)
-	req.Header.Set("Content-Type", "application/json")
-	req.Close = true
-
-	//TODO check response
-	_, err = arb.request.Do(req)
+	_, err := arb.ZestC.Post(arb.arbiterToken, "/cm/grant-container-permissions", jsonPostData, string(ContentTypeJSON))
 	if err != nil {
 		return err
 	}
@@ -133,35 +128,34 @@ func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermiss
 	return nil
 }
 
-func (arb *ArbiterClient) makeArbiterRequest(arbMethod string, path string, hostname string, endpoint string, method string) ([]byte, int) {
+func (arb *ArbiterClient) makeArbiterGETRequest(path string, hostname string, endpoint string, method string) ([]byte, int) {
 
-	if arb.arbiterURL == "" || arb.arbiterToken == "" {
-		//Arbiter not configured
-		//fmt.Println("makeArbiterRequest Warning:: Arbiter not configured")
+	if arb.arbiterZMQURI == "" || arb.arbiterToken == "" {
 		return []byte{}, 200
 	}
-	var jsonStr = []byte(`{"target":"` + hostname + `","path":"` + endpoint + `","method":"` + method + `"}`)
 
-	url := arb.arbiterURL + path
-
-	req, err := http.NewRequest(arbMethod, url, bytes.NewBuffer(jsonStr))
+	resp, err := arb.ZestC.Get(arb.arbiterToken, path, string(ContentTypeTEXT))
 	if err != nil {
-		fmt.Println("makeArbiterRequest Error:: ", err)
-		return []byte{}, 503
+		fmt.Println("makeArbiterGETRequest Error:: ", err)
+		return []byte{}, 500
 	}
-	req.Header.Set("X-Api-Key", arb.arbiterToken)
-	req.Header.Set("Content-Type", "application/json")
-	req.Close = true
-	resp, err := arb.request.Do(req)
+
+	return resp, 200
+}
+
+func (arb *ArbiterClient) makeArbiterPostRequest(path string, hostname string, endpoint string, payload []byte) ([]byte, int) {
+
+	if arb.arbiterZMQURI == "" || arb.arbiterToken == "" {
+		return nil, 200
+	}
+
+	resp, err := arb.ZestC.Post(arb.arbiterToken, path, payload, string(ContentTypeTEXT))
 	if err != nil {
-		fmt.Println("makeArbiterRequest Error:: ", err)
-		return []byte{}, 503
+		fmt.Println("makeArbiterPostRequest Error:: ", err)
+		return nil, 500
 	}
-	defer resp.Body.Close()
 
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	return body, resp.StatusCode
+	return resp, 200
 }
 
 func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, error) {
@@ -182,8 +176,9 @@ func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, erro
 	arb.tokenCacheMutex.Unlock()
 	if !exists {
 		var status int
-		token, status = arb.makeArbiterRequest("POST", "/token", host, u.Path, method)
+		payload := []byte(`{"target":"` + host + `","path":"` + u.Path + `","method":"` + method + `"}`)
 
+		token, status = arb.makeArbiterPostRequest("/token", host, u.Path, payload)
 		if status != 200 {
 			err = errors.New(strconv.Itoa(status) + ": " + string(token))
 			return []byte{}, err

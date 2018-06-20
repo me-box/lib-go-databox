@@ -2,7 +2,6 @@ package libDatabox
 
 import (
 	"encoding/json"
-	"net/http"
 	"os"
 	"strconv"
 	s "strings"
@@ -24,11 +23,14 @@ var dsID string
 
 func Setup() {
 
-	dr := &http.Client{}
-	ac := NewArbiterClient("", dr, "https://arbiter:8080/")
-
 	var err error
-	StoreClient = NewCoreStoreClient(dr, ac, "", "tcp://127.0.0.1:5555", false)
+
+	ac, err := NewArbiterClient("", "", "tcp://127.0.0.1:4444")
+	if err != nil {
+		panic("Cant connect to Zest server. Did you start one? " + err.Error())
+	}
+
+	StoreClient = NewCoreStoreClient(ac, "", "tcp://127.0.0.1:5555", false)
 	if err != nil {
 		panic("Cant connect to Zest server. Did you start one? " + err.Error())
 	}

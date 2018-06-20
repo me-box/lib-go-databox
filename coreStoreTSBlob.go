@@ -40,7 +40,7 @@ func (tbs *TSBlobStore) WriteAt(dataSourceID string, timstamp int64, payload []b
 
 	path = path + strconv.FormatInt(timstamp, 10)
 
-	err = tbs.csc.ZestC.Post(string(token), path, payload, string(tbs.contentType))
+	_, err = tbs.csc.ZestC.Post(string(token), path, payload, string(tbs.contentType))
 	if err != nil {
 		tbs.csc.Arbiter.InvalidateCache(tbs.csc.ZEndpoint+path+"*", "POST")
 		return errors.New("Error writing: " + err.Error())

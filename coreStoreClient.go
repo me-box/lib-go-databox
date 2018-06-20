@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"strings"
 
 	zest "github.com/me-box/goZestClient"
@@ -14,7 +13,6 @@ import (
 type CoreStoreClient struct {
 	ZestC      zest.ZestClient
 	Arbiter    *ArbiterClient
-	Request    *http.Client
 	ZEndpoint  string
 	DEndpoint  string
 	KVJSON     *KVStore
@@ -26,14 +24,13 @@ type CoreStoreClient struct {
 	TSJSON     *TSStore
 }
 
-func NewCoreStoreClient(databoxRequest *http.Client, arbiterClient *ArbiterClient, serverKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient {
+func NewCoreStoreClient(arbiterClient *ArbiterClient, zmqPublicKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient {
 	csc := &CoreStoreClient{
 		Arbiter: arbiterClient,
-		Request: databoxRequest,
 	}
 
 	//get the server key
-	serverKey, err := ioutil.ReadFile(serverKeyPath)
+	serverKey, err := ioutil.ReadFile(zmqPublicKeyPath)
 	if err != nil {
 		fmt.Println("Warning:: failed to read ZMQ_PUBLIC_KEY using default value")
 		serverKey = []byte("vl6wu0A@XP?}Or/&BR#LSxn>A+}L)p44/W[wXL3<")
@@ -91,7 +88,7 @@ func (csc *CoreStoreClient) RegisterDatasource(metadata DataSourceMetadata) erro
 	}
 	hypercatJSON, err := csc.dataSourceMetadataToHypercat(metadata, csc.ZEndpoint)
 
-	writeErr := csc.ZestC.Post(string(token), path, hypercatJSON, "JSON")
+	_, writeErr := csc.ZestC.Post(string(token), path, hypercatJSON, "JSON")
 	if writeErr != nil {
 		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "POST")
 		return errors.New("Error writing: " + writeErr.Error())
@@ -194,7 +191,7 @@ func (csc *CoreStoreClient) write(path string, payload []byte, contentType Store
 		return err
 	}
 
-	err = csc.ZestC.Post(string(token), path, payload, string(contentType))
+	_, err = csc.ZestC.Post(string(token), path, payload, string(contentType))
 	if err != nil {
 		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "POST")
 		return errors.New("Error writing: " + err.Error())

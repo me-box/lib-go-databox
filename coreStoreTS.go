@@ -67,7 +67,7 @@ func (tsc TSStore) WriteAt(dataSourceID string, timstamp int64, payload []byte) 
 
 	path = path + strconv.FormatInt(timstamp, 10)
 
-	err = tsc.csc.ZestC.Post(string(token), path, payload, string(ContentTypeJSON))
+	_, err = tsc.csc.ZestC.Post(string(token), path, payload, string(ContentTypeJSON))
 	if err != nil {
 		tsc.csc.Arbiter.InvalidateCache(tsc.csc.ZEndpoint+path+"*", "POST")
 		return errors.New("Error writing: " + err.Error())
