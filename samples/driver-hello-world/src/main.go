@@ -15,7 +15,7 @@ func main() {
 
 	//Set up the needed databox components to communicate with other parts of the databox
 	var storeEndPoint = os.Getenv("DATABOX_ZMQ_ENDPOINT")
-	arbiterClient := databox.NewArbiterClient(databox.DefaultArbiterKeyPath, databox.DefaultStorePublicKeyPath, os.Getenv("DATABOX_ARBITER_ENDPOINT"))
+	arbiterClient, _ := databox.NewArbiterClient(databox.DefaultArbiterKeyPath, databox.DefaultStorePublicKeyPath, os.Getenv("DATABOX_ARBITER_ENDPOINT"))
 	coreStoreClient := databox.NewCoreStoreClient(arbiterClient, databox.DefaultStorePublicKeyPath, storeEndPoint, false)
 
 	//Register your data source so apps can find it
