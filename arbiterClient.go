@@ -24,6 +24,7 @@ type ArbiterClient struct {
 	ZestC           zest.ZestClient
 }
 
+//NewArbiterClient returns an arbiter client for use by components that require conunication with the arbiter
 func NewArbiterClient(arbiterTokenPath string, zmqPublicKeyPath string, arbiterZMQURI string) (*ArbiterClient, error) {
 
 	ac := ArbiterClient{
@@ -56,6 +57,7 @@ func NewArbiterClient(arbiterTokenPath string, zmqPublicKeyPath string, arbiterZ
 	return &ac, nil
 }
 
+// GetRootDataSourceCatalogue is used by the container manager to access the Root hypercat catalogue
 func (arb *ArbiterClient) GetRootDataSourceCatalogue() (HypercatRoot, error) {
 
 	cat, status := arb.makeArbiterGETRequest("/cat", arb.arbiterZMQURI, "/cat", "GET")
@@ -74,7 +76,8 @@ func (arb *ArbiterClient) GetRootDataSourceCatalogue() (HypercatRoot, error) {
 	return rootCat, nil
 }
 
-func (arb *ArbiterClient) UpdateArbiter(name string, tokenString string, databoxType DataboxType) error {
+// RegesterDataboxComponent allows the container manager to register a new app, driver or store with the arbiter
+func (arb *ArbiterClient) RegesterDataboxComponent(name string, tokenString string, databoxType DataboxType) error {
 
 	type JsonPostData struct {
 		Name string `json:"name"`
@@ -111,6 +114,7 @@ type ContainerPermissions struct {
 	Caveats []string `json:"caveats"`
 }
 
+// GrantContainerPermissions allows the container manager to grant permissions to an app or driver on a registered store.
 func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermissions) error {
 
 	if len(permissions.Caveats) == 0 {
@@ -157,6 +161,7 @@ func (arb *ArbiterClient) makeArbiterPostRequest(path string, hostname string, e
 	return resp, 200
 }
 
+// RequestToken is used internally to request a token from the arbiter
 func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, error) {
 
 	u, err := url.Parse(href)
@@ -190,6 +195,8 @@ func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, erro
 	return token, err
 }
 
+// InvalidateCache can be used to remove a token from the arbiterClient cache.
+// This is done automatically if the token is rejected.
 func (arb *ArbiterClient) InvalidateCache(href string, method string) {
 
 	arb.tokenCacheMutex.Lock()
@@ -218,10 +225,6 @@ func (arb *ArbiterClient) checkTokenCache(href string, method string) ([]byte, e
 
 	}
 	return arb.tokenCache[routeHash], nil
-}
-
-func (arb *ArbiterClient) RegesterDataboxComponent(componentName, componenttype string) {
-	//upsert-continer-info
 }
 
 func (arb *ArbiterClient) RemoveDataboxComponent() {

@@ -39,7 +39,7 @@ func Setup() {
 
 	dsID = "test" + strconv.Itoa(int(time.Now().UnixNano()/int64(time.Millisecond)))
 
-	Arbiter.UpdateArbiter(hostname, "secret", DataboxTypeApp)
+	Arbiter.RegesterDataboxComponent(hostname, "secret", DataboxTypeApp)
 
 	Arbiter.GrantContainerPermissions(ContainerPermissions{
 		Name: hostname,
