@@ -17,6 +17,7 @@ func TestMain(m *testing.M) {
 }
 
 var StoreClient *CoreStoreClient
+var Arbiter *ArbiterClient
 
 //a unique ID per test run so data will not collide
 var dsID string
@@ -24,18 +25,39 @@ var dsID string
 func Setup() {
 
 	var err error
+	hostname, _ := os.Hostname()
 
-	ac, err := NewArbiterClient("", "", "tcp://127.0.0.1:4444")
+	Arbiter, err := NewArbiterClient("", "", "tcp://127.0.0.1:4444")
 	if err != nil {
 		panic("Cant connect to Zest server. Did you start one? " + err.Error())
 	}
 
-	StoreClient = NewCoreStoreClient(ac, "", "tcp://127.0.0.1:5555", false)
+	StoreClient = NewCoreStoreClient(Arbiter, "", "tcp://127.0.0.1:5555", false)
 	if err != nil {
 		panic("Cant connect to Zest server. Did you start one? " + err.Error())
 	}
 
 	dsID = "test" + strconv.Itoa(int(time.Now().UnixNano()/int64(time.Millisecond)))
+
+	Arbiter.UpdateArbiter(hostname, "secret", DataboxTypeApp)
+
+	Arbiter.GrantContainerPermissions(ContainerPermissions{
+		Name: hostname,
+		Route: Route{
+			Target: "127.0.0.1",
+			Path:   "/*",
+			Method: "POST",
+		},
+	})
+
+	Arbiter.GrantContainerPermissions(ContainerPermissions{
+		Name: hostname,
+		Route: Route{
+			Target: "127.0.0.1",
+			Path:   "/*",
+			Method: "GET",
+		},
+	})
 }
 
 func Teardown() {

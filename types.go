@@ -28,6 +28,7 @@ type DataboxType string
 const (
 	DataboxTypeApp    DataboxType = "app"
 	DataboxTypeDriver DataboxType = "driver"
+	DataboxTypeStore  DataboxType = "store"
 )
 
 type Macaroon string

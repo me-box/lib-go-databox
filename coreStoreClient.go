@@ -140,7 +140,7 @@ func (csc *CoreStoreClient) delete(path string, contentType StoreContentType) er
 
 	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "DELETE")
 	if err != nil {
-		return err
+		return errors.New("Error getting Arbiter Token: " + err.Error())
 	}
 
 	err = csc.ZestC.Delete(string(token), path, string(contentType))
@@ -156,7 +156,8 @@ func (csc *CoreStoreClient) read(path string, contentType StoreContentType) ([]b
 
 	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET")
 	if err != nil {
-		return []byte(""), err
+		return []byte(""), errors.New("Error getting Arbiter Token: " + err.Error())
+
 	}
 
 	resp, getErr := csc.ZestC.Get(string(token), path, string(contentType))
@@ -172,7 +173,8 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType) (
 
 	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET")
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Error getting Arbiter Token: " + err.Error())
+
 	}
 
 	payloadChan, getErr := csc.ZestC.Observe(string(token), path, string(contentType), 0)
@@ -188,7 +190,7 @@ func (csc *CoreStoreClient) write(path string, payload []byte, contentType Store
 
 	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "POST")
 	if err != nil {
-		return err
+		return errors.New("Error getting Arbiter Token: " + err.Error())
 	}
 
 	_, err = csc.ZestC.Post(string(token), path, payload, string(contentType))

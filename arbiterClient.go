@@ -1,7 +1,6 @@
 package libDatabox
 
 import (
-	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -36,9 +35,9 @@ func NewArbiterClient(arbiterTokenPath string, zmqPublicKeyPath string, arbiterZ
 	arbToken, err := ioutil.ReadFile(arbiterTokenPath)
 	if err != nil {
 		fmt.Println("Warning:: failed to read ARBITER_TOKEN using default value")
-		ac.arbiterToken = ""
+		ac.arbiterToken = "secret"
 	} else {
-		ac.arbiterToken = b64.StdEncoding.EncodeToString([]byte(arbToken))
+		ac.arbiterToken = string(arbToken)
 	}
 
 	//get the server public key
@@ -49,7 +48,7 @@ func NewArbiterClient(arbiterTokenPath string, zmqPublicKeyPath string, arbiterZ
 	}
 
 	DEndpoint := strings.Replace(arbiterZMQURI, ":4444", ":4445", 1)
-	ac.ZestC, err = zest.New(arbiterZMQURI, DEndpoint, string(serverKey), true)
+	ac.ZestC, err = zest.New(arbiterZMQURI, DEndpoint, string(serverKey), false)
 	if err != nil {
 		return &ArbiterClient{}, errors.New("Can't connect to Arbiter on " + arbiterZMQURI)
 	}
@@ -130,7 +129,7 @@ func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermiss
 
 func (arb *ArbiterClient) makeArbiterGETRequest(path string, hostname string, endpoint string, method string) ([]byte, int) {
 
-	if arb.arbiterZMQURI == "" || arb.arbiterToken == "" {
+	if arb.arbiterZMQURI == "" {
 		return []byte{}, 200
 	}
 
@@ -145,7 +144,7 @@ func (arb *ArbiterClient) makeArbiterGETRequest(path string, hostname string, en
 
 func (arb *ArbiterClient) makeArbiterPostRequest(path string, hostname string, endpoint string, payload []byte) ([]byte, int) {
 
-	if arb.arbiterZMQURI == "" || arb.arbiterToken == "" {
+	if arb.arbiterZMQURI == "" {
 		return nil, 200
 	}
 
