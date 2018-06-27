@@ -18,7 +18,7 @@ import (
 type ArbiterClient struct {
 	request         *http.Client
 	arbiterZMQURI   string
-	arbiterToken    string
+	ArbiterToken    string
 	tokenCache      map[string][]byte
 	tokenCacheMutex *sync.Mutex
 	ZestC           zest.ZestClient
@@ -36,9 +36,9 @@ func NewArbiterClient(arbiterTokenPath string, zmqPublicKeyPath string, arbiterZ
 	arbToken, err := ioutil.ReadFile(arbiterTokenPath)
 	if err != nil {
 		fmt.Println("Warning:: failed to read ARBITER_TOKEN using default value")
-		ac.arbiterToken = "secret"
+		ac.ArbiterToken = "secret"
 	} else {
-		ac.arbiterToken = string(arbToken)
+		ac.ArbiterToken = string(arbToken)
 	}
 
 	//get the server public key
@@ -93,7 +93,7 @@ func (arb *ArbiterClient) RegesterDataboxComponent(name string, tokenString stri
 
 	jsonPostData, _ := json.Marshal(postData)
 
-	_, err := arb.ZestC.Post(arb.arbiterToken, "/cm/upsert-container-info", jsonPostData, string(ContentTypeJSON))
+	_, err := arb.ZestC.Post(arb.ArbiterToken, "/cm/upsert-container-info", jsonPostData, string(ContentTypeJSON))
 	if err != nil {
 		fmt.Println("[UpdateArbiter] Error:: ", err)
 		return err
@@ -123,7 +123,7 @@ func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermiss
 
 	jsonPostData, _ := json.Marshal(permissions)
 
-	_, err := arb.ZestC.Post(arb.arbiterToken, "/cm/grant-container-permissions", jsonPostData, string(ContentTypeJSON))
+	_, err := arb.ZestC.Post(arb.ArbiterToken, "/cm/grant-container-permissions", jsonPostData, string(ContentTypeJSON))
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func (arb *ArbiterClient) makeArbiterGETRequest(path string, hostname string, en
 		return []byte{}, 200
 	}
 
-	resp, err := arb.ZestC.Get(arb.arbiterToken, path, string(ContentTypeTEXT))
+	resp, err := arb.ZestC.Get(arb.ArbiterToken, path, string(ContentTypeTEXT))
 	if err != nil {
 		fmt.Println("makeArbiterGETRequest Error:: ", err)
 		return []byte{}, 500
@@ -152,7 +152,7 @@ func (arb *ArbiterClient) makeArbiterPostRequest(path string, hostname string, e
 		return nil, 200
 	}
 
-	resp, err := arb.ZestC.Post(arb.arbiterToken, path, payload, string(ContentTypeTEXT))
+	resp, err := arb.ZestC.Post(arb.ArbiterToken, path, payload, string(ContentTypeTEXT))
 	if err != nil {
 		fmt.Println("makeArbiterPostRequest Error:: ", err)
 		return nil, 500
