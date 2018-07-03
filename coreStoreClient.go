@@ -26,6 +26,12 @@ type CoreStoreClient struct {
 	TSJSON     *TSStore
 }
 
+func NewDefaultCoreStoreClient(storeEndPoint string) *CoreStoreClient {
+	arbiterClient, err := NewArbiterClient(DefaultArbiterKeyPath, DefaultStorePublicKeyPath, DefaultArbiterURI)
+	ChkErr(err)
+	return NewCoreStoreClient(arbiterClient, DefaultStorePublicKeyPath, storeEndPoint, false)
+}
+
 func NewCoreStoreClient(arbiterClient *ArbiterClient, zmqPublicKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient {
 	csc := &CoreStoreClient{
 		Arbiter: arbiterClient,

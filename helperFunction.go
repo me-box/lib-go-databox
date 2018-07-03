@@ -14,6 +14,8 @@ const DefaultHTTPSRootCertPath = "/run/secrets/DATABOX_ROOT_CA"
 const DefaultArbiterKeyPath = "/run/secrets/ARBITER_TOKEN"
 const DefaultStorePublicKeyPath = "/run/secrets/ZMQ_PUBLIC_KEY"
 
+const DefaultArbiterURI = "tcp://arbiter:4444"
+
 // HypercatToDataSourceMetadata is a helper function to convert the hypercat description of a datasource to a DataSourceMetadata instance
 // Also returns the store url for this data source.
 func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error) {
