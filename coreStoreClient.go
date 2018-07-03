@@ -1,10 +1,12 @@
 package libDatabox
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 	"strings"
 
 	zest "github.com/me-box/goZestClient"
@@ -169,7 +171,7 @@ func (csc *CoreStoreClient) read(path string, contentType StoreContentType) ([]b
 	return resp, nil
 }
 
-func (csc *CoreStoreClient) observe(path string, contentType StoreContentType) (<-chan []byte, error) {
+func (csc *CoreStoreClient) observe(path string, contentType StoreContentType) (<-chan ObserveResponse, error) {
 
 	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET")
 	if err != nil {
@@ -183,7 +185,18 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType) (
 		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
-	return payloadChan, err
+	objectChan := make(chan ObserveResponse)
+
+	go func() {
+		for data := range payloadChan {
+			objectChan <- csc.parseRawObserveResponse(data)
+		}
+
+		//if we get here then payloadChan has been closed so close objectChan
+		close(objectChan)
+	}()
+
+	return objectChan, err
 }
 
 func (csc *CoreStoreClient) write(path string, payload []byte, contentType StoreContentType) error {
@@ -200,4 +213,24 @@ func (csc *CoreStoreClient) write(path string, payload []byte, contentType Store
 	}
 
 	return nil
+}
+
+func (csc *CoreStoreClient) parseRawObserveResponse(data []byte) ObserveResponse {
+
+	parts := bytes.SplitN(data, []byte(" "), 4)
+
+	_timestamp, _ := strconv.ParseInt(string(parts[0]), 10, 64)
+
+	parts2 := bytes.Split(parts[1], []byte("/"))
+
+	_dataSourceID := string(parts2[2])
+
+	_key := ""
+	if len(parts2) > 3 {
+		_key = string(parts2[3])
+	}
+
+	_data := parts[3]
+
+	return ObserveResponse{_timestamp, _dataSourceID, _key, _data}
 }

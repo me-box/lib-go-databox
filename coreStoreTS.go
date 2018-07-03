@@ -160,11 +160,16 @@ func (tsc TSStore) Length(dataSourceID string) (int, error) {
 	return val.Length, nil
 }
 
-func (tsc TSStore) Observe(dataSourceID string) (<-chan []byte, error) {
+func (tsc TSStore) Observe(dataSourceID string) (<-chan ObserveResponse, error) {
 
 	path := "/ts/" + dataSourceID
 
-	return tsc.csc.observe(path, ContentTypeJSON)
+	ObserveResponseChan, err := tsc.csc.observe(path, ContentTypeJSON)
+	if err != nil {
+		return nil, err
+	}
+
+	return ObserveResponseChan, nil
 
 }
 

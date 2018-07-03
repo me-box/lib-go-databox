@@ -346,7 +346,7 @@ func TestObserveBlob(t *testing.T) {
 	startAt := 0
 	numRecords := 10
 
-	receivedData := [][]byte{}
+	receivedData := []ObserveResponse{}
 
 	go func() {
 		dataChan, err := StoreClient.TSBlobJSON.Observe(dsID)
@@ -356,7 +356,7 @@ func TestObserveBlob(t *testing.T) {
 
 		for data := range dataChan {
 			receivedData = append(receivedData, data)
-			t.Log("received:: " + string(data))
+			t.Log("received:: " + string(data.Data))
 		}
 
 	}()
@@ -383,10 +383,10 @@ func TestObserveBlob(t *testing.T) {
 	}
 	for i := startAt; i <= numRecords; i++ {
 		expected := []byte("{\"test\":" + strconv.Itoa(i) + ", \"data\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}")
-		cont := s.Contains(string(receivedData[i]), string(expected))
-		t.Log(string(receivedData[i]))
+		cont := s.Contains(string(receivedData[i].Data), string(expected))
+		t.Log(string(receivedData[i].Data))
 		if cont != true {
-			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i]), string(expected))
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Data), string(expected))
 			break
 		}
 	}

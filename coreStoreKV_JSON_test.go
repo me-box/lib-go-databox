@@ -109,7 +109,7 @@ func TestKVJSONObserveKey(t *testing.T) {
 	startAt := 0
 	numRecords := 10
 
-	receivedData := [][]byte{}
+	receivedData := []ObserveResponse{}
 
 	go func() {
 		dataChan, err := StoreClient.KVJSON.ObserveKey(dsID, "observeTest")
@@ -119,7 +119,7 @@ func TestKVJSONObserveKey(t *testing.T) {
 
 		for data := range dataChan {
 			receivedData = append(receivedData, data)
-			t.Log("received:: ", string(data))
+			t.Log("received:: ", string(data.Data))
 		}
 
 	}()
@@ -146,10 +146,10 @@ func TestKVJSONObserveKey(t *testing.T) {
 	}
 	for i := startAt; i <= numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
-		cont := s.Contains(string(receivedData[i]), string(expected))
-		t.Log(string(receivedData[i]))
+		cont := s.Contains(string(receivedData[i].Data), string(expected))
+		t.Log(string(receivedData[i].Data))
 		if cont != true {
-			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i]), string(expected))
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Data), string(expected))
 			break
 		}
 	}
@@ -164,7 +164,7 @@ func TestObserveKVJSON(t *testing.T) {
 	startAt := 0
 	numRecords := 5
 
-	receivedData := [][]byte{}
+	receivedData := []ObserveResponse{}
 
 	go func() {
 		dataChan, err := StoreClient.KVJSON.Observe(dsID)
@@ -174,7 +174,7 @@ func TestObserveKVJSON(t *testing.T) {
 
 		for data := range dataChan {
 			receivedData = append(receivedData, data)
-			t.Log("received:: ", string(data))
+			t.Log("received:: ", string(data.Data))
 		}
 
 	}()
@@ -208,10 +208,10 @@ func TestObserveKVJSON(t *testing.T) {
 	}
 	for i := startAt; i < numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
-		cont := s.Contains(string(receivedData[i]), string(expected))
+		cont := s.Contains(string(receivedData[i].Data), string(expected))
 		//t.Log("Data:: ", string(receivedData[i].Json), receivedData[i].Key)
 		if cont != true {
-			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i]), string(expected))
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Data), string(expected))
 			break
 		}
 	}

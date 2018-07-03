@@ -139,9 +139,9 @@ func (tbs *TSBlobStore) Length(dataSourceID string) (int, error) {
 }
 
 // Observe allows you to get notifications when a new value is written by a driver
-// the returned chan receives chan []byte continuing json of the
+// the returned chan receives chan ObserveResponse the data value og which contins json of the
 // form {"TimestampMS":213123123,"Json":byte[]}
-func (tbs *TSBlobStore) Observe(dataSourceID string) (<-chan []byte, error) {
+func (tbs *TSBlobStore) Observe(dataSourceID string) (<-chan ObserveResponse, error) {
 
 	path := "/ts/blob/" + dataSourceID
 

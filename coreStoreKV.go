@@ -74,7 +74,7 @@ func (kvj *KVStore) ListKeys(dataSourceID string) ([]string, error) {
 
 }
 
-func (kvj *KVStore) Observe(dataSourceID string) (<-chan []byte, error) {
+func (kvj *KVStore) Observe(dataSourceID string) (<-chan ObserveResponse, error) {
 
 	path := "/kv/" + dataSourceID + "/*"
 
@@ -82,7 +82,7 @@ func (kvj *KVStore) Observe(dataSourceID string) (<-chan []byte, error) {
 
 }
 
-func (kvj *KVStore) ObserveKey(dataSourceID string, key string) (<-chan []byte, error) {
+func (kvj *KVStore) ObserveKey(dataSourceID string, key string) (<-chan ObserveResponse, error) {
 
 	path := "/kv/" + dataSourceID + "/" + key
 

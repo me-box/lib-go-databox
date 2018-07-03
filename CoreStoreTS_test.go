@@ -534,7 +534,7 @@ func TestObserve(t *testing.T) {
 	startAt := 0
 	numRecords := 100
 
-	receivedData := [][]byte{}
+	receivedData := []ObserveResponse{}
 
 	go func() {
 		dataChan, err := StoreClient.TSJSON.Observe(dsID)
@@ -544,7 +544,7 @@ func TestObserve(t *testing.T) {
 
 		for data := range dataChan {
 			receivedData = append(receivedData, data)
-			t.Log("received:: " + string(data))
+			t.Log("received:: " + string(data.Data))
 		}
 
 	}()
@@ -574,10 +574,10 @@ func TestObserve(t *testing.T) {
 	}
 	for i := startAt; i <= numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
-		cont := s.Contains(string(receivedData[i]), string(expected))
+		cont := s.Contains(string(receivedData[i].Data), string(expected))
 		//t.Log(receivedData[i])
 		if cont != true {
-			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i]), string(expected))
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Data), string(expected))
 			break
 		}
 	}

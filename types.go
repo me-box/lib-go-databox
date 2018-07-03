@@ -149,3 +149,15 @@ type HypercatItem struct {
 	ItemMetadata []interface{} `json:"item-metadata"`
 	Href         string        `json:"href"`
 }
+
+//
+//
+// OBSERVE RESPONSE
+//
+//
+type ObserveResponse struct {
+	TimestampMS  int64
+	DataSourceID string
+	Key          string
+	Data         []byte
+}
