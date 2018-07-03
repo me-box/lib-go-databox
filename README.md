@@ -17,6 +17,7 @@
 * [func ChkErrFatal(err error)](#ChkErrFatal)
 * [func Debug(msg string)](#Debug)
 * [func Err(msg string)](#Err)
+* [func GetHttpsCredentials() string](#GetHttpsCredentials)
 * [func GetStoreURLFromDsHref(href string) (string, error)](#GetStoreURLFromDsHref)
 * [func Info(msg string)](#Info)
 * [func NewDataboxHTTPsAPI() *http.Client](#NewDataboxHTTPsAPI)
@@ -24,16 +25,15 @@
 * [func Warn(msg string)](#Warn)
 * [type AggregationType](#AggregationType)
 * [type ArbiterClient](#ArbiterClient)
-  * [func NewArbiterClient(arbiterTokenPath string, databoxRequest *http.Client, arbiterURL string) ArbiterClient](#NewArbiterClient)
+  * [func NewArbiterClient(arbiterTokenPath string, zmqPublicKeyPath string, arbiterZMQURI string) (*ArbiterClient, error)](#NewArbiterClient)
   * [func (arb *ArbiterClient) GetRootDataSourceCatalogue() (HypercatRoot, error)](#ArbiterClient.GetRootDataSourceCatalogue)
   * [func (arb *ArbiterClient) GrantComponentPermission()](#ArbiterClient.GrantComponentPermission)
   * [func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermissions) error](#ArbiterClient.GrantContainerPermissions)
   * [func (arb *ArbiterClient) InvalidateCache(href string, method string)](#ArbiterClient.InvalidateCache)
-  * [func (arb *ArbiterClient) RegesterDataboxComponent(componentName, componenttype string)](#ArbiterClient.RegesterDataboxComponent)
+  * [func (arb *ArbiterClient) RegesterDataboxComponent(name string, tokenString string, databoxType DataboxType) error](#ArbiterClient.RegesterDataboxComponent)
   * [func (arb *ArbiterClient) RemoveDataboxComponent()](#ArbiterClient.RemoveDataboxComponent)
   * [func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, error)](#ArbiterClient.RequestToken)
   * [func (arb *ArbiterClient) RevokeComponentPermission()](#ArbiterClient.RevokeComponentPermission)
-  * [func (arb *ArbiterClient) UpdateArbiter(name string, tokenString string, databoxType DataboxType) error](#ArbiterClient.UpdateArbiter)
 * [type ContainerManagerOptions](#ContainerManagerOptions)
 * [type ContainerPermissions](#ContainerPermissions)
 * [type CoreNetworkClient](#CoreNetworkClient)
@@ -46,12 +46,13 @@
   * [func (cnc CoreNetworkClient) RegisterPrivileged() error](#CoreNetworkClient.RegisterPrivileged)
   * [func (cnc CoreNetworkClient) ServiceRestart(serviceName string, oldIP string, newIP string) error](#CoreNetworkClient.ServiceRestart)
 * [type CoreStoreClient](#CoreStoreClient)
-  * [func NewCoreStoreClient(databoxRequest *http.Client, arbiterClient *ArbiterClient, serverKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient](#NewCoreStoreClient)
+  * [func NewCoreStoreClient(arbiterClient *ArbiterClient, zmqPublicKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient](#NewCoreStoreClient)
+  * [func NewDefaultCoreStoreClient(storeEndPoint string) *CoreStoreClient](#NewDefaultCoreStoreClient)
   * [func (csc *CoreStoreClient) GetStoreDataSourceCatalogue(href string) (HypercatRoot, error)](#CoreStoreClient.GetStoreDataSourceCatalogue)
-  * [func (csc *CoreStoreClient) HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error)](#CoreStoreClient.HypercatToDataSourceMetadata)
   * [func (csc *CoreStoreClient) RegisterDatasource(metadata DataSourceMetadata) error](#CoreStoreClient.RegisterDatasource)
 * [type DataSource](#DataSource)
 * [type DataSourceMetadata](#DataSourceMetadata)
+  * [func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error)](#HypercatToDataSourceMetadata)
 * [type DataboxType](#DataboxType)
 * [type ExportWhitelist](#ExportWhitelist)
 * [type ExternalWhitelist](#ExternalWhitelist)
@@ -63,8 +64,8 @@
   * [func (kvj *KVStore) Delete(dataSourceID string, key string) error](#KVStore.Delete)
   * [func (kvj *KVStore) DeleteAll(dataSourceID string) error](#KVStore.DeleteAll)
   * [func (kvj *KVStore) ListKeys(dataSourceID string) ([]string, error)](#KVStore.ListKeys)
-  * [func (kvj *KVStore) Observe(dataSourceID string) (&lt;-chan []byte, error)](#KVStore.Observe)
-  * [func (kvj *KVStore) ObserveKey(dataSourceID string, key string) (&lt;-chan []byte, error)](#KVStore.ObserveKey)
+  * [func (kvj *KVStore) Observe(dataSourceID string) (&lt;-chan ObserveResponse, error)](#KVStore.Observe)
+  * [func (kvj *KVStore) ObserveKey(dataSourceID string, key string) (&lt;-chan ObserveResponse, error)](#KVStore.ObserveKey)
   * [func (kvj *KVStore) Read(dataSourceID string, key string) ([]byte, error)](#KVStore.Read)
   * [func (kvj *KVStore) Write(dataSourceID string, key string, payload []byte) error](#KVStore.Write)
 * [type LogEntries](#LogEntries)
@@ -81,6 +82,7 @@
 * [type Macaroon](#Macaroon)
 * [type Manifest](#Manifest)
 * [type NetworkConfig](#NetworkConfig)
+* [type ObserveResponse](#ObserveResponse)
 * [type Package](#Package)
 * [type PostNetworkConfig](#PostNetworkConfig)
 * [type RelValPair](#RelValPair)
@@ -97,7 +99,7 @@
   * [func (tbs *TSBlobStore) LastN(dataSourceID string, n int) ([]byte, error)](#TSBlobStore.LastN)
   * [func (tbs *TSBlobStore) Latest(dataSourceID string) ([]byte, error)](#TSBlobStore.Latest)
   * [func (tbs *TSBlobStore) Length(dataSourceID string) (int, error)](#TSBlobStore.Length)
-  * [func (tbs *TSBlobStore) Observe(dataSourceID string) (&lt;-chan []byte, error)](#TSBlobStore.Observe)
+  * [func (tbs *TSBlobStore) Observe(dataSourceID string) (&lt;-chan ObserveResponse, error)](#TSBlobStore.Observe)
   * [func (tbs *TSBlobStore) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) ([]byte, error)](#TSBlobStore.Range)
   * [func (tbs *TSBlobStore) Since(dataSourceID string, sinceTimeStamp int64) ([]byte, error)](#TSBlobStore.Since)
   * [func (tbs *TSBlobStore) Write(dataSourceID string, payload []byte) error](#TSBlobStore.Write)
@@ -108,7 +110,7 @@
   * [func (tsc TSStore) LastN(dataSourceID string, n int, opt TimeSeriesQueryOptions) ([]byte, error)](#TSStore.LastN)
   * [func (tsc TSStore) Latest(dataSourceID string) ([]byte, error)](#TSStore.Latest)
   * [func (tsc TSStore) Length(dataSourceID string) (int, error)](#TSStore.Length)
-  * [func (tsc TSStore) Observe(dataSourceID string) (&lt;-chan []byte, error)](#TSStore.Observe)
+  * [func (tsc TSStore) Observe(dataSourceID string) (&lt;-chan ObserveResponse, error)](#TSStore.Observe)
   * [func (tsc TSStore) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64, opt TimeSeriesQueryOptions) ([]byte, error)](#TSStore.Range)
   * [func (tsc TSStore) Since(dataSourceID string, sinceTimeStamp int64, opt TimeSeriesQueryOptions) ([]byte, error)](#TSStore.Since)
   * [func (tsc TSStore) Write(dataSourceID string, payload []byte) error](#TSStore.Write)
@@ -117,7 +119,7 @@
 
 
 #### <a name="pkg-files">Package files</a>
-[arbiterClient.go](/src/target/arbiterClient.go) [coreNetworkClient.go](/src/target/coreNetworkClient.go) [coreStoreClient.go](/src/target/coreStoreClient.go) [coreStoreKV.go](/src/target/coreStoreKV.go) [coreStoreTS.go](/src/target/coreStoreTS.go) [coreStoreTSBlob.go](/src/target/coreStoreTSBlob.go) [databoxRequest.go](/src/target/databoxRequest.go) [databoxlog.go](/src/target/databoxlog.go) [export.go](/src/target/export.go) [types.go](/src/target/types.go) 
+[arbiterClient.go](/src/target/arbiterClient.go) [coreNetworkClient.go](/src/target/coreNetworkClient.go) [coreStoreClient.go](/src/target/coreStoreClient.go) [coreStoreKV.go](/src/target/coreStoreKV.go) [coreStoreTS.go](/src/target/coreStoreTS.go) [coreStoreTSBlob.go](/src/target/coreStoreTSBlob.go) [databoxRequest.go](/src/target/databoxRequest.go) [databoxlog.go](/src/target/databoxlog.go) [export.go](/src/target/export.go) [helperFunction.go](/src/target/helperFunction.go) [types.go](/src/target/types.go) 
 
 
 ## <a name="pkg-constants">Constants</a>
@@ -136,6 +138,25 @@ const (
 ```
 Allowed values for FilterType and AggregationFunction
 
+``` go
+const DefaultArbiterKeyPath = "/run/secrets/ARBITER_TOKEN"
+```
+``` go
+const DefaultArbiterURI = "tcp://arbiter:4444"
+```
+``` go
+const DefaultHTTPSCertPath = "/run/secrets/DATABOX.pem"
+```
+DefaultHTTPSCertPath is the defaut loaction where apps and drivers can find the https certivicats needed to offer a secure UI
+
+``` go
+const DefaultHTTPSRootCertPath = "/run/secrets/DATABOX_ROOT_CA"
+```
+DefaultHTTPSRootCertPath contins the Public key of this databoxes Root certificate needed to verify requests to other components (used in )
+
+``` go
+const DefaultStorePublicKeyPath = "/run/secrets/ZMQ_PUBLIC_KEY"
+```
 
 
 
@@ -163,7 +184,16 @@ func Err(msg string)
 ```
 
 
-## <a name="GetStoreURLFromDsHref">func</a> [GetStoreURLFromDsHref](/src/target/coreStoreClient.go?s=6785:6840#L206)
+## <a name="GetHttpsCredentials">func</a> [GetHttpsCredentials](/src/target/helperFunction.go?s=3161:3194#L95)
+``` go
+func GetHttpsCredentials() string
+```
+GetHttpsCredentials Returns a string containing the HTTPS credentials to pass to https server when offering an https server.
+These are read form /run/secrets/DATABOX.pem and are generated by the container-manger at run time.
+
+
+
+## <a name="GetStoreURLFromDsHref">func</a> [GetStoreURLFromDsHref](/src/target/helperFunction.go?s=2765:2820#L82)
 ``` go
 func GetStoreURLFromDsHref(href string) (string, error)
 ```
@@ -183,7 +213,7 @@ func NewDataboxHTTPsAPI() *http.Client
 ```
 
 
-## <a name="NewDataboxHTTPsAPIWithPaths">func</a> [NewDataboxHTTPsAPIWithPaths](/src/target/databoxRequest.go?s=254:320#L8)
+## <a name="NewDataboxHTTPsAPIWithPaths">func</a> [NewDataboxHTTPsAPIWithPaths](/src/target/databoxRequest.go?s=248:314#L8)
 ``` go
 func NewDataboxHTTPsAPIWithPaths(cmRootCaPath string) *http.Client
 ```
@@ -209,9 +239,12 @@ type AggregationType string
 
 
 
-## <a name="ArbiterClient">type</a> [ArbiterClient](/src/target/arbiterClient.go?s=171:342#L8)
+## <a name="ArbiterClient">type</a> [ArbiterClient](/src/target/arbiterClient.go?s=179:383#L8)
 ``` go
 type ArbiterClient struct {
+    ArbiterToken string
+
+    ZestC zest.ZestClient
     // contains filtered or unexported fields
 }
 ```
@@ -221,78 +254,84 @@ type ArbiterClient struct {
 
 
 
-### <a name="NewArbiterClient">func</a> [NewArbiterClient](/src/target/arbiterClient.go?s=344:452#L16)
+### <a name="NewArbiterClient">func</a> [NewArbiterClient](/src/target/arbiterClient.go?s=495:612#L18)
 ``` go
-func NewArbiterClient(arbiterTokenPath string, databoxRequest *http.Client, arbiterURL string) ArbiterClient
+func NewArbiterClient(arbiterTokenPath string, zmqPublicKeyPath string, arbiterZMQURI string) (*ArbiterClient, error)
 ```
+NewArbiterClient returns an arbiter client for use by components that require conunication with the arbiter
 
 
 
 
-### <a name="ArbiterClient.GetRootDataSourceCatalogue">func</a> (\*ArbiterClient) [GetRootDataSourceCatalogue](/src/target/arbiterClient.go?s=890:966#L36)
+
+### <a name="ArbiterClient.GetRootDataSourceCatalogue">func</a> (\*ArbiterClient) [GetRootDataSourceCatalogue](/src/target/arbiterClient.go?s=1596:1672#L51)
 ``` go
 func (arb *ArbiterClient) GetRootDataSourceCatalogue() (HypercatRoot, error)
 ```
+GetRootDataSourceCatalogue is used by the container manager to access the Root hypercat catalogue
 
 
 
-### <a name="ArbiterClient.GrantComponentPermission">func</a> (\*ArbiterClient) [GrantComponentPermission](/src/target/arbiterClient.go?s=5684:5736#L227)
+
+### <a name="ArbiterClient.GrantComponentPermission">func</a> (\*ArbiterClient) [GrantComponentPermission](/src/target/arbiterClient.go?s=6104:6156#L224)
 ``` go
 func (arb *ArbiterClient) GrantComponentPermission()
 ```
 
 
 
-### <a name="ArbiterClient.GrantContainerPermissions">func</a> (\*ArbiterClient) [GrantContainerPermissions](/src/target/arbiterClient.go?s=2418:2509#L100)
+### <a name="ArbiterClient.GrantContainerPermissions">func</a> (\*ArbiterClient) [GrantContainerPermissions](/src/target/arbiterClient.go?s=3119:3210#L108)
 ``` go
 func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermissions) error
 ```
+GrantContainerPermissions allows the container manager to grant permissions to an app or driver on a registered store.
 
 
 
-### <a name="ArbiterClient.InvalidateCache">func</a> (\*ArbiterClient) [InvalidateCache](/src/target/arbiterClient.go?s=4764:4833#L189)
+
+### <a name="ArbiterClient.InvalidateCache">func</a> (\*ArbiterClient) [InvalidateCache](/src/target/arbiterClient.go?s=5301:5370#L190)
 ``` go
 func (arb *ArbiterClient) InvalidateCache(href string, method string)
 ```
+InvalidateCache can be used to remove a token from the arbiterClient cache.
+This is done automatically if the token is rejected.
 
 
 
-### <a name="ArbiterClient.RegesterDataboxComponent">func</a> (\*ArbiterClient) [RegesterDataboxComponent](/src/target/arbiterClient.go?s=5487:5574#L219)
+
+### <a name="ArbiterClient.RegesterDataboxComponent">func</a> (\*ArbiterClient) [RegesterDataboxComponent](/src/target/arbiterClient.go?s=2165:2279#L70)
 ``` go
-func (arb *ArbiterClient) RegesterDataboxComponent(componentName, componenttype string)
+func (arb *ArbiterClient) RegesterDataboxComponent(name string, tokenString string, databoxType DataboxType) error
 ```
+RegesterDataboxComponent allows the container manager to register a new app, driver or store with the arbiter
 
 
 
-### <a name="ArbiterClient.RemoveDataboxComponent">func</a> (\*ArbiterClient) [RemoveDataboxComponent](/src/target/arbiterClient.go?s=5604:5654#L223)
+
+### <a name="ArbiterClient.RemoveDataboxComponent">func</a> (\*ArbiterClient) [RemoveDataboxComponent](/src/target/arbiterClient.go?s=6024:6074#L220)
 ``` go
 func (arb *ArbiterClient) RemoveDataboxComponent()
 ```
 
 
 
-### <a name="ArbiterClient.RequestToken">func</a> (\*ArbiterClient) [RequestToken](/src/target/arbiterClient.go?s=4022:4104#L157)
+### <a name="ArbiterClient.RequestToken">func</a> (\*ArbiterClient) [RequestToken](/src/target/arbiterClient.go?s=4328:4410#L155)
 ``` go
 func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, error)
 ```
+RequestToken is used internally to request a token from the arbiter
 
 
 
-### <a name="ArbiterClient.RevokeComponentPermission">func</a> (\*ArbiterClient) [RevokeComponentPermission](/src/target/arbiterClient.go?s=5766:5819#L231)
+
+### <a name="ArbiterClient.RevokeComponentPermission">func</a> (\*ArbiterClient) [RevokeComponentPermission](/src/target/arbiterClient.go?s=6186:6239#L228)
 ``` go
 func (arb *ArbiterClient) RevokeComponentPermission()
 ```
 
 
 
-### <a name="ArbiterClient.UpdateArbiter">func</a> (\*ArbiterClient) [UpdateArbiter](/src/target/arbiterClient.go?s=1346:1449#L53)
-``` go
-func (arb *ArbiterClient) UpdateArbiter(name string, tokenString string, databoxType DataboxType) error
-```
-
-
-
-## <a name="ContainerManagerOptions">type</a> [ContainerManagerOptions](/src/target/types.go?s=89:664#L1)
+## <a name="ContainerManagerOptions">type</a> [ContainerManagerOptions](/src/target/types.go?s=89:696#L1)
 ``` go
 type ContainerManagerOptions struct {
     Version               string
@@ -310,7 +349,8 @@ type ContainerManagerOptions struct {
     EnableDebugLogging    bool
     ClearSLAs             bool
     OverridePasword       string
-    InternalIP            string
+    Hostname              string
+    InternalIPs           []string
     ExternalIP            string
     HostPath              string
 }
@@ -326,7 +366,7 @@ ContainerManagerOptions is used to configure the Container Manager
 
 
 
-## <a name="ContainerPermissions">type</a> [ContainerPermissions](/src/target/arbiterClient.go?s=2280:2416#L94)
+## <a name="ContainerPermissions">type</a> [ContainerPermissions](/src/target/arbiterClient.go?s=2859:2995#L101)
 ``` go
 type ContainerPermissions struct {
     Name    string   `json:"name"`
@@ -413,12 +453,11 @@ func (cnc CoreNetworkClient) ServiceRestart(serviceName string, oldIP string, ne
 
 
 
-## <a name="CoreStoreClient">type</a> [CoreStoreClient](/src/target/coreStoreClient.go?s=153:461#L5)
+## <a name="CoreStoreClient">type</a> [CoreStoreClient](/src/target/coreStoreClient.go?s=150:433#L5)
 ``` go
 type CoreStoreClient struct {
     ZestC      zest.ZestClient
     Arbiter    *ArbiterClient
-    Request    *http.Client
     ZEndpoint  string
     DEndpoint  string
     KVJSON     *KVStore
@@ -436,32 +475,27 @@ type CoreStoreClient struct {
 
 
 
-### <a name="NewCoreStoreClient">func</a> [NewCoreStoreClient](/src/target/coreStoreClient.go?s=463:626#L20)
+### <a name="NewCoreStoreClient">func</a> [NewCoreStoreClient](/src/target/coreStoreClient.go?s=723:860#L25)
 ``` go
-func NewCoreStoreClient(databoxRequest *http.Client, arbiterClient *ArbiterClient, serverKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient
+func NewCoreStoreClient(arbiterClient *ArbiterClient, zmqPublicKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient
+```
+
+### <a name="NewDefaultCoreStoreClient">func</a> [NewDefaultCoreStoreClient](/src/target/coreStoreClient.go?s=435:504#L19)
+``` go
+func NewDefaultCoreStoreClient(storeEndPoint string) *CoreStoreClient
 ```
 
 
 
 
-### <a name="CoreStoreClient.GetStoreDataSourceCatalogue">func</a> (\*CoreStoreClient) [GetStoreDataSourceCatalogue](/src/target/coreStoreClient.go?s=1598:1688#L50)
+### <a name="CoreStoreClient.GetStoreDataSourceCatalogue">func</a> (\*CoreStoreClient) [GetStoreDataSourceCatalogue](/src/target/coreStoreClient.go?s=1808:1898#L54)
 ``` go
 func (csc *CoreStoreClient) GetStoreDataSourceCatalogue(href string) (HypercatRoot, error)
 ```
 
 
 
-### <a name="CoreStoreClient.HypercatToDataSourceMetadata">func</a> (\*CoreStoreClient) [HypercatToDataSourceMetadata](/src/target/coreStoreClient.go?s=4812:4942#L135)
-``` go
-func (csc *CoreStoreClient) HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error)
-```
-HypercatToDataSourceMetadata is a helper function to convert the hypercat description of a datasource to a DataSourceMetadata instance
-Also returns the store url for this data source.
-
-
-
-
-### <a name="CoreStoreClient.RegisterDatasource">func</a> (\*CoreStoreClient) [RegisterDatasource](/src/target/coreStoreClient.go?s=2299:2380#L75)
+### <a name="CoreStoreClient.RegisterDatasource">func</a> (\*CoreStoreClient) [RegisterDatasource](/src/target/coreStoreClient.go?s=2509:2590#L79)
 ``` go
 func (csc *CoreStoreClient) RegisterDatasource(metadata DataSourceMetadata) error
 ```
@@ -471,7 +505,7 @@ own.
 
 
 
-## <a name="DataSource">type</a> [DataSource](/src/target/types.go?s=1203:1502#L44)
+## <a name="DataSource">type</a> [DataSource](/src/target/types.go?s=1276:1575#L46)
 ``` go
 type DataSource struct {
     Type          string       `json:"type"`
@@ -491,7 +525,7 @@ type DataSource struct {
 
 
 
-## <a name="DataSourceMetadata">type</a> [DataSourceMetadata](/src/target/types.go?s=4147:4389#L97)
+## <a name="DataSourceMetadata">type</a> [DataSourceMetadata](/src/target/types.go?s=4220:4462#L99)
 ``` go
 type DataSourceMetadata struct {
     Description    string
@@ -511,10 +545,18 @@ type DataSourceMetadata struct {
 
 
 
+### <a name="HypercatToDataSourceMetadata">func</a> [HypercatToDataSourceMetadata](/src/target/helperFunction.go?s=815:922#L11)
+``` go
+func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSourceMetadata, string, error)
+```
+HypercatToDataSourceMetadata is a helper function to convert the hypercat description of a datasource to a DataSourceMetadata instance
+Also returns the store url for this data source.
 
 
 
-## <a name="DataboxType">type</a> [DataboxType](/src/target/types.go?s=666:689#L15)
+
+
+## <a name="DataboxType">type</a> [DataboxType](/src/target/types.go?s=698:721#L16)
 ``` go
 type DataboxType string
 ```
@@ -523,6 +565,7 @@ type DataboxType string
 const (
     DataboxTypeApp    DataboxType = "app"
     DataboxTypeDriver DataboxType = "driver"
+    DataboxTypeStore  DataboxType = "store"
 )
 ```
 
@@ -534,7 +577,7 @@ const (
 
 
 
-## <a name="ExportWhitelist">type</a> [ExportWhitelist](/src/target/types.go?s=1096:1201#L39)
+## <a name="ExportWhitelist">type</a> [ExportWhitelist](/src/target/types.go?s=1169:1274#L41)
 ``` go
 type ExportWhitelist struct {
     Url         string `json:"url"`
@@ -550,7 +593,7 @@ type ExportWhitelist struct {
 
 
 
-## <a name="ExternalWhitelist">type</a> [ExternalWhitelist](/src/target/types.go?s=982:1094#L34)
+## <a name="ExternalWhitelist">type</a> [ExternalWhitelist](/src/target/types.go?s=1055:1167#L36)
 ``` go
 type ExternalWhitelist struct {
     Urls        []string `json:"urls"`
@@ -598,7 +641,7 @@ type FilterType string
 
 
 
-## <a name="HypercatItem">type</a> [HypercatItem](/src/target/types.go?s=5009:5130#L136)
+## <a name="HypercatItem">type</a> [HypercatItem](/src/target/types.go?s=5082:5203#L138)
 ``` go
 type HypercatItem struct {
     ItemMetadata []interface{} `json:"item-metadata"`
@@ -614,7 +657,7 @@ type HypercatItem struct {
 
 
 
-## <a name="HypercatRoot">type</a> [HypercatRoot](/src/target/types.go?s=4868:5007#L131)
+## <a name="HypercatRoot">type</a> [HypercatRoot](/src/target/types.go?s=4941:5080#L133)
 ``` go
 type HypercatRoot struct {
     CatalogueMetadata []RelValPair   `json:"catalogue-metadata"`
@@ -672,16 +715,16 @@ ListKeys returns an array of key registed under the dataSourceID
 
 
 
-### <a name="KVStore.Observe">func</a> (\*KVStore) [Observe](/src/target/coreStoreKV.go?s=1731:1802#L67)
+### <a name="KVStore.Observe">func</a> (\*KVStore) [Observe](/src/target/coreStoreKV.go?s=1731:1811#L67)
 ``` go
-func (kvj *KVStore) Observe(dataSourceID string) (<-chan []byte, error)
+func (kvj *KVStore) Observe(dataSourceID string) (<-chan ObserveResponse, error)
 ```
 
 
 
-### <a name="KVStore.ObserveKey">func</a> (\*KVStore) [ObserveKey](/src/target/coreStoreKV.go?s=1896:1982#L75)
+### <a name="KVStore.ObserveKey">func</a> (\*KVStore) [ObserveKey](/src/target/coreStoreKV.go?s=1905:2000#L75)
 ``` go
-func (kvj *KVStore) ObserveKey(dataSourceID string, key string) (<-chan []byte, error)
+func (kvj *KVStore) ObserveKey(dataSourceID string, key string) (<-chan ObserveResponse, error)
 ```
 
 
@@ -803,7 +846,7 @@ type Logs []LogEntries
 
 
 
-## <a name="Macaroon">type</a> [Macaroon](/src/target/types.go?s=783:803#L22)
+## <a name="Macaroon">type</a> [Macaroon](/src/target/types.go?s=856:876#L24)
 ``` go
 type Macaroon string
 ```
@@ -816,7 +859,7 @@ type Macaroon string
 
 
 
-## <a name="Manifest">type</a> [Manifest](/src/target/types.go?s=1504:2724#L53)
+## <a name="Manifest">type</a> [Manifest](/src/target/types.go?s=1577:2797#L55)
 ``` go
 type Manifest struct {
     ManifestVersion      int                  `json:"manifest-version"` //
@@ -862,7 +905,27 @@ type NetworkConfig struct {
 
 
 
-## <a name="Package">type</a> [Package](/src/target/types.go?s=886:980#L29)
+## <a name="ObserveResponse">type</a> [ObserveResponse](/src/target/types.go?s=5237:5351#L148)
+``` go
+type ObserveResponse struct {
+    TimestampMS  int64
+    DataSourceID string
+    Key          string
+    Data         []byte
+}
+```
+OBSERVE RESPONSE
+
+
+
+
+
+
+
+
+
+
+## <a name="Package">type</a> [Package](/src/target/types.go?s=959:1053#L31)
 ``` go
 type Package struct {
 }
@@ -892,7 +955,7 @@ type PostNetworkConfig struct {
 
 
 
-## <a name="RelValPair">type</a> [RelValPair](/src/target/types.go?s=4708:4784#L121)
+## <a name="RelValPair">type</a> [RelValPair](/src/target/types.go?s=4781:4857#L123)
 ``` go
 type RelValPair struct {
     Rel string `json:"rel"`
@@ -908,7 +971,7 @@ type RelValPair struct {
 
 
 
-## <a name="RelValPairBool">type</a> [RelValPairBool](/src/target/types.go?s=4786:4866#L126)
+## <a name="RelValPairBool">type</a> [RelValPairBool](/src/target/types.go?s=4859:4939#L128)
 ``` go
 type RelValPairBool struct {
     Rel string `json:"rel"`
@@ -924,7 +987,7 @@ type RelValPairBool struct {
 
 
 
-## <a name="Repository">type</a> [Repository](/src/target/types.go?s=805:884#L24)
+## <a name="Repository">type</a> [Repository](/src/target/types.go?s=878:957#L26)
 ``` go
 type Repository struct {
     Type string `json:"Type"`
@@ -940,7 +1003,7 @@ type Repository struct {
 
 
 
-## <a name="ResourceRequirements">type</a> [ResourceRequirements](/src/target/types.go?s=4080:4145#L93)
+## <a name="ResourceRequirements">type</a> [ResourceRequirements](/src/target/types.go?s=4153:4218#L95)
 ``` go
 type ResourceRequirements struct {
     Store string `json:"store"`
@@ -955,7 +1018,7 @@ type ResourceRequirements struct {
 
 
 
-## <a name="Route">type</a> [Route](/src/target/arbiterClient.go?s=2166:2278#L88)
+## <a name="Route">type</a> [Route](/src/target/arbiterClient.go?s=2745:2857#L95)
 ``` go
 type Route struct {
     Target string `json:"target"`
@@ -972,7 +1035,7 @@ type Route struct {
 
 
 
-## <a name="SLA">type</a> [SLA](/src/target/types.go?s=2726:4078#L72)
+## <a name="SLA">type</a> [SLA](/src/target/types.go?s=2799:4151#L74)
 ``` go
 type SLA struct {
     ManifestVersion      int                  `json:"manifest-version"` //
@@ -1004,7 +1067,7 @@ type SLA struct {
 
 
 
-## <a name="StoreContentType">type</a> [StoreContentType](/src/target/types.go?s=4529:4557#L115)
+## <a name="StoreContentType">type</a> [StoreContentType](/src/target/types.go?s=4602:4630#L117)
 ``` go
 type StoreContentType string
 ```
@@ -1029,7 +1092,7 @@ const ContentTypeTEXT StoreContentType = "TEXT"
 
 
 
-## <a name="StoreType">type</a> [StoreType](/src/target/types.go?s=4391:4412#L109)
+## <a name="StoreType">type</a> [StoreType](/src/target/types.go?s=4464:4485#L111)
 ``` go
 type StoreType string
 ```
@@ -1069,7 +1132,7 @@ type TSBlobStore struct {
 
 
 
-### <a name="TSBlobStore.Earliest">func</a> (\*TSBlobStore) [Earliest](/src/target/coreStoreTSBlob.go?s=1875:1944#L57)
+### <a name="TSBlobStore.Earliest">func</a> (\*TSBlobStore) [Earliest](/src/target/coreStoreTSBlob.go?s=1878:1947#L57)
 ``` go
 func (tbs *TSBlobStore) Earliest(dataSourceID string) ([]byte, error)
 ```
@@ -1080,7 +1143,7 @@ return data is a byte array contingin  of the format
 
 
 
-### <a name="TSBlobStore.FirstN">func</a> (\*TSBlobStore) [FirstN](/src/target/coreStoreTSBlob.go?s=2630:2704#L79)
+### <a name="TSBlobStore.FirstN">func</a> (\*TSBlobStore) [FirstN](/src/target/coreStoreTSBlob.go?s=2633:2707#L79)
 ``` go
 func (tbs *TSBlobStore) FirstN(dataSourceID string, n int) ([]byte, error)
 ```
@@ -1091,7 +1154,7 @@ return data is a byte array contingin  of the format
 
 
 
-### <a name="TSBlobStore.LastN">func</a> (\*TSBlobStore) [LastN](/src/target/coreStoreTSBlob.go?s=2242:2315#L68)
+### <a name="TSBlobStore.LastN">func</a> (\*TSBlobStore) [LastN](/src/target/coreStoreTSBlob.go?s=2245:2318#L68)
 ``` go
 func (tbs *TSBlobStore) LastN(dataSourceID string, n int) ([]byte, error)
 ```
@@ -1102,7 +1165,7 @@ return data is a byte array contingin  of the format
 
 
 
-### <a name="TSBlobStore.Latest">func</a> (\*TSBlobStore) [Latest](/src/target/coreStoreTSBlob.go?s=1512:1579#L46)
+### <a name="TSBlobStore.Latest">func</a> (\*TSBlobStore) [Latest](/src/target/coreStoreTSBlob.go?s=1515:1582#L46)
 ``` go
 func (tbs *TSBlobStore) Latest(dataSourceID string) ([]byte, error)
 ```
@@ -1113,7 +1176,7 @@ return data is a byte array contingin  of the format
 
 
 
-### <a name="TSBlobStore.Length">func</a> (\*TSBlobStore) [Length](/src/target/coreStoreTSBlob.go?s=3834:3898#L110)
+### <a name="TSBlobStore.Length">func</a> (\*TSBlobStore) [Length](/src/target/coreStoreTSBlob.go?s=3837:3901#L110)
 ``` go
 func (tbs *TSBlobStore) Length(dataSourceID string) (int, error)
 ```
@@ -1122,18 +1185,18 @@ TSBlobLength returns then number of items stored in the timeseries
 
 
 
-### <a name="TSBlobStore.Observe">func</a> (\*TSBlobStore) [Observe](/src/target/coreStoreTSBlob.go?s=4424:4499#L134)
+### <a name="TSBlobStore.Observe">func</a> (\*TSBlobStore) [Observe](/src/target/coreStoreTSBlob.go?s=4457:4541#L134)
 ``` go
-func (tbs *TSBlobStore) Observe(dataSourceID string) (<-chan []byte, error)
+func (tbs *TSBlobStore) Observe(dataSourceID string) (<-chan ObserveResponse, error)
 ```
 Observe allows you to get notifications when a new value is written by a driver
-the returned chan receives chan []byte continuing json of the
+the returned chan receives chan ObserveResponse the data value og which contins json of the
 form {"TimestampMS":213123123,"Json":byte[]}
 
 
 
 
-### <a name="TSBlobStore.Range">func</a> (\*TSBlobStore) [Range](/src/target/coreStoreTSBlob.go?s=3476:3582#L101)
+### <a name="TSBlobStore.Range">func</a> (\*TSBlobStore) [Range](/src/target/coreStoreTSBlob.go?s=3479:3585#L101)
 ``` go
 func (tbs *TSBlobStore) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64) ([]byte, error)
 ```
@@ -1144,7 +1207,7 @@ return data is a byte array contingin  of the format
 
 
 
-### <a name="TSBlobStore.Since">func</a> (\*TSBlobStore) [Since](/src/target/coreStoreTSBlob.go?s=3025:3113#L90)
+### <a name="TSBlobStore.Since">func</a> (\*TSBlobStore) [Since](/src/target/coreStoreTSBlob.go?s=3028:3116#L90)
 ``` go
 func (tbs *TSBlobStore) Since(dataSourceID string, sinceTimeStamp int64) ([]byte, error)
 ```
@@ -1189,7 +1252,7 @@ type TSStore struct {
 
 
 
-### <a name="TSStore.Earliest">func</a> (TSStore) [Earliest](/src/target/coreStoreTS.go?s=2659:2723#L82)
+### <a name="TSStore.Earliest">func</a> (TSStore) [Earliest](/src/target/coreStoreTS.go?s=2662:2726#L82)
 ``` go
 func (tsc TSStore) Earliest(dataSourceID string) ([]byte, error)
 ```
@@ -1199,7 +1262,7 @@ return data is a JSON object of the format {"timestamp":213123123,"data":[data-w
 
 
 
-### <a name="TSStore.FirstN">func</a> (TSStore) [FirstN](/src/target/coreStoreTS.go?s=3443:3540#L102)
+### <a name="TSStore.FirstN">func</a> (TSStore) [FirstN](/src/target/coreStoreTS.go?s=3446:3543#L102)
 ``` go
 func (tsc TSStore) FirstN(dataSourceID string, n int, opt TimeSeriesQueryOptions) ([]byte, error)
 ```
@@ -1209,7 +1272,7 @@ return data is an array of JSON objects of the format {"timestamp":213123123,"da
 
 
 
-### <a name="TSStore.LastN">func</a> (TSStore) [LastN](/src/target/coreStoreTS.go?s=3014:3110#L92)
+### <a name="TSStore.LastN">func</a> (TSStore) [LastN](/src/target/coreStoreTS.go?s=3017:3113#L92)
 ``` go
 func (tsc TSStore) LastN(dataSourceID string, n int, opt TimeSeriesQueryOptions) ([]byte, error)
 ```
@@ -1219,7 +1282,7 @@ return data is an array of JSON objects of the format {"timestamp":213123123,"da
 
 
 
-### <a name="TSStore.Latest">func</a> (TSStore) [Latest](/src/target/coreStoreTS.go?s=2319:2381#L72)
+### <a name="TSStore.Latest">func</a> (TSStore) [Latest](/src/target/coreStoreTS.go?s=2322:2384#L72)
 ``` go
 func (tsc TSStore) Latest(dataSourceID string) ([]byte, error)
 ```
@@ -1229,7 +1292,7 @@ return data is a JSON object of the format {"timestamp":213123123,"data":[data-w
 
 
 
-### <a name="TSStore.Length">func</a> (TSStore) [Length](/src/target/coreStoreTS.go?s=4748:4807#L131)
+### <a name="TSStore.Length">func</a> (TSStore) [Length](/src/target/coreStoreTS.go?s=4751:4810#L131)
 ``` go
 func (tsc TSStore) Length(dataSourceID string) (int, error)
 ```
@@ -1238,14 +1301,14 @@ Length retruns the number of records stored for that dataSourceID
 
 
 
-### <a name="TSStore.Observe">func</a> (TSStore) [Observe](/src/target/coreStoreTS.go?s=5133:5203#L153)
+### <a name="TSStore.Observe">func</a> (TSStore) [Observe](/src/target/coreStoreTS.go?s=5136:5215#L153)
 ``` go
-func (tsc TSStore) Observe(dataSourceID string) (<-chan []byte, error)
+func (tsc TSStore) Observe(dataSourceID string) (<-chan ObserveResponse, error)
 ```
 
 
 
-### <a name="TSStore.Range">func</a> (TSStore) [Range](/src/target/coreStoreTS.go?s=4348:4477#L122)
+### <a name="TSStore.Range">func</a> (TSStore) [Range](/src/target/coreStoreTS.go?s=4351:4480#L122)
 ``` go
 func (tsc TSStore) Range(dataSourceID string, formTimeStamp int64, toTimeStamp int64, opt TimeSeriesQueryOptions) ([]byte, error)
 ```
@@ -1255,7 +1318,7 @@ return data is a JSON object of the format {"timestamp":213123123,"data":[data-w
 
 
 
-### <a name="TSStore.Since">func</a> (TSStore) [Since](/src/target/coreStoreTS.go?s=3867:3978#L112)
+### <a name="TSStore.Since">func</a> (TSStore) [Since](/src/target/coreStoreTS.go?s=3870:3981#L112)
 ``` go
 func (tsc TSStore) Since(dataSourceID string, sinceTimeStamp int64, opt TimeSeriesQueryOptions) ([]byte, error)
 ```
