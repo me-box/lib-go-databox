@@ -100,6 +100,7 @@ type SLA struct {
 	ResourceRequirements ResourceRequirements `json:"resource-requirements"`
 	DisplayName          string               `json:"displayName"`
 	StoreURL             string               `json:"storeUrl"`
+	Registry             string               `json:"registry"`
 }
 
 type ResourceRequirements struct {
