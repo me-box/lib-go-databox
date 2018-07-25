@@ -9,6 +9,7 @@ type ContainerManagerOptions struct {
 	DefaultAppStore       string
 	DefaultStoreImage     string
 	ContainerManagerImage string
+	CoreUIImage           string
 	ArbiterImage          string
 	CoreNetworkImage      string
 	CoreNetworkRelayImage string
