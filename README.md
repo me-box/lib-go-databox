@@ -36,15 +36,6 @@
   * [func (arb *ArbiterClient) RevokeComponentPermission()](#ArbiterClient.RevokeComponentPermission)
 * [type ContainerManagerOptions](#ContainerManagerOptions)
 * [type ContainerPermissions](#ContainerPermissions)
-* [type CoreNetworkClient](#CoreNetworkClient)
-  * [func NewCoreNetworkClient(containerManagerKeyPath string, request *http.Client) CoreNetworkClient](#NewCoreNetworkClient)
-  * [func (cnc CoreNetworkClient) ConnectEndpoints(serviceName string, peers []string) error](#CoreNetworkClient.ConnectEndpoints)
-  * [func (cnc CoreNetworkClient) DisconnectEndpoints(serviceName string, netConfig PostNetworkConfig) error](#CoreNetworkClient.DisconnectEndpoints)
-  * [func (cnc CoreNetworkClient) NetworkOfService(service swarm.Service, serviceName string) (PostNetworkConfig, error)](#CoreNetworkClient.NetworkOfService)
-  * [func (cnc CoreNetworkClient) PostUninstall(name string, netConfig PostNetworkConfig) error](#CoreNetworkClient.PostUninstall)
-  * [func (cnc CoreNetworkClient) PreConfig(localContainerName string, sla SLA) NetworkConfig](#CoreNetworkClient.PreConfig)
-  * [func (cnc CoreNetworkClient) RegisterPrivileged() error](#CoreNetworkClient.RegisterPrivileged)
-  * [func (cnc CoreNetworkClient) ServiceRestart(serviceName string, oldIP string, newIP string) error](#CoreNetworkClient.ServiceRestart)
 * [type CoreStoreClient](#CoreStoreClient)
   * [func NewCoreStoreClient(arbiterClient *ArbiterClient, zmqPublicKeyPath string, storeEndPoint string, enableLogging bool) *CoreStoreClient](#NewCoreStoreClient)
   * [func NewDefaultCoreStoreClient(storeEndPoint string) *CoreStoreClient](#NewDefaultCoreStoreClient)
@@ -81,10 +72,8 @@
 * [type Logs](#Logs)
 * [type Macaroon](#Macaroon)
 * [type Manifest](#Manifest)
-* [type NetworkConfig](#NetworkConfig)
 * [type ObserveResponse](#ObserveResponse)
 * [type Package](#Package)
-* [type PostNetworkConfig](#PostNetworkConfig)
 * [type RelValPair](#RelValPair)
 * [type RelValPairBool](#RelValPairBool)
 * [type Repository](#Repository)
@@ -119,7 +108,7 @@
 
 
 #### <a name="pkg-files">Package files</a>
-[arbiterClient.go](/src/target/arbiterClient.go) [coreNetworkClient.go](/src/target/coreNetworkClient.go) [coreStoreClient.go](/src/target/coreStoreClient.go) [coreStoreKV.go](/src/target/coreStoreKV.go) [coreStoreTS.go](/src/target/coreStoreTS.go) [coreStoreTSBlob.go](/src/target/coreStoreTSBlob.go) [databoxRequest.go](/src/target/databoxRequest.go) [databoxlog.go](/src/target/databoxlog.go) [export.go](/src/target/export.go) [helperFunction.go](/src/target/helperFunction.go) [types.go](/src/target/types.go) 
+[arbiterClient.go](/src/target/arbiterClient.go) [coreStoreClient.go](/src/target/coreStoreClient.go) [coreStoreKV.go](/src/target/coreStoreKV.go) [coreStoreTS.go](/src/target/coreStoreTS.go) [coreStoreTSBlob.go](/src/target/coreStoreTSBlob.go) [databoxRequest.go](/src/target/databoxRequest.go) [databoxlog.go](/src/target/databoxlog.go) [export.go](/src/target/export.go) [helperFunction.go](/src/target/helperFunction.go) [types.go](/src/target/types.go) 
 
 
 ## <a name="pkg-constants">Constants</a>
@@ -331,7 +320,7 @@ func (arb *ArbiterClient) RevokeComponentPermission()
 
 
 
-## <a name="ContainerManagerOptions">type</a> [ContainerManagerOptions](/src/target/types.go?s=89:696#L1)
+## <a name="ContainerManagerOptions">type</a> [ContainerManagerOptions](/src/target/types.go?s=89:859#L1)
 ``` go
 type ContainerManagerOptions struct {
     Version               string
@@ -341,6 +330,7 @@ type ContainerManagerOptions struct {
     DefaultAppStore       string
     DefaultStoreImage     string
     ContainerManagerImage string
+    CoreUIImage           string
     ArbiterImage          string
     CoreNetworkImage      string
     CoreNetworkRelayImage string
@@ -353,6 +343,7 @@ type ContainerManagerOptions struct {
     InternalIPs           []string
     ExternalIP            string
     HostPath              string
+    Arch                  string //current architecture used to chose the correct docker images "" for x86 or "arm64v8" for arm64v8 ;-)
 }
 ```
 ContainerManagerOptions is used to configure the Container Manager
@@ -380,76 +371,6 @@ type ContainerPermissions struct {
 
 
 
-
-
-
-## <a name="CoreNetworkClient">type</a> [CoreNetworkClient](/src/target/coreNetworkClient.go?s=393:488#L13)
-``` go
-type CoreNetworkClient struct {
-    CM_KEY string
-    // contains filtered or unexported fields
-}
-```
-
-
-
-
-
-
-### <a name="NewCoreNetworkClient">func</a> [NewCoreNetworkClient](/src/target/coreNetworkClient.go?s=636:733#L29)
-``` go
-func NewCoreNetworkClient(containerManagerKeyPath string, request *http.Client) CoreNetworkClient
-```
-
-
-
-
-### <a name="CoreNetworkClient.ConnectEndpoints">func</a> (CoreNetworkClient) [ConnectEndpoints](/src/target/coreNetworkClient.go?s=5847:5934#L210)
-``` go
-func (cnc CoreNetworkClient) ConnectEndpoints(serviceName string, peers []string) error
-```
-
-
-
-### <a name="CoreNetworkClient.DisconnectEndpoints">func</a> (CoreNetworkClient) [DisconnectEndpoints](/src/target/coreNetworkClient.go?s=6218:6321#L227)
-``` go
-func (cnc CoreNetworkClient) DisconnectEndpoints(serviceName string, netConfig PostNetworkConfig) error
-```
-
-
-
-### <a name="CoreNetworkClient.NetworkOfService">func</a> (CoreNetworkClient) [NetworkOfService](/src/target/coreNetworkClient.go?s=3560:3675#L132)
-``` go
-func (cnc CoreNetworkClient) NetworkOfService(service swarm.Service, serviceName string) (PostNetworkConfig, error)
-```
-
-
-
-### <a name="CoreNetworkClient.PostUninstall">func</a> (CoreNetworkClient) [PostUninstall](/src/target/coreNetworkClient.go?s=4851:4941#L177)
-``` go
-func (cnc CoreNetworkClient) PostUninstall(name string, netConfig PostNetworkConfig) error
-```
-
-
-
-### <a name="CoreNetworkClient.PreConfig">func</a> (CoreNetworkClient) [PreConfig](/src/target/coreNetworkClient.go?s=1116:1204#L49)
-``` go
-func (cnc CoreNetworkClient) PreConfig(localContainerName string, sla SLA) NetworkConfig
-```
-
-
-
-### <a name="CoreNetworkClient.RegisterPrivileged">func</a> (CoreNetworkClient) [RegisterPrivileged](/src/target/coreNetworkClient.go?s=6616:6671#L244)
-``` go
-func (cnc CoreNetworkClient) RegisterPrivileged() error
-```
-
-
-
-### <a name="CoreNetworkClient.ServiceRestart">func</a> (CoreNetworkClient) [ServiceRestart](/src/target/coreNetworkClient.go?s=6884:6981#L256)
-``` go
-func (cnc CoreNetworkClient) ServiceRestart(serviceName string, oldIP string, newIP string) error
-```
 
 
 
@@ -505,7 +426,7 @@ own.
 
 
 
-## <a name="DataSource">type</a> [DataSource](/src/target/types.go?s=1276:1575#L46)
+## <a name="DataSource">type</a> [DataSource](/src/target/types.go?s=1439:1738#L48)
 ``` go
 type DataSource struct {
     Type          string       `json:"type"`
@@ -525,7 +446,7 @@ type DataSource struct {
 
 
 
-## <a name="DataSourceMetadata">type</a> [DataSourceMetadata](/src/target/types.go?s=4220:4462#L99)
+## <a name="DataSourceMetadata">type</a> [DataSourceMetadata](/src/target/types.go?s=4613:4855#L103)
 ``` go
 type DataSourceMetadata struct {
     Description    string
@@ -556,7 +477,7 @@ Also returns the store url for this data source.
 
 
 
-## <a name="DataboxType">type</a> [DataboxType](/src/target/types.go?s=698:721#L16)
+## <a name="DataboxType">type</a> [DataboxType](/src/target/types.go?s=861:884#L18)
 ``` go
 type DataboxType string
 ```
@@ -577,7 +498,7 @@ const (
 
 
 
-## <a name="ExportWhitelist">type</a> [ExportWhitelist](/src/target/types.go?s=1169:1274#L41)
+## <a name="ExportWhitelist">type</a> [ExportWhitelist](/src/target/types.go?s=1332:1437#L43)
 ``` go
 type ExportWhitelist struct {
     Url         string `json:"url"`
@@ -593,7 +514,7 @@ type ExportWhitelist struct {
 
 
 
-## <a name="ExternalWhitelist">type</a> [ExternalWhitelist](/src/target/types.go?s=1055:1167#L36)
+## <a name="ExternalWhitelist">type</a> [ExternalWhitelist](/src/target/types.go?s=1218:1330#L38)
 ``` go
 type ExternalWhitelist struct {
     Urls        []string `json:"urls"`
@@ -641,7 +562,7 @@ type FilterType string
 
 
 
-## <a name="HypercatItem">type</a> [HypercatItem](/src/target/types.go?s=5082:5203#L138)
+## <a name="HypercatItem">type</a> [HypercatItem](/src/target/types.go?s=5475:5596#L142)
 ``` go
 type HypercatItem struct {
     ItemMetadata []interface{} `json:"item-metadata"`
@@ -657,7 +578,7 @@ type HypercatItem struct {
 
 
 
-## <a name="HypercatRoot">type</a> [HypercatRoot](/src/target/types.go?s=4941:5080#L133)
+## <a name="HypercatRoot">type</a> [HypercatRoot](/src/target/types.go?s=5334:5473#L137)
 ``` go
 type HypercatRoot struct {
     CatalogueMetadata []RelValPair   `json:"catalogue-metadata"`
@@ -846,7 +767,7 @@ type Logs []LogEntries
 
 
 
-## <a name="Macaroon">type</a> [Macaroon](/src/target/types.go?s=856:876#L24)
+## <a name="Macaroon">type</a> [Macaroon](/src/target/types.go?s=1019:1039#L26)
 ``` go
 type Macaroon string
 ```
@@ -859,7 +780,7 @@ type Macaroon string
 
 
 
-## <a name="Manifest">type</a> [Manifest](/src/target/types.go?s=1577:2797#L55)
+## <a name="Manifest">type</a> [Manifest](/src/target/types.go?s=1740:2960#L57)
 ``` go
 type Manifest struct {
     ManifestVersion      int                  `json:"manifest-version"` //
@@ -889,23 +810,7 @@ type Manifest struct {
 
 
 
-## <a name="NetworkConfig">type</a> [NetworkConfig](/src/target/coreNetworkClient.go?s=490:559#L19)
-``` go
-type NetworkConfig struct {
-    NetworkName string
-    DNS         string
-}
-```
-
-
-
-
-
-
-
-
-
-## <a name="ObserveResponse">type</a> [ObserveResponse](/src/target/types.go?s=5237:5351#L148)
+## <a name="ObserveResponse">type</a> [ObserveResponse](/src/target/types.go?s=5630:5744#L152)
 ``` go
 type ObserveResponse struct {
     TimestampMS  int64
@@ -925,7 +830,7 @@ OBSERVE RESPONSE
 
 
 
-## <a name="Package">type</a> [Package](/src/target/types.go?s=959:1053#L31)
+## <a name="Package">type</a> [Package](/src/target/types.go?s=1122:1216#L33)
 ``` go
 type Package struct {
 }
@@ -939,23 +844,7 @@ type Package struct {
 
 
 
-## <a name="PostNetworkConfig">type</a> [PostNetworkConfig](/src/target/coreNetworkClient.go?s=561:634#L24)
-``` go
-type PostNetworkConfig struct {
-    NetworkName string
-    IPv4Address string
-}
-```
-
-
-
-
-
-
-
-
-
-## <a name="RelValPair">type</a> [RelValPair](/src/target/types.go?s=4781:4857#L123)
+## <a name="RelValPair">type</a> [RelValPair](/src/target/types.go?s=5174:5250#L127)
 ``` go
 type RelValPair struct {
     Rel string `json:"rel"`
@@ -971,7 +860,7 @@ type RelValPair struct {
 
 
 
-## <a name="RelValPairBool">type</a> [RelValPairBool](/src/target/types.go?s=4859:4939#L128)
+## <a name="RelValPairBool">type</a> [RelValPairBool](/src/target/types.go?s=5252:5332#L132)
 ``` go
 type RelValPairBool struct {
     Rel string `json:"rel"`
@@ -987,7 +876,7 @@ type RelValPairBool struct {
 
 
 
-## <a name="Repository">type</a> [Repository](/src/target/types.go?s=878:957#L26)
+## <a name="Repository">type</a> [Repository](/src/target/types.go?s=1041:1120#L28)
 ``` go
 type Repository struct {
     Type string `json:"Type"`
@@ -1003,7 +892,7 @@ type Repository struct {
 
 
 
-## <a name="ResourceRequirements">type</a> [ResourceRequirements](/src/target/types.go?s=4153:4218#L95)
+## <a name="ResourceRequirements">type</a> [ResourceRequirements](/src/target/types.go?s=4546:4611#L99)
 ``` go
 type ResourceRequirements struct {
     Store string `json:"store"`
@@ -1035,11 +924,12 @@ type Route struct {
 
 
 
-## <a name="SLA">type</a> [SLA](/src/target/types.go?s=2799:4151#L74)
+## <a name="SLA">type</a> [SLA](/src/target/types.go?s=2962:4544#L76)
 ``` go
 type SLA struct {
     ManifestVersion      int                  `json:"manifest-version"` //
-    Name                 string               `json:"name"`
+    Name                 string               `json:"name"`             // container name  e.g core-store
+    Image                string               `json:"image"`            //docker image tag e.g datboxsystems/core-store-amd64
     DataboxType          DataboxType          `json:"databox-type"`
     Version              string               `json:"version"`     //this is databox version e.g 0.3.1
     Description          string               `json:"description"` // free text description
@@ -1056,6 +946,7 @@ type SLA struct {
     ResourceRequirements ResourceRequirements `json:"resource-requirements"`
     DisplayName          string               `json:"displayName"`
     StoreURL             string               `json:"storeUrl"`
+    Registry             string               `json:"registry"`
 }
 ```
 
@@ -1067,7 +958,7 @@ type SLA struct {
 
 
 
-## <a name="StoreContentType">type</a> [StoreContentType](/src/target/types.go?s=4602:4630#L117)
+## <a name="StoreContentType">type</a> [StoreContentType](/src/target/types.go?s=4995:5023#L121)
 ``` go
 type StoreContentType string
 ```
@@ -1092,7 +983,7 @@ const ContentTypeTEXT StoreContentType = "TEXT"
 
 
 
-## <a name="StoreType">type</a> [StoreType](/src/target/types.go?s=4464:4485#L111)
+## <a name="StoreType">type</a> [StoreType](/src/target/types.go?s=4857:4878#L115)
 ``` go
 type StoreType string
 ```
