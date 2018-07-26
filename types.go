@@ -85,7 +85,8 @@ type Manifest struct {
 
 type SLA struct {
 	ManifestVersion      int                  `json:"manifest-version"` //
-	Name                 string               `json:"name"`
+	Name                 string               `json:"name"`             // container name  e.g core-store
+	Image                string               `json:"image"`            //docker image tag e.g datboxsystems/core-store-amd64
 	DataboxType          DataboxType          `json:"databox-type"`
 	Version              string               `json:"version"`     //this is databox version e.g 0.3.1
 	Description          string               `json:"description"` // free text description
