@@ -41,8 +41,12 @@ type Repository struct {
 }
 
 type Package struct {
-	//todo flesh this out
-	// if they are going we still need datasources
+	Name        string `json:"name"`
+	Purpose     string `json:"purpose"`
+	Install     string `json:"install"`
+	Risks       string `json:"urls"`
+	Benefits    string `json:"risks"`
+	DataSources string `json:"datastores"`
 }
 
 type ExternalWhitelist struct {
@@ -76,6 +80,7 @@ type Manifest struct {
 	Homepage             string               `json:"homepage"`    //homepage url
 	Repository           Repository           `json:"repository"`
 	Packages             []Package            `json:"packages"`
+	DataSources          []DataSource         `json:"datasources"`
 	ExportWhitelists     []ExportWhitelist    `json:"export-whitelist"`
 	ExternalWhitelist    []ExternalWhitelist  `json:"external-whitelist"`
 	ResourceRequirements ResourceRequirements `json:"resource-requirements"`
