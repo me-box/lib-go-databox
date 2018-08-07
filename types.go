@@ -41,12 +41,12 @@ type Repository struct {
 }
 
 type Package struct {
-	Name        string `json:"name"`
-	Purpose     string `json:"purpose"`
-	Install     string `json:"install"`
-	Risks       string `json:"urls"`
-	Benefits    string `json:"risks"`
-	DataSources string `json:"datastores"`
+	Name        string   `json:"name"`
+	Purpose     string   `json:"purpose"`
+	Install     string   `json:"install"`
+	Risks       string   `json:"risks"`
+	Benefits    string   `json:"benefits"`
+	DataSources []string `json:"datastores"`
 }
 
 type ExternalWhitelist struct {
