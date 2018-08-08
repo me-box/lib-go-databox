@@ -139,7 +139,7 @@ func (arb *ArbiterClient) makeArbiterGETRequest(path string, hostname string, en
 
 	resp, err := arb.ZestC.Get(arb.ArbiterToken, path, string(ContentTypeTEXT))
 	if err != nil {
-		fmt.Println("makeArbiterGETRequest Error:: ", err)
+		fmt.Println("makeArbiterGETRequest "+path+" Error:: ", err)
 		return []byte{}, 500
 	}
 
@@ -154,7 +154,7 @@ func (arb *ArbiterClient) makeArbiterPostRequest(path string, hostname string, e
 
 	resp, err := arb.ZestC.Post(arb.ArbiterToken, path, payload, string(ContentTypeTEXT))
 	if err != nil {
-		fmt.Println("makeArbiterPostRequest Error:: ", err)
+		fmt.Println("makeArbiterPostRequest "+path+" Error:: ", err)
 		return nil, 500
 	}
 
