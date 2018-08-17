@@ -6,8 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	//databox "github.com/me-box/lib-go-databox"
-	databox "github.com/toshbrown/lib-go-databox"
+	databox "github.com/me-box/lib-go-databox"
 )
 
 func main() {

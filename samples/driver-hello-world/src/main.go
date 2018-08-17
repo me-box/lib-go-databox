@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	databox "github.com/toshbrown/lib-go-databox"
+	databox "github.com/me-box/lib-go-databox"
 )
 
 func main() {
