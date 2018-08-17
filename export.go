@@ -1,14 +1,8 @@
 package libDatabox
 
-import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"os"
-)
+//TODO Make exportServiceClient work !!!
 
-var exportServiceURL = os.Getenv("DATABOX_EXPORT_SERVICE_ENDPOINT")
+/*var exportServiceURL = os.Getenv("DATABOX_EXPORT_SERVICE_ENDPOINT")
 
 // ExportLongpoll exports data to external service (payload must be an escaped json string)
 // permissions must be requested in the app manifest (drivers dont need to use the export service)
@@ -50,4 +44,4 @@ func makeStoreRequestPOST(href string, data string) (string, error) {
 	}
 
 	return string(body[:]), nil
-}
+}*/

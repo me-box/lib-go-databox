@@ -7,20 +7,20 @@ import (
 	"time"
 )
 
-func TestKVWrite(t *testing.T) {
-	err := kvc.Write(dsID, "key1", []byte("{\"value\":3.1415}"))
+func TestKVTextWrite(t *testing.T) {
+	err := StoreClient.KVText.Write(dsID, "key1", []byte("{\"value\":3.1415}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 }
 
-func TestKVRead(t *testing.T) {
-	err := kvc.Write(dsID, "key2", []byte("{\"value\":42}"))
+func TestKVTextRead(t *testing.T) {
+	err := StoreClient.KVText.Write(dsID, "key2", []byte("{\"value\":42}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	result, err := kvc.Read(dsID, "key2")
+	result, err := StoreClient.KVText.Read(dsID, "key2")
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
@@ -32,19 +32,19 @@ func TestKVRead(t *testing.T) {
 	}
 }
 
-func TestKVMutiKeys(t *testing.T) {
+func TestKVTextMutiKeys(t *testing.T) {
 
-	err := kvc.Write(dsID, "key1", []byte("{\"value\":\"some random string\"}"))
+	err := StoreClient.KVText.Write(dsID, "key1", []byte("{\"value\":\"some random string\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	err = kvc.Write(dsID, "key2", []byte("{\"value\":42}"))
+	err = StoreClient.KVText.Write(dsID, "key2", []byte("{\"value\":42}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	result, err := kvc.Read(dsID, "key2")
+	result, err := StoreClient.KVText.Read(dsID, "key2")
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
@@ -55,7 +55,7 @@ func TestKVMutiKeys(t *testing.T) {
 		t.Errorf("TestWriteLots failed expected %s but got %s", expected, result)
 	}
 
-	result, err = kvc.Read(dsID, "key1")
+	result, err = StoreClient.KVText.Read(dsID, "key1")
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
@@ -67,22 +67,22 @@ func TestKVMutiKeys(t *testing.T) {
 	}
 }
 
-func TestListKeysKV(t *testing.T) {
+func TestListKeysKVText(t *testing.T) {
 	_dsID := dsID + "TestListKeysKV"
-	err := kvc.Write(_dsID, "key1", []byte("{\"value\":\"some random string\"}"))
+	err := StoreClient.KVText.Write(_dsID, "key1", []byte("{\"value\":\"some random string\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", _dsID, err.Error())
 	}
-	err = kvc.Write(_dsID, "key2", []byte("{\"value\":\"some random string\"}"))
+	err = StoreClient.KVText.Write(_dsID, "key2", []byte("{\"value\":\"some random string\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", _dsID, err.Error())
 	}
-	err = kvc.Write(_dsID, "key3", []byte("{\"value\":\"some random string\"}"))
+	err = StoreClient.KVText.Write(_dsID, "key3", []byte("{\"value\":\"some random string\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", _dsID, err.Error())
 	}
 
-	keys, err := kvc.ListKeys(_dsID)
+	keys, err := StoreClient.KVText.ListKeys(_dsID)
 	if err != nil {
 		t.Errorf("ListKeys from %s failed expected err to be nil got %s", _dsID, err.Error())
 	}
@@ -101,25 +101,25 @@ func TestListKeysKV(t *testing.T) {
 
 }
 
-func TestObserveKeyKV(t *testing.T) {
+func TestKVTextObserveKey(t *testing.T) {
 
 	doneChanWrite := make(chan int)
 	//doneChanRead := make(chan int)
 	//now := time.Now().UnixNano() / int64(time.Millisecond)
 	startAt := 0
-	numRecords := 100
+	numRecords := 10
 
-	receivedData := []JsonObserveResponse{}
+	receivedData := []ObserveResponse{}
 
 	go func() {
-		dataChan, err := kvc.ObserveKey(dsID, "observeTest")
+		dataChan, err := StoreClient.KVText.ObserveKey(dsID, "observeTest")
 		if err != nil {
 			t.Errorf("Observing %s failed expected err to be nil got %s", dsID, err.Error())
 		}
 
 		for data := range dataChan {
 			receivedData = append(receivedData, data)
-			t.Log("received:: ", string(data.Json), data.TimestampMS)
+			t.Log("received:: ", string(data.Data))
 		}
 
 	}()
@@ -129,7 +129,7 @@ func TestObserveKeyKV(t *testing.T) {
 
 	go func() {
 		for i := startAt; i <= numRecords; i++ {
-			err := kvc.Write(dsID, "observeTest", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+			err := StoreClient.KVText.Write(dsID, "observeTest", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 			if err != nil {
 				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 			}
@@ -146,35 +146,35 @@ func TestObserveKeyKV(t *testing.T) {
 	}
 	for i := startAt; i <= numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
-		cont := s.Contains(string(receivedData[i].Json), string(expected))
-		t.Log(string(receivedData[i].Json))
+		cont := s.Contains(string(receivedData[i].Data), string(expected))
+		t.Log(string(receivedData[i].Data))
 		if cont != true {
-			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Json), string(expected))
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Data), string(expected))
 			break
 		}
 	}
 
 }
 
-func TestObserveKV(t *testing.T) {
+func TestObserveKVText(t *testing.T) {
 
 	doneChanWrite := make(chan int)
 	//doneChanRead := make(chan int)
 	//now := time.Now().UnixNano() / int64(time.Millisecond)
 	startAt := 0
-	numRecords := 50
+	numRecords := 5
 
-	receivedData := []JsonObserveResponse{}
+	receivedData := []ObserveResponse{}
 
 	go func() {
-		dataChan, err := kvc.Observe(dsID)
+		dataChan, err := StoreClient.KVText.Observe(dsID)
 		if err != nil {
 			t.Errorf("Observing %s failed expected err to be nil got %s", dsID, err.Error())
 		}
 
 		for data := range dataChan {
 			receivedData = append(receivedData, data)
-			t.Log("received:: ", string(data.Json), data.TimestampMS)
+			t.Log("received:: ", string(data.Data))
 		}
 
 	}()
@@ -184,7 +184,7 @@ func TestObserveKV(t *testing.T) {
 
 	go func() {
 		for i := startAt; i < numRecords; i++ {
-			err := kvc.Write(dsID, "observeTest"+strconv.Itoa(i), []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+			err := StoreClient.KVText.Write(dsID, "observeTest"+strconv.Itoa(i), []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 			if err != nil {
 				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 			}
@@ -208,10 +208,10 @@ func TestObserveKV(t *testing.T) {
 	}
 	for i := startAt; i < numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
-		cont := s.Contains(string(receivedData[i].Json), string(expected))
+		cont := s.Contains(string(receivedData[i].Data), string(expected))
 		//t.Log("Data:: ", string(receivedData[i].Json), receivedData[i].Key)
-		if cont != true && receivedData[i].Key == "observeTest"+strconv.Itoa(i) {
-			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Json), string(expected))
+		if cont != true {
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Data), string(expected))
 			break
 		}
 	}

@@ -3,7 +3,7 @@ WORKDIR /
 ENV GOPATH="/"
 RUN apk update && apk add pkgconfig build-base bash autoconf automake libtool gettext openrc git libzmq zeromq-dev mercurial
 #COPY . . if you update the libs below build with --no-cache
-RUN go get -u github.com/toshbrown/lib-go-databox
+RUN go get -u github.com/me-box/lib-go-databox
 COPY . .
 RUN addgroup -S databox && adduser -S -g databox databox
 RUN GGO_ENABLED=0 GOOS=linux go build -a -tags netgo -installsuffix netgo -ldflags '-s -w' -o app /src/main.go

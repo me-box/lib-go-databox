@@ -7,10 +7,11 @@ before_install:
   - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   - sudo apt-get update
   - sudo apt-get -y install docker-ce libtool pkg-config build-essential autoconf automake uuid-dev wget
-  - sudo docker run -p 5555:5555 -p 5556:5556 -d --name zest --rm jptmoore/zest:v0.0.6 /app/zest/server.exe --secret-key-file example-server-key
+  - ./setupTest.sh
   - wget https://github.com/zeromq/libzmq/releases/download/v4.2.3/zeromq-4.2.3.tar.gz
   - tar xvzf zeromq-4.2.3.tar.gz
   - cd zeromq-4.2.3; ./configure; sudo make install; sudo ldconfig; cd ..; sudo rm -rf zeromq-4.2.3
+  - if [ -d "$HOME/gopath/src/github.com/me-box" ]; then mv $HOME/gopath/src/github.com/me-box $HOME/gopath/src/github.com/me-box; fi
 script:
   - go test -coverprofile=coverage.txt -covermode=atomic
 after_success:

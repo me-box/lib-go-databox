@@ -9,7 +9,7 @@ import (
 
 func TestAggregationFunctionMinOnEmptyDS(t *testing.T) {
 
-	_, err := tsc.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, JSONTimeSeriesQueryOptions{
+	_, err := StoreClient.TSJSON.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, TimeSeriesQueryOptions{
 		AggregationFunction: Min,
 	})
 	if err != nil {
@@ -20,7 +20,7 @@ func TestAggregationFunctionMinOnEmptyDS(t *testing.T) {
 
 func TestAggregationFunctionMaxOnEmptyDS(t *testing.T) {
 
-	_, err := tsc.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, JSONTimeSeriesQueryOptions{
+	_, err := StoreClient.TSJSON.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, TimeSeriesQueryOptions{
 		AggregationFunction: Max,
 	})
 	if err != nil {
@@ -31,7 +31,7 @@ func TestAggregationFunctionMaxOnEmptyDS(t *testing.T) {
 
 func TestAggregationFunctionSumOnEmptyDS(t *testing.T) {
 
-	_, err := tsc.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, JSONTimeSeriesQueryOptions{
+	_, err := StoreClient.TSJSON.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, TimeSeriesQueryOptions{
 		AggregationFunction: Sum,
 	})
 	if err != nil {
@@ -42,7 +42,7 @@ func TestAggregationFunctionSumOnEmptyDS(t *testing.T) {
 
 func TestAggregationFunctionSDOnEmptyDS(t *testing.T) {
 
-	_, err := tsc.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, JSONTimeSeriesQueryOptions{
+	_, err := StoreClient.TSJSON.LastN(dsID+"TestAggregationFunctionOnEmptyDS", 4, TimeSeriesQueryOptions{
 		AggregationFunction: StandardDeviation,
 	})
 	if err != nil {
@@ -52,7 +52,7 @@ func TestAggregationFunctionSDOnEmptyDS(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
-	err := tsc.Write(dsID, []byte("{\"value\":3.1415}"))
+	err := StoreClient.TSJSON.Write(dsID, []byte("{\"value\":3.1415}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
@@ -62,7 +62,7 @@ func benchmarkWrite(num int, b *testing.B) {
 	// write b.N times
 	for n := 0; n < b.N; n++ {
 		for i := 0; i < num; i++ {
-			tsc.Write(dsID+"benchmarkWrite"+strconv.Itoa(num), []byte("{\"value\":"+strconv.Itoa(n)+"}"))
+			StoreClient.TSJSON.Write(dsID+"benchmarkWrite"+strconv.Itoa(num), []byte("{\"value\":"+strconv.Itoa(n)+"}"))
 		}
 	}
 }
@@ -77,14 +77,14 @@ func benchmarkLastN(num int, b *testing.B) {
 
 	// write then read b.N times
 	for n := 0; n < b.N; n++ {
-		tsc.LastN(dsID+"benchmarkLastN", num, JSONTimeSeriesQueryOptions{})
+		StoreClient.TSJSON.LastN(dsID+"benchmarkLastN", num, TimeSeriesQueryOptions{})
 	}
 }
 
 //BenchmarkLastNWrite Not part of the benchmark just writes some data in to the store
 func BenchmarkLastNWrite(b *testing.B) {
 	for i := 0; i < 50000; i++ {
-		tsc.Write(dsID+"benchmarkLastN", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		StoreClient.TSJSON.Write(dsID+"benchmarkLastN", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 	}
 }
 func BenchmarkLastN1(b *testing.B)     { benchmarkLastN(1, b) }
@@ -97,14 +97,14 @@ func benchmarkLastNSum(num int, b *testing.B) {
 
 	// write then read b.N times
 	for n := 0; n < b.N; n++ {
-		tsc.LastN(dsID+"benchmarkLastNSum", num, JSONTimeSeriesQueryOptions{AggregationFunction: Sum})
+		StoreClient.TSJSON.LastN(dsID+"benchmarkLastNSum", num, TimeSeriesQueryOptions{AggregationFunction: Sum})
 	}
 }
 
 //BenchmarkLastNSumWrite Not part of the benchmark just writes some data in to the store
 func BenchmarkLastNSumWrite(b *testing.B) {
 	for i := 0; i < 50000; i++ {
-		tsc.Write(dsID+"benchmarkLastNSum", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		StoreClient.TSJSON.Write(dsID+"benchmarkLastNSum", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 	}
 }
 
@@ -118,14 +118,14 @@ func benchmarkLastNMean(num int, b *testing.B) {
 
 	// write then read b.N times
 	for n := 0; n < b.N; n++ {
-		tsc.LastN(dsID+"benchmarkLastNMean", num, JSONTimeSeriesQueryOptions{AggregationFunction: Mean})
+		StoreClient.TSJSON.LastN(dsID+"benchmarkLastNMean", num, TimeSeriesQueryOptions{AggregationFunction: Mean})
 	}
 }
 
 //BenchmarkLastNMeanWrite Not part of the benchmark just writes some data in to the store
 func BenchmarkLastNMeanWrite(b *testing.B) {
 	for i := 0; i < 50000; i++ {
-		tsc.Write(dsID+"benchmarkLastNMean", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		StoreClient.TSJSON.Write(dsID+"benchmarkLastNMean", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 	}
 }
 
@@ -137,19 +137,19 @@ func BenchmarkLastNMean50000(b *testing.B) { benchmarkLastNMean(50000, b) }
 
 func BenchmarkWriteReadMixed(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(n)+"}"))
-		tsc.Latest(dsID)
+		StoreClient.TSJSON.Write(dsID, []byte("{\"value\":"+strconv.Itoa(n)+"}"))
+		StoreClient.TSJSON.Latest(dsID)
 	}
 }
 
 func TestLatest(t *testing.T) {
 
-	err := tsc.Write(dsID, []byte("{\"value\":3.14}"))
+	err := StoreClient.TSJSON.Write(dsID, []byte("{\"value\":3.14}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	result, err := tsc.Latest(dsID)
+	result, err := StoreClient.TSJSON.Latest(dsID)
 	if err != nil {
 		t.Errorf("Call to Latest failed with error %s", err.Error())
 	}
@@ -163,13 +163,13 @@ func TestLatest(t *testing.T) {
 func TestWriteLots(t *testing.T) {
 
 	for i := 1; i <= 10; i++ {
-		err := tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		err := StoreClient.TSJSON.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 		}
 	}
 
-	result, err := tsc.Latest(dsID)
+	result, err := StoreClient.TSJSON.Latest(dsID)
 	if err != nil {
 		t.Errorf("Call to Latest failed with error %s", err.Error())
 	}
@@ -186,13 +186,13 @@ func TestWriteLength(t *testing.T) {
 	_dsID := dsID + "TestWriteLength"
 
 	for i := 1; i <= numRecToWrite; i++ {
-		err := tsc.Write(_dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		err := StoreClient.TSJSON.Write(_dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", _dsID, err.Error())
 		}
 	}
 
-	result, err := tsc.Length(_dsID)
+	result, err := StoreClient.TSJSON.Length(_dsID)
 	if err != nil {
 		t.Errorf("Call to Latest failed with error %s", err.Error())
 	}
@@ -201,75 +201,28 @@ func TestWriteLength(t *testing.T) {
 	}
 }
 
-//TODO this fails looks like a timing thing
-/*func TestWriteThenWriteAT(t *testing.T) {
-
-	now := time.Now().UnixNano() / int64(time.Millisecond)
-
-	for i := 1; i <= 10; i++ {
-		err := tsbc.Write(dsID, []byte("{\"TestWriteThenWriteAT\":\"data"+strconv.Itoa(i)+"\"}"))
-		if err != nil {
-			t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
-		}
-	}
-
-	//time.Sleep(time.Second * 2)
-
-	now = time.Now().UnixNano() / int64(time.Millisecond)
-	fmt.Println(now + 1000)
-	err := tsbc.WriteAt(dsID, now+1000, []byte("{\"TestWriteThenWriteAT\":\"data11\"}"))
-	if err != nil {
-		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
-	}
-
-	err = tsbc.WriteAt(dsID, now+1001, []byte("{\"TestWriteThenWriteAT\":\"data12\"}"))
-	if err != nil {
-		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
-	}
-
-	//time.Sleep(time.Second * 5)
-
-	result, err := tsbc.LastN(dsID, 2)
-	if err != nil {
-		t.Errorf("Call to LastN failed with error %s", err.Error())
-	}
-
-	expected := []byte(`{"TestWriteThenWriteAT":"data11"}`)
-	cont := s.Contains(string(result), string(expected))
-	if cont != true {
-		t.Errorf("Call to LastN failed expected %s but got %s", expected, result)
-	}
-
-	expected = []byte(`{"TestWriteThenWriteAT":"data12"}`)
-	cont = s.Contains(string(result), string(expected))
-	if cont != true {
-		t.Errorf("Call to LastN failed expected %s but got %s", expected, result)
-	}
-
-}*/
-
 func TestLastNWithTag(t *testing.T) {
 
 	//now := time.Now().UnixNano() / int64(time.Millisecond)
 
-	err := tsc.Write(dsID, []byte("{\"value\":11, \"lastNTag\":\"one\"}"))
+	err := StoreClient.TSJSON.Write(dsID, []byte("{\"value\":11, \"lastNTag\":\"one\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.Write(dsID, []byte("{\"value\":12, \"lastNTag\":\"one\"}"))
+	err = StoreClient.TSJSON.Write(dsID, []byte("{\"value\":12, \"lastNTag\":\"one\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.Write(dsID, []byte("{\"value\":13, \"lastNTag\":\"two\"}"))
+	err = StoreClient.TSJSON.Write(dsID, []byte("{\"value\":13, \"lastNTag\":\"two\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.Write(dsID, []byte("{\"value\":14, \"lastNTag\":\"two\"}"))
+	err = StoreClient.TSJSON.Write(dsID, []byte("{\"value\":14, \"lastNTag\":\"two\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	result, err := tsc.LastN(dsID, 99, JSONTimeSeriesQueryOptions{
+	result, err := StoreClient.TSJSON.LastN(dsID, 99, TimeSeriesQueryOptions{
 		Filter: &Filter{
 			TagName:    "lastNTag",
 			FilterType: "equals",
@@ -297,24 +250,24 @@ func TestLastNWithSum(t *testing.T) {
 
 	//now := time.Now().UnixNano() / int64(time.Millisecond)
 
-	err := tsc.Write(dsID, []byte("{\"value\":11, \"lastNTag\":\"one\"}"))
+	err := StoreClient.TSJSON.Write(dsID, []byte("{\"value\":11, \"lastNTag\":\"one\"}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.Write(dsID, []byte("{\"value\":12}, \"lastNTag\":\"one\""))
+	err = StoreClient.TSJSON.Write(dsID, []byte("{\"value\":12}, \"lastNTag\":\"one\""))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.Write(dsID, []byte("{\"value\":13}, \"lastNTag\":\"two\""))
+	err = StoreClient.TSJSON.Write(dsID, []byte("{\"value\":13}, \"lastNTag\":\"two\""))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.Write(dsID, []byte("{\"value\":14}, \"lastNTag\":\"two\""))
+	err = StoreClient.TSJSON.Write(dsID, []byte("{\"value\":14}, \"lastNTag\":\"two\""))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	result, err := tsc.LastN(dsID, 4, JSONTimeSeriesQueryOptions{
+	result, err := StoreClient.TSJSON.LastN(dsID, 4, TimeSeriesQueryOptions{
 		AggregationFunction: Sum,
 	})
 	if err != nil {
@@ -332,24 +285,24 @@ func TestLastNWithMean(t *testing.T) {
 
 	//now := time.Now().UnixNano() / int64(time.Millisecond)
 
-	err := tsc.Write(dsID, []byte("{\"value\":11.0}"))
+	err := StoreClient.TSJSON.Write(dsID, []byte("{\"value\":11.0}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.Write(dsID, []byte("{\"value\":12.0}"))
+	err = StoreClient.TSJSON.Write(dsID, []byte("{\"value\":12.0}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.Write(dsID, []byte("{\"value\":13.0}"))
+	err = StoreClient.TSJSON.Write(dsID, []byte("{\"value\":13.0}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
-	err = tsc.Write(dsID, []byte("{\"value\":14.0}"))
+	err = StoreClient.TSJSON.Write(dsID, []byte("{\"value\":14.0}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", dsID, err.Error())
 	}
 
-	result, err := tsc.LastN(dsID, 4, JSONTimeSeriesQueryOptions{
+	result, err := StoreClient.TSJSON.LastN(dsID, 4, TimeSeriesQueryOptions{
 		AggregationFunction: Mean,
 	})
 	if err != nil {
@@ -368,16 +321,16 @@ func TestLastN(t *testing.T) {
 	now := time.Now().UnixNano() / int64(time.Millisecond)
 	thisDsID := dsID + "TestLastN"
 
-	err := tsc.WriteAt(thisDsID, now+20, []byte("{\"value\":11}"))
+	err := StoreClient.TSJSON.WriteAt(thisDsID, now+20, []byte("{\"value\":11}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", thisDsID, err.Error())
 	}
-	err = tsc.WriteAt(thisDsID, now+40, []byte("{\"value\":12}"))
+	err = StoreClient.TSJSON.WriteAt(thisDsID, now+40, []byte("{\"value\":12}"))
 	if err != nil {
 		t.Errorf("Write to %s failed expected err to be nil got %s", thisDsID, err.Error())
 	}
 
-	result, err := tsc.LastN(thisDsID, 2, JSONTimeSeriesQueryOptions{})
+	result, err := StoreClient.TSJSON.LastN(thisDsID, 2, TimeSeriesQueryOptions{})
 	if err != nil {
 		t.Errorf("Call to LastN failed with error %s", err.Error())
 	}
@@ -398,7 +351,7 @@ func TestLastN(t *testing.T) {
 func TestEarliest(t *testing.T) {
 
 	for i := 1; i <= 10; i++ {
-		err := tsc.Write(dsID+"TestEarliest", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		err := StoreClient.TSJSON.Write(dsID+"TestEarliest", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestEarliest", err.Error())
 		}
@@ -412,7 +365,7 @@ func TestEarliest(t *testing.T) {
 
 	time.Sleep(time.Second)
 
-	result, err := tsc.Earliest(dsID + "TestEarliest")
+	result, err := StoreClient.TSJSON.Earliest(dsID + "TestEarliest")
 	if err != nil {
 		t.Errorf("Call to Earliest failed with error %s", err.Error())
 	}
@@ -428,7 +381,7 @@ func TestEarliest(t *testing.T) {
 func TestFirstN(t *testing.T) {
 
 	for i := 1; i <= 100; i++ {
-		err := tsc.Write(dsID+"TestFirstN", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		err := StoreClient.TSJSON.Write(dsID+"TestFirstN", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestFirstN", err.Error())
 		}
@@ -439,7 +392,7 @@ func TestFirstN(t *testing.T) {
 		time.Sleep(time.Millisecond * 10)
 	}
 
-	result, err := tsc.FirstN(dsID+"TestFirstN", 20, JSONTimeSeriesQueryOptions{})
+	result, err := StoreClient.TSJSON.FirstN(dsID+"TestFirstN", 20, TimeSeriesQueryOptions{})
 	if err != nil {
 		t.Errorf("Call to FirstN failed with error %s", err.Error())
 	}
@@ -460,7 +413,7 @@ func TestFirstN(t *testing.T) {
 func TestFirstNPastInternalBuffer(t *testing.T) {
 
 	for i := 1; i <= 1000; i++ {
-		err := tsc.Write(dsID+"TestFirstN", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		err := StoreClient.TSJSON.Write(dsID+"TestFirstN", []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 		if err != nil {
 			t.Errorf("Write to %s failed expected err to be nil got %s", dsID+"TestFirstN", err.Error())
 		}
@@ -468,7 +421,7 @@ func TestFirstNPastInternalBuffer(t *testing.T) {
 	}
 
 	startTime := time.Now().Unix()
-	result, err := tsc.FirstN(dsID+"TestFirstN", 20, JSONTimeSeriesQueryOptions{})
+	result, err := StoreClient.TSJSON.FirstN(dsID+"TestFirstN", 20, TimeSeriesQueryOptions{})
 	if err != nil {
 		t.Errorf("Call to FirstN failed with error %s", err.Error())
 	}
@@ -496,7 +449,7 @@ func TestWriteAtAndRange(t *testing.T) {
 
 	for i := 1; i <= numRecords; i++ {
 
-		err := tsc.WriteAt(dsID, now+int64(timeStepMs*i), []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+		err := StoreClient.TSJSON.WriteAt(dsID, now+int64(timeStepMs*i), []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 		if err != nil {
 			t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 		}
@@ -506,7 +459,7 @@ func TestWriteAtAndRange(t *testing.T) {
 		// https://github.com/jptmoore/zestdb/issues/25
 	}
 
-	result, err := tsc.Range(dsID, now, now+int64(numRecords*timeStepMs), JSONTimeSeriesQueryOptions{})
+	result, err := StoreClient.TSJSON.Range(dsID, now, now+int64(numRecords*timeStepMs), TimeSeriesQueryOptions{})
 	if err != nil {
 		t.Errorf("Call to Range failed with error %s", err.Error())
 	}
@@ -528,34 +481,6 @@ func TestWriteAtAndRange(t *testing.T) {
 	}
 }
 
-func TestRegisterDatasource(t *testing.T) {
-
-	dsmd := DataSourceMetadata{
-		DataSourceID:   dsID,
-		Vendor:         "testing",
-		ContentType:    "application/json",
-		StoreType:      "ts",
-		Description:    "A test DS",
-		DataSourceType: "test",
-	}
-
-	err := tsc.RegisterDatasource(dsmd)
-	if err != nil {
-		t.Errorf("RegisterDatasource failed expected err to be nil got %s", err.Error())
-	}
-
-	catByteArray, getErr := tsc.GetDatasourceCatalogue()
-	if getErr != nil {
-		t.Errorf("GetDatasourceCatalogue failed expected err to be nil got %s", getErr.Error())
-	}
-
-	dsmdByteArray, _ := dataSourceMetadataToHypercat(dsmd, "tcp://127.0.0.1:5555/ts/")
-	cont := s.Contains(string(catByteArray), string(dsmdByteArray))
-	if cont != true {
-		t.Errorf("GetDatasourceCatalogue Error '%s' does not contain  %s", string(catByteArray), string(dsmdByteArray))
-	}
-}
-
 func TestConcurrentWriteAndRead(t *testing.T) {
 
 	doneChanWrite := make(chan int)
@@ -565,7 +490,7 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 
 	go func() {
 		for i := startAt; i <= numRecords; i++ {
-			err := tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+			err := StoreClient.TSJSON.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 			if err != nil {
 				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 			}
@@ -575,7 +500,7 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 
 	go func() {
 		for i := 1; i <= numRecords; i++ {
-			_, err := tsc.Latest(dsID)
+			_, err := StoreClient.TSJSON.Latest(dsID)
 			if err != nil {
 				t.Errorf("Latest failed expected err to be nil got %s", err.Error())
 			}
@@ -586,7 +511,7 @@ func TestConcurrentWriteAndRead(t *testing.T) {
 	<-doneChanWrite
 	<-doneChanRead
 
-	result, err := tsc.LastN(dsID, numRecords, JSONTimeSeriesQueryOptions{})
+	result, err := StoreClient.TSJSON.LastN(dsID, numRecords, TimeSeriesQueryOptions{})
 	if err != nil {
 		t.Errorf("Call to LastN failed with error %s", err.Error())
 	}
@@ -609,17 +534,17 @@ func TestObserve(t *testing.T) {
 	startAt := 0
 	numRecords := 100
 
-	receivedData := []JsonObserveResponse{}
+	receivedData := []ObserveResponse{}
 
 	go func() {
-		dataChan, err := tsc.Observe(dsID)
+		dataChan, err := StoreClient.TSJSON.Observe(dsID)
 		if err != nil {
 			t.Errorf("Observing %s failed expected err to be nil got %s", dsID, err.Error())
 		}
 
 		for data := range dataChan {
 			receivedData = append(receivedData, data)
-			t.Log("received:: " + string(data.Json))
+			t.Log("received:: " + string(data.Data))
 		}
 
 	}()
@@ -630,7 +555,7 @@ func TestObserve(t *testing.T) {
 
 	go func() {
 		for i := startAt; i <= numRecords; i++ {
-			err := tsc.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
+			err := StoreClient.TSJSON.Write(dsID, []byte("{\"value\":"+strconv.Itoa(i)+"}"))
 			if err != nil {
 				t.Errorf("WriteAt to %s failed expected err to be nil got %s", dsID, err.Error())
 			}
@@ -649,10 +574,10 @@ func TestObserve(t *testing.T) {
 	}
 	for i := startAt; i <= numRecords; i++ {
 		expected := []byte("{\"value\":" + strconv.Itoa(i) + "}")
-		cont := s.Contains(string(receivedData[i].Json), string(expected))
+		cont := s.Contains(string(receivedData[i].Data), string(expected))
 		//t.Log(receivedData[i])
 		if cont != true {
-			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Json), string(expected))
+			t.Errorf("receivedData Error '%s' does not contain  %s", string(receivedData[i].Data), string(expected))
 			break
 		}
 	}
