@@ -262,7 +262,7 @@ GetRootDataSourceCatalogue is used by the container manager to access the Root h
 
 
 
-### <a name="ArbiterClient.GrantComponentPermission">func</a> (\*ArbiterClient) [GrantComponentPermission](/src/target/arbiterClient.go?s=6104:6156#L224)
+### <a name="ArbiterClient.GrantComponentPermission">func</a> (\*ArbiterClient) [GrantComponentPermission](/src/target/arbiterClient.go?s=6122:6174#L224)
 ``` go
 func (arb *ArbiterClient) GrantComponentPermission()
 ```
@@ -278,7 +278,7 @@ GrantContainerPermissions allows the container manager to grant permissions to a
 
 
 
-### <a name="ArbiterClient.InvalidateCache">func</a> (\*ArbiterClient) [InvalidateCache](/src/target/arbiterClient.go?s=5301:5370#L190)
+### <a name="ArbiterClient.InvalidateCache">func</a> (\*ArbiterClient) [InvalidateCache](/src/target/arbiterClient.go?s=5319:5388#L190)
 ``` go
 func (arb *ArbiterClient) InvalidateCache(href string, method string)
 ```
@@ -297,14 +297,14 @@ RegesterDataboxComponent allows the container manager to register a new app, dri
 
 
 
-### <a name="ArbiterClient.RemoveDataboxComponent">func</a> (\*ArbiterClient) [RemoveDataboxComponent](/src/target/arbiterClient.go?s=6024:6074#L220)
+### <a name="ArbiterClient.RemoveDataboxComponent">func</a> (\*ArbiterClient) [RemoveDataboxComponent](/src/target/arbiterClient.go?s=6042:6092#L220)
 ``` go
 func (arb *ArbiterClient) RemoveDataboxComponent()
 ```
 
 
 
-### <a name="ArbiterClient.RequestToken">func</a> (\*ArbiterClient) [RequestToken](/src/target/arbiterClient.go?s=4328:4410#L155)
+### <a name="ArbiterClient.RequestToken">func</a> (\*ArbiterClient) [RequestToken](/src/target/arbiterClient.go?s=4346:4428#L155)
 ``` go
 func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, error)
 ```
@@ -313,7 +313,7 @@ RequestToken is used internally to request a token from the arbiter
 
 
 
-### <a name="ArbiterClient.RevokeComponentPermission">func</a> (\*ArbiterClient) [RevokeComponentPermission](/src/target/arbiterClient.go?s=6186:6239#L228)
+### <a name="ArbiterClient.RevokeComponentPermission">func</a> (\*ArbiterClient) [RevokeComponentPermission](/src/target/arbiterClient.go?s=6204:6257#L228)
 ``` go
 func (arb *ArbiterClient) RevokeComponentPermission()
 ```
@@ -426,7 +426,7 @@ own.
 
 
 
-## <a name="DataSource">type</a> [DataSource](/src/target/types.go?s=1439:1738#L48)
+## <a name="DataSource">type</a> [DataSource](/src/target/types.go?s=1601:1900#L52)
 ``` go
 type DataSource struct {
     Type          string       `json:"type"`
@@ -446,7 +446,7 @@ type DataSource struct {
 
 
 
-## <a name="DataSourceMetadata">type</a> [DataSourceMetadata](/src/target/types.go?s=4613:4855#L103)
+## <a name="DataSourceMetadata">type</a> [DataSourceMetadata](/src/target/types.go?s=4839:5081#L108)
 ``` go
 type DataSourceMetadata struct {
     Description    string
@@ -498,7 +498,7 @@ const (
 
 
 
-## <a name="ExportWhitelist">type</a> [ExportWhitelist](/src/target/types.go?s=1332:1437#L43)
+## <a name="ExportWhitelist">type</a> [ExportWhitelist](/src/target/types.go?s=1494:1599#L47)
 ``` go
 type ExportWhitelist struct {
     Url         string `json:"url"`
@@ -514,7 +514,7 @@ type ExportWhitelist struct {
 
 
 
-## <a name="ExternalWhitelist">type</a> [ExternalWhitelist](/src/target/types.go?s=1218:1330#L38)
+## <a name="ExternalWhitelist">type</a> [ExternalWhitelist](/src/target/types.go?s=1380:1492#L42)
 ``` go
 type ExternalWhitelist struct {
     Urls        []string `json:"urls"`
@@ -562,7 +562,7 @@ type FilterType string
 
 
 
-## <a name="HypercatItem">type</a> [HypercatItem](/src/target/types.go?s=5475:5596#L142)
+## <a name="HypercatItem">type</a> [HypercatItem](/src/target/types.go?s=5701:5822#L147)
 ``` go
 type HypercatItem struct {
     ItemMetadata []interface{} `json:"item-metadata"`
@@ -578,7 +578,7 @@ type HypercatItem struct {
 
 
 
-## <a name="HypercatRoot">type</a> [HypercatRoot](/src/target/types.go?s=5334:5473#L137)
+## <a name="HypercatRoot">type</a> [HypercatRoot](/src/target/types.go?s=5560:5699#L142)
 ``` go
 type HypercatRoot struct {
     CatalogueMetadata []RelValPair   `json:"catalogue-metadata"`
@@ -780,7 +780,7 @@ type Macaroon string
 
 
 
-## <a name="Manifest">type</a> [Manifest](/src/target/types.go?s=1740:2960#L57)
+## <a name="Manifest">type</a> [Manifest](/src/target/types.go?s=1902:3186#L61)
 ``` go
 type Manifest struct {
     ManifestVersion      int                  `json:"manifest-version"` //
@@ -794,6 +794,7 @@ type Manifest struct {
     Homepage             string               `json:"homepage"`    //homepage url
     Repository           Repository           `json:"repository"`
     Packages             []Package            `json:"packages"`
+    DataSources          []DataSource         `json:"datasources"`
     ExportWhitelists     []ExportWhitelist    `json:"export-whitelist"`
     ExternalWhitelist    []ExternalWhitelist  `json:"external-whitelist"`
     ResourceRequirements ResourceRequirements `json:"resource-requirements"`
@@ -810,7 +811,7 @@ type Manifest struct {
 
 
 
-## <a name="ObserveResponse">type</a> [ObserveResponse](/src/target/types.go?s=5630:5744#L152)
+## <a name="ObserveResponse">type</a> [ObserveResponse](/src/target/types.go?s=5856:5970#L157)
 ``` go
 type ObserveResponse struct {
     TimestampMS  int64
@@ -830,9 +831,15 @@ OBSERVE RESPONSE
 
 
 
-## <a name="Package">type</a> [Package](/src/target/types.go?s=1122:1216#L33)
+## <a name="Package">type</a> [Package](/src/target/types.go?s=1122:1378#L33)
 ``` go
 type Package struct {
+    Name        string   `json:"name"`
+    Purpose     string   `json:"purpose"`
+    Install     string   `json:"install"`
+    Risks       string   `json:"risks"`
+    Benefits    string   `json:"benefits"`
+    DataSources []string `json:"datastores"`
 }
 ```
 
@@ -844,7 +851,7 @@ type Package struct {
 
 
 
-## <a name="RelValPair">type</a> [RelValPair](/src/target/types.go?s=5174:5250#L127)
+## <a name="RelValPair">type</a> [RelValPair](/src/target/types.go?s=5400:5476#L132)
 ``` go
 type RelValPair struct {
     Rel string `json:"rel"`
@@ -860,7 +867,7 @@ type RelValPair struct {
 
 
 
-## <a name="RelValPairBool">type</a> [RelValPairBool](/src/target/types.go?s=5252:5332#L132)
+## <a name="RelValPairBool">type</a> [RelValPairBool](/src/target/types.go?s=5478:5558#L137)
 ``` go
 type RelValPairBool struct {
     Rel string `json:"rel"`
@@ -892,7 +899,7 @@ type Repository struct {
 
 
 
-## <a name="ResourceRequirements">type</a> [ResourceRequirements](/src/target/types.go?s=4546:4611#L99)
+## <a name="ResourceRequirements">type</a> [ResourceRequirements](/src/target/types.go?s=4772:4837#L104)
 ``` go
 type ResourceRequirements struct {
     Store string `json:"store"`
@@ -924,7 +931,7 @@ type Route struct {
 
 
 
-## <a name="SLA">type</a> [SLA](/src/target/types.go?s=2962:4544#L76)
+## <a name="SLA">type</a> [SLA](/src/target/types.go?s=3188:4770#L81)
 ``` go
 type SLA struct {
     ManifestVersion      int                  `json:"manifest-version"` //
@@ -958,7 +965,7 @@ type SLA struct {
 
 
 
-## <a name="StoreContentType">type</a> [StoreContentType](/src/target/types.go?s=4995:5023#L121)
+## <a name="StoreContentType">type</a> [StoreContentType](/src/target/types.go?s=5221:5249#L126)
 ``` go
 type StoreContentType string
 ```
@@ -983,7 +990,7 @@ const ContentTypeTEXT StoreContentType = "TEXT"
 
 
 
-## <a name="StoreType">type</a> [StoreType](/src/target/types.go?s=4857:4878#L115)
+## <a name="StoreType">type</a> [StoreType](/src/target/types.go?s=5083:5104#L120)
 ``` go
 type StoreType string
 ```
