@@ -116,13 +116,14 @@ type ResourceRequirements struct {
 }
 
 type DataSourceMetadata struct {
-	Description    string
-	ContentType    string
-	Vendor         string
-	DataSourceType string
-	DataSourceID   string
-	StoreType      StoreType
+	Description    string           //required
+	ContentType    StoreContentType //required
+	Vendor         string           //required
+	DataSourceType string           //required
+	DataSourceID   string           //required
+	StoreType      StoreType        //required
 	IsActuator     bool
+	IsFunc         bool
 	Unit           string
 	Location       string
 }
@@ -132,6 +133,7 @@ type StoreType string
 const StoreTypeTS StoreType = "ts"
 const StoreTypeTSBlob StoreType = "ts/blob"
 const StoreTypeKV StoreType = "kv"
+const StoreTypeFunc StoreType = "notification/request"
 
 type StoreContentType string
 
@@ -169,4 +171,10 @@ type ObserveResponse struct {
 	DataSourceID string
 	Key          string
 	Data         []byte
+}
+
+type NotifyResponse struct {
+	TimestampMS int64
+	ContentType StoreContentType
+	Data        []byte
 }

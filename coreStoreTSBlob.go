@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+
+	zest "github.com/me-box/goZestClient"
 )
 
 type TSBlobStore struct {
@@ -145,6 +147,6 @@ func (tbs *TSBlobStore) Observe(dataSourceID string) (<-chan ObserveResponse, er
 
 	path := "/ts/blob/" + dataSourceID
 
-	return tbs.csc.observe(path, tbs.contentType)
+	return tbs.csc.observe(path, tbs.contentType, zest.ObserveModeData)
 
 }

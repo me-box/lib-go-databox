@@ -3,6 +3,8 @@ package libDatabox
 import (
 	"encoding/json"
 	"errors"
+
+	zest "github.com/me-box/goZestClient"
 )
 
 type KVStore struct {
@@ -78,7 +80,7 @@ func (kvj *KVStore) Observe(dataSourceID string) (<-chan ObserveResponse, error)
 
 	path := "/kv/" + dataSourceID + "/*"
 
-	return kvj.csc.observe(path, kvj.contentType)
+	return kvj.csc.observe(path, kvj.contentType, zest.ObserveModeData)
 
 }
 
@@ -86,6 +88,6 @@ func (kvj *KVStore) ObserveKey(dataSourceID string, key string) (<-chan ObserveR
 
 	path := "/kv/" + dataSourceID + "/" + key
 
-	return kvj.csc.observe(path, kvj.contentType)
+	return kvj.csc.observe(path, kvj.contentType, zest.ObserveModeData)
 
 }

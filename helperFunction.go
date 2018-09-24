@@ -34,7 +34,7 @@ func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSou
 			continue
 		}
 		if vals["rel"].(string) == "urn:X-hypercat:rels:isContentType" {
-			dm.ContentType = vals["val"].(string)
+			dm.ContentType = StoreContentType(vals["val"].(string))
 			continue
 		}
 		if vals["rel"].(string) == "urn:X-databox:rels:hasVendor" {
@@ -69,6 +69,10 @@ func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSou
 			continue
 		}
 		if vals["rel"].(string) == "urn:X-databox:rels:isActuator" {
+			dm.IsActuator = vals["val"].(bool)
+			continue
+		}
+		if vals["rel"].(string) == "urn:X-databox:rels:isFunc" {
 			dm.IsActuator = vals["val"].(bool)
 			continue
 		}

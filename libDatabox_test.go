@@ -22,17 +22,20 @@ var Arbiter *ArbiterClient
 //a unique ID per test run so data will not collide
 var dsID string
 
+const StoreURL = "tcp://127.0.0.1:5555"
+const ArbiterURL = "tcp://127.0.0.1:4444"
+
 func Setup() {
 
 	var err error
 	hostname, _ := os.Hostname()
 
-	Arbiter, err := NewArbiterClient("", "", "tcp://127.0.0.1:4444")
+	Arbiter, err := NewArbiterClient("", "", ArbiterURL)
 	if err != nil {
 		panic("Cant connect to Zest server. Did you start one? " + err.Error())
 	}
 
-	StoreClient = NewCoreStoreClient(Arbiter, "", "tcp://127.0.0.1:5555", false)
+	StoreClient = NewCoreStoreClient(Arbiter, "", StoreURL, false)
 	if err != nil {
 		panic("Cant connect to Zest server. Did you start one? " + err.Error())
 	}
@@ -80,13 +83,13 @@ func TestRegisterDatasource(t *testing.T) {
 		t.Errorf("RegisterDatasource failed expected err to be nil got %s", err.Error())
 	}
 
-	rootCat, getErr := StoreClient.GetStoreDataSourceCatalogue("tcp://127.0.0.1:5555")
+	rootCat, getErr := StoreClient.GetStoreDataSourceCatalogue(StoreURL)
 	if getErr != nil {
 		t.Errorf("GetDatasourceCatalogue failed expected err to be nil got %s", getErr.Error())
 	}
 	catByteArray, _ := json.Marshal(rootCat)
 
-	dsmdByteArray, _ := StoreClient.dataSourceMetadataToHypercat(dsmd, "tcp://127.0.0.1:5555")
+	dsmdByteArray, _ := StoreClient.dataSourceMetadataToHypercat(dsmd, StoreURL)
 
 	cont := s.Contains(string(catByteArray), string(dsmdByteArray))
 	if cont != true {

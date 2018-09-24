@@ -24,6 +24,7 @@ type CoreStoreClient struct {
 	TSBlobText *TSBlobStore
 	TSBlobBin  *TSBlobStore
 	TSJSON     *TSStore
+	FUNC       *Func
 }
 
 func NewDefaultCoreStoreClient(storeEndPoint string) *CoreStoreClient {
@@ -58,6 +59,7 @@ func NewCoreStoreClient(arbiterClient *ArbiterClient, zmqPublicKeyPath string, s
 	csc.TSBlobText = newTSBlobStore(csc, ContentTypeTEXT)
 	csc.TSBlobBin = newTSBlobStore(csc, ContentTypeBINARY)
 	csc.TSJSON = newTSStore(csc, ContentTypeBINARY)
+	csc.FUNC = newFunc(csc)
 	return csc
 }
 
@@ -120,7 +122,7 @@ func (csc *CoreStoreClient) dataSourceMetadataToHypercat(metadata DataSourceMeta
 
 	cat := HypercatItem{}
 	cat.ItemMetadata = append(cat.ItemMetadata, RelValPair{Rel: "urn:X-hypercat:rels:hasDescription:en", Val: metadata.Description})
-	cat.ItemMetadata = append(cat.ItemMetadata, RelValPair{Rel: "urn:X-hypercat:rels:isContentType", Val: metadata.ContentType})
+	cat.ItemMetadata = append(cat.ItemMetadata, RelValPair{Rel: "urn:X-hypercat:rels:isContentType", Val: string(metadata.ContentType)})
 	cat.ItemMetadata = append(cat.ItemMetadata, RelValPair{Rel: "urn:X-databox:rels:hasVendor", Val: metadata.Vendor})
 	cat.ItemMetadata = append(cat.ItemMetadata, RelValPair{Rel: "urn:X-databox:rels:hasType", Val: metadata.DataSourceType})
 	cat.ItemMetadata = append(cat.ItemMetadata, RelValPair{Rel: "urn:X-databox:rels:hasDatasourceid", Val: metadata.DataSourceID})
@@ -128,6 +130,10 @@ func (csc *CoreStoreClient) dataSourceMetadataToHypercat(metadata DataSourceMeta
 
 	if metadata.IsActuator {
 		cat.ItemMetadata = append(cat.ItemMetadata, RelValPairBool{Rel: "urn:X-databox:rels:isActuator", Val: true})
+	}
+
+	if metadata.IsFunc {
+		cat.ItemMetadata = append(cat.ItemMetadata, RelValPairBool{Rel: "urn:X-databox:rels:isFunc", Val: true})
 	}
 
 	if metadata.Location != "" {
@@ -138,7 +144,11 @@ func (csc *CoreStoreClient) dataSourceMetadataToHypercat(metadata DataSourceMeta
 		cat.ItemMetadata = append(cat.ItemMetadata, RelValPair{Rel: "urn:X-databox:rels:hasUnit", Val: metadata.Unit})
 	}
 
-	cat.Href = endPoint + "/" + string(metadata.StoreType) + "/" + metadata.DataSourceID
+	if metadata.IsFunc {
+		cat.Href = endPoint + "/request/" + metadata.DataSourceID
+	} else {
+		cat.Href = endPoint + "/" + string(metadata.StoreType) + "/" + metadata.DataSourceID
+	}
 
 	return json.Marshal(cat)
 
@@ -177,7 +187,7 @@ func (csc *CoreStoreClient) read(path string, contentType StoreContentType) ([]b
 	return resp, nil
 }
 
-func (csc *CoreStoreClient) observe(path string, contentType StoreContentType) (<-chan ObserveResponse, error) {
+func (csc *CoreStoreClient) observe(path string, contentType StoreContentType, observeMode zest.ObserveMode) (<-chan ObserveResponse, error) {
 
 	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET")
 	if err != nil {
@@ -185,7 +195,7 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType) (
 
 	}
 
-	payloadChan, getErr := csc.ZestC.Observe(string(token), path, string(contentType), 0)
+	payloadChan, getErr := csc.ZestC.Observe(string(token), path, string(contentType), observeMode, 0)
 	if getErr != nil {
 		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET")
 		return nil, errors.New("Error observing: " + getErr.Error())
@@ -196,6 +206,35 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType) (
 	go func() {
 		for data := range payloadChan {
 			objectChan <- csc.parseRawObserveResponse(data)
+		}
+
+		//if we get here then payloadChan has been closed so close objectChan
+		close(objectChan)
+	}()
+
+	return objectChan, err
+}
+
+func (csc *CoreStoreClient) notify(path string, contentType StoreContentType) (<-chan NotifyResponse, error) {
+
+	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET")
+	if err != nil {
+		return nil, errors.New("Error getting Arbiter Token: " + err.Error())
+	}
+
+	payloadChan, getErr := csc.ZestC.Notify(string(token), path, string(contentType), 0)
+	if getErr != nil {
+		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET")
+		return nil, errors.New("Error starting notify: " + getErr.Error())
+	}
+
+	objectChan := make(chan NotifyResponse)
+
+	go func() {
+		for data := range payloadChan {
+			objectChan <- csc.parseRawNotifyResponse(data)
+			//notify only allows one response so if we get here its time to close the channel
+			break
 		}
 
 		//if we get here then payloadChan has been closed so close objectChan
@@ -239,4 +278,19 @@ func (csc *CoreStoreClient) parseRawObserveResponse(data []byte) ObserveResponse
 	_data := parts[3]
 
 	return ObserveResponse{_timestamp, _dataSourceID, _key, _data}
+}
+
+func (csc *CoreStoreClient) parseRawNotifyResponse(data []byte) NotifyResponse {
+
+	parts := bytes.SplitN(data, []byte(" "), 4)
+	timestamp, _ := strconv.ParseInt(string(parts[0]), 10, 64)
+	//responsePath := parts[1]
+	ct := parts[2]
+	payload := parts[3]
+
+	return NotifyResponse{
+		TimestampMS: timestamp,
+		ContentType: StoreContentType(ct),
+		Data:        payload,
+	}
 }

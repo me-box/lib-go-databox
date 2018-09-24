@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+
+	zest "github.com/me-box/goZestClient"
 )
 
 type AggregationType string
@@ -164,7 +166,7 @@ func (tsc TSStore) Observe(dataSourceID string) (<-chan ObserveResponse, error) 
 
 	path := "/ts/" + dataSourceID
 
-	ObserveResponseChan, err := tsc.csc.observe(path, ContentTypeJSON)
+	ObserveResponseChan, err := tsc.csc.observe(path, ContentTypeJSON, zest.ObserveModeData)
 	if err != nil {
 		return nil, err
 	}

@@ -1,4 +1,8 @@
 github.com/me-box/goZestClient v0.0.8 h1:5njz7G9AA+sZ+w33KnK1XHDR+xjLMQB/KXkNxVLRH+s=
 github.com/me-box/goZestClient v0.0.8/go.mod h1:Hk1xjFnb9f21bXs+gepUCjXOHzFLahp917dYvG9WhOI=
+github.com/me-box/goZestClient v0.0.9 h1:Yr4lnqIJT+HJBXXzQc8F8xCnO4icTpLdzSNpAxz2Hp4=
+github.com/me-box/goZestClient v0.0.9/go.mod h1:Hk1xjFnb9f21bXs+gepUCjXOHzFLahp917dYvG9WhOI=
+github.com/me-box/goZestClient v0.0.10 h1:dIU2G0iIGF4Oi8hRHwAKD3v6cobpGkXnqfOz0qJ3uQg=
+github.com/me-box/goZestClient v0.0.10/go.mod h1:Hk1xjFnb9f21bXs+gepUCjXOHzFLahp917dYvG9WhOI=
 github.com/pebbe/zmq4 v1.0.0 h1:D+MSmPpqkL5PSSmnh8g51ogirUCyemThuZzLW7Nrt78=
 github.com/pebbe/zmq4 v1.0.0/go.mod h1:7N4y5R18zBiu3l0vajMUWQgZyjv464prE8RCyBcmnZM=
