@@ -5,27 +5,32 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/google/uuid"
 	zest "github.com/me-box/goZestClient"
 )
 
+//Func the databox function call, drivers can regiter functions with the Register method. Apps can request access to these in their manifests and call them using the call method Call.
 type Func struct {
 	csc                   *CoreStoreClient
 	funcRequestChan       chan FuncRequest
 	registeredFuncHandler map[string]FuncHandler
 }
 
+//FuncStatus is an int representing the status of a returned function
 type FuncStatus int
 
-const FuncStatusOK = 0
-const FuncStatusFailedToGetToken = 97
-const FuncStatusInvalidPayload = 98
-const FuncStatusError = 99
+const FuncStatusOK FuncStatus = 0
+const FuncStatusFailedToGetToken FuncStatus = 97
+const FuncStatusInvalidPayload FuncStatus = 98
+const FuncStatusError FuncStatus = 99
 
+// FuncResponse describes the response that must be returned by a FuncHandler
 type FuncResponse struct {
 	Status   FuncStatus
 	Response []byte
 }
 
+// FuncRequest holds the datareturned from a function call
 type FuncRequest struct {
 	TimestampMS int64
 	Path        string
@@ -45,7 +50,9 @@ func newFunc(csc *CoreStoreClient) *Func {
 type FuncHandler = func(contentType StoreContentType, payload []byte) []byte
 
 // Register is used to advertise available functions to other components
-// it adds an enters into your stores Hypercat catalogue.
+// it adds an entry into your stores Hypercat catalogue and starts listening
+// for requests. Received requests are routed to the FuncHandler registed
+// for the function.
 func (f *Func) Register(vendor string, functionName string, contentType StoreContentType, handler FuncHandler) error {
 
 	if _, ok := f.registeredFuncHandler[functionName]; ok {
@@ -71,20 +78,22 @@ func (f *Func) Register(vendor string, functionName string, contentType StoreCon
 	//register the FuncHandler
 	f.registeredFuncHandler[functionName] = handler
 
-	//create FuncRequestChan by observing /notification/request/*
+	//create FuncRequestChan by observing /notification/request/functionName/*
 	//start go routine to process events, if we have not started one already.
 	if f.funcRequestChan == nil {
 		rawRequestChan, err := f.csc.observe("/notification/request/*", ContentTypeJSON, zest.ObserveModeNotification)
 		if err != nil {
 			Err("Could not observe /notification/request/* you will not receive any requests")
 		}
-		Info("Setting up Observe on /notification/request/*")
+		Debug("[Notifications] Setting up Observe on /notification/request/*")
 		go f.parseRawFuncRequest(rawRequestChan)
 	}
 	return nil
 }
 
-// Call is used by clients to invoke functions by name
+// Call is used by clients to invoke functions by name. The
+// result of the function call is returned via the FuncResponse chan
+// only one result will be retuned then the channel will be closed.
 func (f Func) Call(functionName string, payload []byte, contentType StoreContentType) (<-chan FuncResponse, error) {
 
 	responseChan := make(chan FuncResponse)
@@ -94,14 +103,20 @@ func (f Func) Call(functionName string, payload []byte, contentType StoreContent
 }
 
 func (f *Func) parseRawFuncRequest(rawRequest <-chan ObserveResponse) {
+	Debug("[Notifications] Waiting to process function requests")
 
 	for obsResponse := range rawRequest {
-		parts := bytes.SplitN(obsResponse.Data, []byte(" "), 4)
+		Debug("[Notifications] Got a function request " + string(obsResponse.Data))
+		parts := bytes.SplitN(obsResponse.Data, []byte(" "), 5)
 		//timestamp, _ := strconv.ParseInt(string(parts[0]), 10, 64)
-		responsePath := string(parts[1])
-		functionName := strings.Replace(string(parts[1]), "/notification/request/", "", 1)
-		ct := string(parts[2])
-		payload := parts[3]
+		responsePath := string(parts[2])
+		splitPath := strings.Split(responsePath, "/")
+		functionName := splitPath[3]
+		ct := string(parts[3])
+		payload := []byte{}
+		if len(parts) >= 5 {
+			payload = parts[4]
+		}
 
 		var contentType StoreContentType
 		if _, ok := f.registeredFuncHandler[functionName]; ok {
@@ -117,17 +132,17 @@ func (f *Func) parseRawFuncRequest(rawRequest <-chan ObserveResponse) {
 				contentType = ContentTypeTEXT
 				break
 			default:
-				Err("Unknown content type in raw function request, not calling function")
+				Err("Unknown content type (" + ct + ") in raw function request, not calling function")
 				//dont process this data
 				continue
 			}
 
 			//we have a registered function call it ;-)
-			Info("Calling registered function " + functionName)
+			Debug("[Notifications] Calling registered function " + functionName)
 			response := f.registeredFuncHandler[functionName](contentType, payload)
 
 			//Send response to caller
-			Info("Sending response to caller on " + responsePath + " data: " + string(response))
+			Debug("[Notifications] Sending response to caller on " + responsePath + " data: " + string(response))
 			err := f.csc.write(responsePath, response, contentType)
 			if err != nil {
 				Err("Writing request to " + responsePath)
@@ -143,20 +158,22 @@ func (f *Func) parseRawFuncRequest(rawRequest <-chan ObserveResponse) {
 
 func (f *Func) parseRawFuncResponse(functionName string, payload []byte, contentType StoreContentType, responseChan chan FuncResponse) {
 
+	jobID := uuid.New().String()
+
 	//set up a channel to receive the result
-	NotifyResponseChan, err := f.csc.notify("/notification/response/"+functionName, contentType)
+	NotifyResponseChan, err := f.csc.notify("/notification/response/"+functionName+"/"+jobID, contentType)
 	if err != nil {
 		responseChan <- FuncResponse{
 			Status:   FuncStatusError,
-			Response: []byte(`[Error] failed setup notification functionName for /notification/response/` + functionName + `. ` + err.Error()),
+			Response: []byte(`[Error] failed setup notification functionName for /notification/response/` + functionName + `/` + jobID + `. ` + err.Error()),
 		}
 		return
 	}
-	Info("Setting up notify on /notification/response/" + functionName)
+	Debug("[Notifications] Setting up notify on /notification/response/" + functionName + "/" + jobID)
 
 	//call the function
-	Info("Calling /notification/request/" + functionName + " with payload: " + string(payload))
-	err = f.csc.write("/notification/request/"+functionName, payload, contentType)
+	Debug("[Notifications] Calling /notification/request/" + functionName + "/" + jobID + " with payload: " + string(payload))
+	err = f.csc.write("/notification/request/"+functionName+"/"+jobID, payload, contentType)
 	if err != nil {
 		responseChan <- FuncResponse{
 			Status:   FuncStatusInvalidPayload,

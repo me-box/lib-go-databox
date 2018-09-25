@@ -17,6 +17,7 @@ func TestMain(m *testing.M) {
 }
 
 var StoreClient *CoreStoreClient
+var StoreClient2 *CoreStoreClient
 var Arbiter *ArbiterClient
 
 //a unique ID per test run so data will not collide
@@ -36,6 +37,11 @@ func Setup() {
 	}
 
 	StoreClient = NewCoreStoreClient(Arbiter, "", StoreURL, false)
+	if err != nil {
+		panic("Cant connect to Zest server. Did you start one? " + err.Error())
+	}
+
+	StoreClient2 = NewCoreStoreClient(Arbiter, "", StoreURL, false)
 	if err != nil {
 		panic("Cant connect to Zest server. Did you start one? " + err.Error())
 	}

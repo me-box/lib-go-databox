@@ -205,7 +205,11 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType, o
 
 	go func() {
 		for data := range payloadChan {
-			objectChan <- csc.parseRawObserveResponse(data)
+			if observeMode == zest.ObserveModeNotification {
+				objectChan <- csc.parseRawObserveResponseNotification(data)
+			} else {
+				objectChan <- csc.parseRawObserveResponseData(data)
+			}
 		}
 
 		//if we get here then payloadChan has been closed so close objectChan
@@ -260,8 +264,9 @@ func (csc *CoreStoreClient) write(path string, payload []byte, contentType Store
 	return nil
 }
 
-func (csc *CoreStoreClient) parseRawObserveResponse(data []byte) ObserveResponse {
+func (csc *CoreStoreClient) parseRawObserveResponseData(data []byte) ObserveResponse {
 
+	Debug("parseRawObserveResponseData::" + string(data))
 	parts := bytes.SplitN(data, []byte(" "), 4)
 
 	_timestamp, _ := strconv.ParseInt(string(parts[0]), 10, 64)
@@ -280,13 +285,23 @@ func (csc *CoreStoreClient) parseRawObserveResponse(data []byte) ObserveResponse
 	return ObserveResponse{_timestamp, _dataSourceID, _key, _data}
 }
 
-func (csc *CoreStoreClient) parseRawNotifyResponse(data []byte) NotifyResponse {
+func (csc *CoreStoreClient) parseRawObserveResponseNotification(data []byte) ObserveResponse {
 
-	parts := bytes.SplitN(data, []byte(" "), 4)
+	Debug("parseRawObserveResponseNotification::" + string(data))
+	return ObserveResponse{Data: data}
+
+}
+
+func (csc *CoreStoreClient) parseRawNotifyResponse(data []byte) NotifyResponse {
+	Debug("parseRawNotifyResponse:: " + string(data))
+	parts := bytes.SplitN(data, []byte(" "), 5)
 	timestamp, _ := strconv.ParseInt(string(parts[0]), 10, 64)
 	//responsePath := parts[1]
-	ct := parts[2]
-	payload := parts[3]
+	ct := parts[3]
+	payload := []byte{}
+	if len(parts) >= 5 {
+		payload = parts[4]
+	}
 
 	return NotifyResponse{
 		TimestampMS: timestamp,
