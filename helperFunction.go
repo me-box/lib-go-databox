@@ -92,6 +92,38 @@ func HypercatToDataSourceMetadata(hypercatDataSourceDescription string) (DataSou
 	return dm, url, getStoreURLErr
 }
 
+func IsActuator(dsm DataSource) bool {
+
+	for _, item := range dsm.Hypercat.ItemMetadata {
+		switch item.(type) {
+		case RelValPairBool:
+			if item.(RelValPairBool).Rel == "urn:X-databox:rels:isActuator" && item.(RelValPairBool).Val == true {
+				return true
+			}
+		default:
+			// we are only interested in libDatabox.RelValPairBool
+		}
+	}
+
+	return false
+}
+
+func IsFunc(dsm DataSource) bool {
+
+	for _, item := range dsm.Hypercat.ItemMetadata {
+		switch item.(type) {
+		case RelValPairBool:
+			if item.(RelValPairBool).Rel == "urn:X-databox:rels:isFunc" && item.(RelValPairBool).Val == true {
+				return true
+			}
+		default:
+			// we are only interested in libDatabox.RelValPairBool
+		}
+	}
+
+	return false
+}
+
 // GetStoreURLFromDsHref extracts the base store url from the href provied in the hypercat descriptions.
 func GetStoreURLFromDsHref(href string) (string, error) {
 
