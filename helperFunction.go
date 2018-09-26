@@ -105,6 +105,12 @@ func IsActuator(dsm DataSource) bool {
 			if item.(RelValPair).Rel == "urn:X-databox:rels:isActuator" && strings.ToLower(item.(RelValPair).Val) == "true" {
 				return true
 			}
+		case interface{}:
+			val := item.(map[string]interface{})["Val"].(bool)
+			rel := item.(map[string]interface{})["Rel"]
+			if rel == "urn:X-databox:rels:isActuator" && val == true {
+				return true
+			}
 		}
 	}
 
@@ -121,6 +127,12 @@ func IsFunc(dsm DataSource) bool {
 			}
 		case RelValPair:
 			if item.(RelValPair).Rel == "urn:X-databox:rels:isFunc" && strings.ToLower(item.(RelValPair).Val) == "true" {
+				return true
+			}
+		case interface{}:
+			val := item.(map[string]interface{})["Val"].(bool)
+			rel := item.(map[string]interface{})["Rel"]
+			if rel == "urn:X-databox:rels:isFunc" && val == true {
 				return true
 			}
 		}
