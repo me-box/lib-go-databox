@@ -3,6 +3,7 @@ package libDatabox
 import (
 	"encoding/json"
 	"net/url"
+	"strings"
 )
 
 // DefaultHTTPSCertPath is the defaut loaction where apps and drivers can find the https certivicats needed to offer a secure UI
@@ -100,8 +101,10 @@ func IsActuator(dsm DataSource) bool {
 			if item.(RelValPairBool).Rel == "urn:X-databox:rels:isActuator" && item.(RelValPairBool).Val == true {
 				return true
 			}
-		default:
-			// we are only interested in libDatabox.RelValPairBool
+		case RelValPair:
+			if item.(RelValPair).Rel == "urn:X-databox:rels:isActuator" && strings.ToLower(item.(RelValPair).Val) == "true" {
+				return true
+			}
 		}
 	}
 
@@ -116,8 +119,10 @@ func IsFunc(dsm DataSource) bool {
 			if item.(RelValPairBool).Rel == "urn:X-databox:rels:isFunc" && item.(RelValPairBool).Val == true {
 				return true
 			}
-		default:
-			// we are only interested in libDatabox.RelValPairBool
+		case RelValPair:
+			if item.(RelValPair).Rel == "urn:X-databox:rels:isFunc" && strings.ToLower(item.(RelValPair).Val) == "true" {
+				return true
+			}
 		}
 	}
 

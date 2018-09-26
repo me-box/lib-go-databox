@@ -107,6 +107,62 @@ func TestIsActuator(t *testing.T) {
 	if !IsActuator(dsm) {
 		t.Errorf("TestIsActuator failed expected False but got %t", IsActuator(dsm))
 	}
+
+	dsm.Hypercat = HypercatItem{
+		ItemMetadata: []interface{}{
+			RelValPair{
+				Rel: "urn:X-databox:rels:isActuator",
+				Val: "true",
+			},
+		},
+		Href: "tcp://container-manager:5555/kv/data",
+	}
+
+	if !IsActuator(dsm) {
+		t.Errorf("TestIsActuator failed expected False but got %t", IsActuator(dsm))
+	}
+
+	dsm.Hypercat = HypercatItem{
+		ItemMetadata: []interface{}{
+			RelValPair{
+				Rel: "urn:X-databox:rels:isActuator",
+				Val: "false",
+			},
+		},
+		Href: "tcp://container-manager:5555/kv/data",
+	}
+
+	if IsActuator(dsm) {
+		t.Errorf("TestIsActuator failed expected False but got %t", IsActuator(dsm))
+	}
+
+	dsm.Hypercat = HypercatItem{
+		ItemMetadata: []interface{}{
+			RelValPair{
+				Rel: "urn:X-databox:rels:isActuator",
+				Val: "trasadaue",
+			},
+		},
+		Href: "tcp://container-manager:5555/kv/data",
+	}
+
+	if IsActuator(dsm) {
+		t.Errorf("TestIsActuator failed expected False but got %t", IsActuator(dsm))
+	}
+
+	dsm.Hypercat = HypercatItem{
+		ItemMetadata: []interface{}{
+			RelValPair{
+				Rel: "urn:X-databox:rels:isActuator",
+				Val: "TrUe",
+			},
+		},
+		Href: "tcp://container-manager:5555/kv/data",
+	}
+
+	if !IsActuator(dsm) {
+		t.Errorf("TestIsActuator failed expected False but got %t", IsActuator(dsm))
+	}
 }
 
 func TestIsFunc(t *testing.T) {
