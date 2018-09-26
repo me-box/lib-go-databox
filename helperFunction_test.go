@@ -177,6 +177,47 @@ func TestIsActuator(t *testing.T) {
 	if !IsActuator(dsm) {
 		t.Errorf("TestIsActuator failed expected True but got %t", IsActuator(dsm))
 	}
+
+	dsm.Hypercat = HypercatItem{
+		ItemMetadata: []interface{}{
+			map[string]interface{}{
+				"Rel": "urn:X-databox:rels:isActuator",
+				"Val": nil,
+			},
+		},
+		Href: "tcp://container-manager:5555/kv/data",
+	}
+
+	if IsActuator(dsm) {
+		t.Errorf("TestIsActuator failed expected False but got %t", IsActuator(dsm))
+	}
+
+	dsm.Hypercat = HypercatItem{
+		ItemMetadata: []interface{}{
+			map[string]interface{}{
+				"Val": true,
+			},
+		},
+		Href: "tcp://container-manager:5555/kv/data",
+	}
+
+	if IsActuator(dsm) {
+		t.Errorf("TestIsActuator failed expected False but got %t", IsActuator(dsm))
+	}
+
+	dsm.Hypercat = HypercatItem{
+		ItemMetadata: []interface{}{
+			map[string]interface{}{
+				"test": true,
+			},
+		},
+		Href: "tcp://container-manager:5555/kv/data",
+	}
+
+	if IsActuator(dsm) {
+		t.Errorf("TestIsActuator failed expected False but got %t", IsActuator(dsm))
+	}
+
 }
 
 func TestIsFunc(t *testing.T) {
