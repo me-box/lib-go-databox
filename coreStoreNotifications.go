@@ -182,9 +182,11 @@ func (f *Func) parseRawFuncResponse(functionName string, payload []byte, content
 		return
 	}
 
+	Debug("[Notifications] awaiting the response")
 	//block and await the response
 	response := <-NotifyResponseChan
 
+	Debug("[Notifications] got the response sending to caller")
 	//send the result to the caller
 	responseChan <- FuncResponse{
 		Status:   FuncStatusOK,
