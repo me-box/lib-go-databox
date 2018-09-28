@@ -18,7 +18,7 @@ type LogEntries struct {
 
 type Logs []LogEntries
 
-var debug = false
+var debug = true
 
 func New(store *CoreStoreClient, outputDebugLogs bool) (*Logger, error) {
 
