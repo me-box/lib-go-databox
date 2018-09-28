@@ -3,7 +3,6 @@ package libDatabox
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	s "strings"
 	"testing"
 )
@@ -98,33 +97,32 @@ func TestFuncCallWithPayload(t *testing.T) {
 
 func TestFuncCallWithPayloadManyCalls(t *testing.T) {
 
-	testJson := `[{"data":"This is a test"}]`
 	//Test function registration
 	testFunc := func(contentType StoreContentType, payload []byte) []byte {
 
 		return payload
 	}
 
-	err := StoreClient.FUNC.Register("databox", "TestFuncCallWithPayloadManyCalls", ContentTypeJSON, testFunc)
+	err := StoreClient2.FUNC.Register("databox", "TestFuncCallWithPayloadManyCalls", ContentTypeJSON, testFunc)
 	if err != nil {
 		t.Errorf("FUNC.Register failed expected err to be nil got %s", err.Error())
 	}
 
 	//call the function
 	for i := 0; i < 10; i++ {
-		funcResponseChan, err := StoreClient.FUNC.Call("TestFuncCallWithPayloadManyCalls", []byte(testJson), ContentTypeJSON)
+		funcResponseChan, err := StoreClient2.FUNC.Call("TestFuncCallWithPayloadManyCalls", []byte("This is a test"), ContentTypeJSON)
 		if err != nil {
 			t.Errorf("TestFunc Call failed expected err to be nil got %s", err.Error())
 		}
-		
+
 		response := <-funcResponseChan
-		fmt.Println(string(response.Response))
+
 		if response.Status != FuncStatusOK {
 			t.Errorf("TestFunc Call failed expected status to be  to be FuncStatusOK got %d with the message %s", response.Status, response.Response)
 		}
 
-		if bytes.Equal(response.Response, []byte(testJson)) {
-			t.Errorf("TestFunc Call failed expected response to be "+testJson+" got %d ", response.Response)
+		if bytes.Equal(response.Response, []byte("This is a test")) {
+			t.Errorf("TestFunc Call failed expected status to be  to be Testingtesting132"+dsID+" got %d ", response.Response)
 		}
 	}
 

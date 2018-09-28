@@ -28,8 +28,6 @@ const ArbiterURL = "tcp://127.0.0.1:4444"
 
 func Setup() {
 
-	OutputDebug(true)
-
 	var err error
 	hostname, _ := os.Hostname()
 

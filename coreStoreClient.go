@@ -211,6 +211,9 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType, o
 				objectChan <- csc.parseRawObserveResponseData(data)
 			}
 		}
+
+		//if we get here then payloadChan has been closed so close objectChan
+		close(objectChan)
 	}()
 
 	return objectChan, err
@@ -234,8 +237,12 @@ func (csc *CoreStoreClient) notify(path string, contentType StoreContentType) (<
 	go func() {
 		for data := range payloadChan {
 			objectChan <- csc.parseRawNotifyResponse(data)
+			//notify only allows one response so if we get here its time to close the channel
 			break
 		}
+
+		//if we get here then payloadChan has been closed so close objectChan
+		close(objectChan)
 	}()
 
 	return objectChan, err
