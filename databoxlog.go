@@ -18,7 +18,7 @@ type LogEntries struct {
 
 type Logs []LogEntries
 
-var debug = true
+var debug = false
 
 func New(store *CoreStoreClient, outputDebugLogs bool) (*Logger, error) {
 
@@ -142,5 +142,8 @@ func Debug(msg string) {
 		log.SetFlags(log.LstdFlags)
 		log.Println(msg)
 	}
+}
 
+func OutputDebug(state bool) {
+	debug = state
 }
