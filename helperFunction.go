@@ -160,18 +160,38 @@ func IsFunc(dsm DataSource) bool {
 			}
 		case interface{}:
 			if item.(map[string]interface{})["Val"] != nil && item.(map[string]interface{})["Rel"] != nil {
-				val := item.(map[string]interface{})["Val"].(bool)
-				rel := item.(map[string]interface{})["Rel"]
-				if rel == "urn:X-databox:rels:isFunc" && val == true {
-					return true
+				switch item.(map[string]interface{})["Val"].(type) {
+				case string:
+					val := strings.ToLower(item.(map[string]interface{})["Val"].(string))
+					rel := item.(map[string]interface{})["Rel"]
+					if rel == "urn:X-databox:rels:isFunc" && val == "true" {
+						return true
+					}
+				case bool:
+					val := item.(map[string]interface{})["Val"].(bool)
+					rel := item.(map[string]interface{})["Rel"]
+					if rel == "urn:X-databox:rels:isFunc" && val == true {
+						return true
+					}
 				}
+
 			}
 			if item.(map[string]interface{})["val"] != nil && item.(map[string]interface{})["rel"] != nil {
-				val := strings.ToLower(item.(map[string]interface{})["val"].(string))
-				rel := item.(map[string]interface{})["rel"]
-				if rel == "urn:X-databox:rels:isFunc" && val == "true" {
-					return true
+				switch item.(map[string]interface{})["val"].(type) {
+				case string:
+					val := strings.ToLower(item.(map[string]interface{})["val"].(string))
+					rel := item.(map[string]interface{})["rel"]
+					if rel == "urn:X-databox:rels:isFunc" && val == "true" {
+						return true
+					}
+				case bool:
+					val := item.(map[string]interface{})["val"].(bool)
+					rel := item.(map[string]interface{})["rel"]
+					if rel == "urn:X-databox:rels:isFunc" && val == true {
+						return true
+					}
 				}
+
 			}
 		}
 	}
