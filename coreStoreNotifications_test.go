@@ -3,6 +3,7 @@ package libDatabox
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	s "strings"
 	"testing"
 )
@@ -10,9 +11,9 @@ import (
 func TestFuncRegistration(t *testing.T) {
 
 	//Test function registration
-	testFunc := func(contentType StoreContentType, payload []byte) []byte {
+	testFunc := func(contentType StoreContentType, payload []byte) ([]byte, error) {
 
-		return []byte("Testingtesting132")
+		return []byte("Testingtesting132"), nil
 	}
 
 	err := StoreClient2.FUNC.Register("databox", "testFunc"+dsID, ContentTypeTEXT, testFunc)
@@ -36,9 +37,9 @@ func TestFuncRegistration(t *testing.T) {
 func TestFuncCall(t *testing.T) {
 
 	//Test function registration
-	testFunc := func(contentType StoreContentType, payload []byte) []byte {
+	testFunc := func(contentType StoreContentType, payload []byte) ([]byte, error) {
 
-		return []byte("Testingtesting132" + dsID)
+		return []byte("Testingtesting132" + dsID), nil
 	}
 
 	err := StoreClient2.FUNC.Register("databox", "TestFunc", ContentTypeJSON, testFunc)
@@ -67,9 +68,9 @@ func TestFuncCall(t *testing.T) {
 func TestFuncCallWithPayload(t *testing.T) {
 
 	//Test function registration
-	testFunc := func(contentType StoreContentType, payload []byte) []byte {
+	testFunc := func(contentType StoreContentType, payload []byte) ([]byte, error) {
 
-		return payload
+		return payload, nil
 	}
 
 	err := StoreClient2.FUNC.Register("databox", "TestFuncWithPayload", ContentTypeJSON, testFunc)
@@ -98,9 +99,9 @@ func TestFuncCallWithPayload(t *testing.T) {
 func TestFuncCallWithPayloadManyCalls(t *testing.T) {
 
 	//Test function registration
-	testFunc := func(contentType StoreContentType, payload []byte) []byte {
+	testFunc := func(contentType StoreContentType, payload []byte) ([]byte, error) {
 
-		return payload
+		return payload, nil
 	}
 
 	err := StoreClient2.FUNC.Register("databox", "TestFuncCallWithPayloadManyCalls", ContentTypeJSON, testFunc)
@@ -124,6 +125,35 @@ func TestFuncCallWithPayloadManyCalls(t *testing.T) {
 		if !bytes.Equal(response.Response, []byte("This is a test")) {
 			t.Errorf("TestFunc Call failed Response to be 'this is a test' got %s ", response.Response)
 		}
+	}
+
+}
+
+func TestFuncCallWithError(t *testing.T) {
+
+	//Test function registration
+	testFunc := func(contentType StoreContentType, payload []byte) ([]byte, error) {
+		return payload, errors.New("Test Error")
+	}
+
+	err := StoreClient2.FUNC.Register("databox", "TestFuncCallWithError", ContentTypeJSON, testFunc)
+	if err != nil {
+		t.Errorf("FUNC.Register failed expected err to be nil got %s", err.Error())
+	}
+
+	funcResponseChan, err := StoreClient2.FUNC.Call("TestFuncCallWithError", []byte("This is a test"), ContentTypeJSON)
+	if err != nil {
+		t.Errorf("TestFuncCallWithError Call failed expected err to be nil got %s", err.Error())
+	}
+
+	response := <-funcResponseChan
+
+	if response.Status != FuncStatusError {
+		t.Errorf("TestFuncCallWithError Call failed expected status to be  to be FuncStatusError got %d with the message %s", response.Status, response.Response)
+	}
+
+	if !bytes.Equal(response.Response, []byte("Test Error")) {
+		t.Errorf("TestFuncCallWithError Call failed Response to be 'Test Error' got %s ", response.Response)
 	}
 
 }

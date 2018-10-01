@@ -2,6 +2,7 @@ package libDatabox
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"strings"
 
@@ -38,6 +39,9 @@ type FuncRequest struct {
 	Payload     []byte
 }
 
+// FuncHandler s are executed when a request is received on the request endpoint of registered functions
+type FuncHandler = func(contentType StoreContentType, payload []byte) ([]byte, error)
+
 func newFunc(csc *CoreStoreClient) *Func {
 	return &Func{
 		csc:                   csc,
@@ -45,9 +49,6 @@ func newFunc(csc *CoreStoreClient) *Func {
 		registeredFuncHandler: make(map[string]FuncHandler),
 	}
 }
-
-// FuncHandler s are executed when a request is received on the request endpoint of registered functions
-type FuncHandler = func(contentType StoreContentType, payload []byte) []byte
 
 // Register is used to advertise available functions to other components
 // it adds an entry into your stores Hypercat catalogue and starts listening
@@ -139,15 +140,23 @@ func (f *Func) parseRawFuncRequest(rawRequest <-chan ObserveResponse) {
 
 			//we have a registered function call it ;-)
 			Debug("[Notifications] Calling registered function " + functionName)
-			response := f.registeredFuncHandler[functionName](contentType, payload)
+			responseData, funcErr := f.registeredFuncHandler[functionName](contentType, payload)
 
 			//Send response to caller
-			Debug("[Notifications] Sending response to caller on " + responsePath + " data: " + string(response))
-			err := f.csc.write(responsePath, response, contentType)
+			var resp FuncResponse
+			if funcErr == nil {
+				resp.Status = FuncStatusOK
+				resp.Response = responseData
+			} else {
+				resp.Status = FuncStatusError
+				resp.Response = []byte(funcErr.Error())
+			}
+			respJson, _ := json.Marshal(resp)
+			Debug("[Notifications] Sending response to caller on " + responsePath + " data: " + string(respJson))
+			err := f.csc.write(responsePath, respJson, contentType)
 			if err != nil {
 				Err("Writing request to " + responsePath)
 			}
-
 		} else {
 			//return an error code
 			Err("Unknown/Unregistered function " + functionName)
@@ -176,7 +185,7 @@ func (f *Func) parseRawFuncResponse(functionName string, payload []byte, content
 	err = f.csc.write("/notification/request/"+functionName+"/"+jobID, payload, contentType)
 	if err != nil {
 		responseChan <- FuncResponse{
-			Status:   FuncStatusInvalidPayload,
+			Status:   FuncStatusError,
 			Response: []byte(`[Error] failed to call to ` + functionName + " " + err.Error()),
 		}
 		return
@@ -185,10 +194,18 @@ func (f *Func) parseRawFuncResponse(functionName string, payload []byte, content
 	//block and await the response
 	response := <-NotifyResponseChan
 
-	//send the result to the caller
-	responseChan <- FuncResponse{
-		Status:   FuncStatusOK,
-		Response: response.Data,
+	var funcResp FuncResponse
+	err = json.Unmarshal(response.Data, &funcResp)
+	if err != nil {
+		responseChan <- FuncResponse{
+			Status:   FuncStatusError,
+			Response: []byte(`[Error] failed to decode response from ` + functionName + " " + err.Error()),
+		}
+		return
 	}
+
+	//send the result to the caller
+	responseChan <- funcResp
+
 	return
 }
