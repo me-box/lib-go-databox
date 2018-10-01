@@ -58,8 +58,8 @@ func TestFuncCall(t *testing.T) {
 		t.Errorf("TestFunc Call failed expected status to be  to be FuncStatusOK got %d with the message %s", response.Status, response.Response)
 	}
 
-	if bytes.Equal(response.Response, []byte("Testingtesting132"+dsID)) {
-		t.Errorf("TestFunc Call failed expected status to be  to be Testingtesting132"+dsID+" got %d ", response.Response)
+	if !bytes.Equal(response.Response, []byte("Testingtesting132"+dsID)) {
+		t.Errorf("TestFunc Call failed expected Response to be Testingtesting132"+dsID+" got %s ", response.Response)
 	}
 
 }
@@ -89,8 +89,8 @@ func TestFuncCallWithPayload(t *testing.T) {
 		t.Errorf("TestFunc Call failed expected status to be  to be FuncStatusOK got %d with the message %s", response.Status, response.Response)
 	}
 
-	if bytes.Equal(response.Response, []byte("This is a test")) {
-		t.Errorf("TestFunc Call failed expected status to be  to be Testingtesting132"+dsID+" got %d ", response.Response)
+	if !bytes.Equal(response.Response, []byte("This is a test")) {
+		t.Errorf("TestFunc Call failed expected Response to be 'This is a test' got %s ", response.Response)
 	}
 
 }
@@ -121,8 +121,8 @@ func TestFuncCallWithPayloadManyCalls(t *testing.T) {
 			t.Errorf("TestFunc Call failed expected status to be  to be FuncStatusOK got %d with the message %s", response.Status, response.Response)
 		}
 
-		if bytes.Equal(response.Response, []byte("This is a test")) {
-			t.Errorf("TestFunc Call failed expected status to be  to be Testingtesting132"+dsID+" got %d ", response.Response)
+		if !bytes.Equal(response.Response, []byte("This is a test")) {
+			t.Errorf("TestFunc Call failed Response to be 'this is a test' got %s ", response.Response)
 		}
 	}
 

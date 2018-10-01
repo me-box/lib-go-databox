@@ -31,6 +31,8 @@ func Setup() {
 	var err error
 	hostname, _ := os.Hostname()
 
+	//OutputDebug(true)
+
 	Arbiter, err := NewArbiterClient("", "", ArbiterURL)
 	if err != nil {
 		panic("Cant connect to Zest server. Did you start one? " + err.Error())

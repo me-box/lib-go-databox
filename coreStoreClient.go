@@ -294,13 +294,13 @@ func (csc *CoreStoreClient) parseRawObserveResponseNotification(data []byte) Obs
 
 func (csc *CoreStoreClient) parseRawNotifyResponse(data []byte) NotifyResponse {
 	Debug("parseRawNotifyResponse:: " + string(data))
-	parts := bytes.SplitN(data, []byte(" "), 5)
+	parts := bytes.SplitN(data, []byte(" "), 4)
 	timestamp, _ := strconv.ParseInt(string(parts[0]), 10, 64)
 	//responsePath := parts[1]
 	ct := parts[3]
 	payload := []byte{}
-	if len(parts) >= 5 {
-		payload = parts[4]
+	if len(parts) >= 3 {
+		payload = parts[3]
 	}
 
 	return NotifyResponse{
