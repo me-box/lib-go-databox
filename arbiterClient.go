@@ -118,7 +118,7 @@ type ContainerPermissions struct {
 func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermissions) error {
 
 	if len(permissions.Caveats) == 0 {
-		permissions.Caveats = nil
+		permissions.Caveats = []string{}
 	}
 
 	jsonPostData, _ := json.Marshal(permissions)
@@ -180,7 +180,7 @@ func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, erro
 	arb.tokenCacheMutex.Unlock()
 	if !exists {
 		var status int
-		payload := []byte(`{"target":"` + host + `","path":"` + u.Path + `","method":"` + method + `"}`)
+		payload := []byte(`{"target":"` + host + `","path":"` + u.Path + `","method":"` + method + `", "caveats":[]}`)
 
 		token, status = arb.makeArbiterPostRequest("/token", host, u.Path, payload)
 		if status != 200 {
