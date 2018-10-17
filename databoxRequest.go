@@ -29,10 +29,9 @@ func NewDataboxHTTPsAPIWithPaths(cmRootCaPath string) *http.Client {
 			}).Dial,
 			TLSHandshakeTimeout: 5 * time.Second,
 			DisableCompression:  true,
-			MaxIdleConns: 100,
-			MaxIdleConnsPerHost:10,
-			MaxConnsPerHost:10,
-			IdleConnTimeout:5,
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 10,
+			IdleConnTimeout:     5,
 		}
 
 	} else {

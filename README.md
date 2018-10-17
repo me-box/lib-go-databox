@@ -43,7 +43,7 @@ func main () {
 }
 ```
 
-More examples can be found in the [databox-quickstart guide](https://github.com/me-box/databox-quickstart/testenv/)
+More examples can be found in the [databox-quickstart guide](https://github.com/me-box/databox-quickstart)
 
 ## Development of databox was supported by the following funding
 ```
