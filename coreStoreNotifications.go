@@ -193,6 +193,7 @@ func (f *Func) parseRawFuncResponse(functionName string, payload []byte, content
 
 	//block and await the response
 	response := <-NotifyResponseChan
+	Debug("response.Data" + string(response.Data))
 
 	var funcResp FuncResponse
 	err = json.Unmarshal(response.Data, &funcResp)
@@ -203,6 +204,8 @@ func (f *Func) parseRawFuncResponse(functionName string, payload []byte, content
 		}
 		return
 	}
+
+	Debug("funcResp.Response " + string(funcResp.Response))
 
 	//send the result to the caller
 	responseChan <- funcResp
