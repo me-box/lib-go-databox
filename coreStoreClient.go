@@ -25,6 +25,7 @@ type CoreStoreClient struct {
 	TSBlobBin  *TSBlobStore
 	TSJSON     *TSStore
 	FUNC       *Func
+	EXPORT     *Export
 }
 
 func NewDefaultCoreStoreClient(storeEndPoint string) *CoreStoreClient {
@@ -60,6 +61,7 @@ func NewCoreStoreClient(arbiterClient *ArbiterClient, zmqPublicKeyPath string, s
 	csc.TSBlobBin = newTSBlobStore(csc, ContentTypeBINARY)
 	csc.TSJSON = newTSStore(csc, ContentTypeBINARY)
 	csc.FUNC = newFunc(csc)
+	csc.EXPORT = newExport(csc.Arbiter)
 	return csc
 }
 

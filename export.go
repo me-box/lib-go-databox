@@ -1,12 +1,32 @@
 package libDatabox
 
+import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+)
+
 //TODO Make exportServiceClient work !!!
 
-/*var exportServiceURL = os.Getenv("DATABOX_EXPORT_SERVICE_ENDPOINT")
+var exportServiceURL = os.Getenv("DATABOX_EXPORT_SERVICE_ENDPOINT")
 
-// ExportLongpoll exports data to external service (payload must be an escaped json string)
+type Export struct {
+	arb               *ArbiterClient
+	databoxHTTPClient *http.Client
+}
+
+func newExport(arb *ArbiterClient) *Export {
+	return &Export{
+		arb:               arb,
+		databoxHTTPClient: NewDataboxHTTPsAPIWithPaths("/certs/containerManager.crt"),
+	}
+}
+
+// Longpoll exports data to external service (payload must be an escaped json string)
 // permissions must be requested in the app manifest (drivers dont need to use the export service)
-func ExportLongpoll(destination string, payload string) (string, error) {
+func (e Export) Longpoll(destination string, payload string) (string, error) {
 
 	//TODO payload must be an escaped json string detect it it is not and error or escape it!!
 
@@ -14,25 +34,25 @@ func ExportLongpoll(destination string, payload string) (string, error) {
 
 	fmt.Println("Sending ", jsonStr)
 
-	res, err := makeStoreRequestPOST(exportServiceURL+"/lp/export", jsonStr)
+	res, err := e.makeStoreRequestPOST(exportServiceURL+"/lp/export", jsonStr)
 
 	return res, err
 }
 
-func makeStoreRequestPOST(href string, data string) (string, error) {
+func (e Export) makeStoreRequestPOST(href string, data string) (string, error) {
 
 	method := "POST"
-	token, err := checkTokenCache(href, method)
+	token, err := e.arb.RequestToken(href, method)
 	if err != nil {
 		return "", err
 	}
 
 	//perform store request with token
 	req, err := http.NewRequest(method, href, bytes.NewBufferString(data))
-	req.Header.Set("X-Api-Key", token)
+	req.Header.Set("X-Api-Key", string(token))
 	req.Header.Set("Content-Type", "application/json")
 	req.Close = true
-	resp, err := databoxClient.Do(req)
+	resp, err := e.databoxHTTPClient.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -44,4 +64,4 @@ func makeStoreRequestPOST(href string, data string) (string, error) {
 	}
 
 	return string(body[:]), nil
-}*/
+}
