@@ -40,15 +40,6 @@ type Repository struct {
 	Url  string `json:"url"`
 }
 
-type Package struct {
-	Name        string   `json:"name"`
-	Purpose     string   `json:"purpose"`
-	Install     string   `json:"install"`
-	Risks       string   `json:"risks"`
-	Benefits    string   `json:"benefits"`
-	DataSources []string `json:"datastores"`
-}
-
 type ExternalWhitelist struct {
 	Urls        []string `json:"urls"`
 	Description string   `json:"description"`
@@ -60,55 +51,57 @@ type ExportWhitelist struct {
 }
 
 type DataSource struct {
-	Type          string       `json:"type"`
-	Required      bool         `json:"required"`
-	Name          string       `json:"name"`
-	Clientid      string       `json:"clientid"`
-	Granularities []string     `json:"granularities"`
-	Hypercat      HypercatItem `json:"hypercat"`
+	Type               string       `json:"type"`
+	Required           bool         `json:"required"`
+	Name               string       `json:"name"`
+	Clientid           string       `json:"clientid"`
+	Granularities      []string     `json:"granularities"`
+	Hypercat           HypercatItem `json:"hypercat"`
+	Min                int          `json:"min"`
+	Max                int          `json:"max"`
+	NotifyOfNewSources bool         `json:"allow-notification-of-new-sources"`
 }
 
 type Manifest struct {
-	ManifestVersion      int                  `json:"manifest-version"` //
-	Name                 string               `json:"name"`
-	DataboxType          DataboxType          `json:"databox-type"`
-	Version              string               `json:"version"`     //this is databox version e.g 0.3.1
-	Description          string               `json:"description"` // free text description
-	Author               string               `json:"author"`      //Tosh Brown <Anthony.Brown@nottingham.ac.uk>
-	License              string               `json:"license"`     //Software licence
-	Tags                 []string             `json:"tags"`        //search tags
-	Homepage             string               `json:"homepage"`    //homepage url
-	Repository           Repository           `json:"repository"`
-	Packages             []Package            `json:"packages"`
-	DataSources          []DataSource         `json:"datasources"`
-	ExportWhitelists     []ExportWhitelist    `json:"export-whitelist"`
-	ExternalWhitelist    []ExternalWhitelist  `json:"external-whitelist"`
-	ResourceRequirements ResourceRequirements `json:"resource-requirements"`
+	ManifestVersion      int                  `json:"manifest-version"`      //
+	Name                 string               `json:"name"`                  //
+	DockerImage          string               `json:"docker-image"`          // Optional: docker image name including registry e.g datboxsystems/core-store (-amd64 or -amd64v8 will be added depending on the platform)
+	DockerImageTag       string               `json:"docker-image-tag"`      // Optional: docker image tag e.g latest or v0.5.1 etc (will be appended to DockerImage )
+	DataboxType          DataboxType          `json:"databox-type"`          //
+	Version              string               `json:"version"`               // this is databox version e.g 0.3.1
+	Description          string               `json:"description"`           // free text description
+	Author               string               `json:"author"`                // Tosh Brown <Anthony.Brown@nottingham.ac.uk>
+	License              string               `json:"license"`               // Software licence
+	Tags                 []string             `json:"tags"`                  // search tags
+	Homepage             string               `json:"homepage"`              // homepage url
+	Repository           Repository           `json:"repository"`            //  git repo where the core can be found
+	DataSources          []DataSource         `json:"datasources"`           //
+	ExportWhitelists     []ExportWhitelist    `json:"export-whitelist"`      // "export-whitelist": [{"url": "https://export.amar.io/","description": "Exports the data to amar.io"}],
+	ExternalWhitelist    []ExternalWhitelist  `json:"external-whitelist"`    // "external-whitelist": [{"urls": ["https://api.twitter.com/"],"description": "reason displayed to user for requiring access"}]
+	ResourceRequirements ResourceRequirements `json:"resource-requirements"` //this is where you can requests a store "store":"core-store" is the only valid option for now.
 	DisplayName          string               `json:"displayName"`
 	StoreURL             string               `json:"storeUrl"`
 }
 
 type SLA struct {
-	ManifestVersion      int                  `json:"manifest-version"` //
-	Name                 string               `json:"name"`             // container name  e.g core-store
-	Image                string               `json:"image"`            //docker image tag e.g datboxsystems/core-store-amd64
-	DataboxType          DataboxType          `json:"databox-type"`
-	Version              string               `json:"version"`     //this is databox version e.g 0.3.1
-	Description          string               `json:"description"` // free text description
-	Author               string               `json:"author"`      //Tosh Brown <Anthony.Brown@nottingham.ac.uk>
-	License              string               `json:"license"`     //Software licence
-	Tags                 []string             `json:"tags"`        //search tags
-	Homepage             string               `json:"homepage"`    //homepage url
-	Repository           Repository           `json:"repository"`
-	Packages             []Package            `json:"packages"`
-	AllowedCombinations  []string             `json:"allowed-combinations"`
-	Datasources          []DataSource         `json:"datasources"`
-	ExportWhitelists     []ExportWhitelist    `json:"export-whitelist"`
-	ExternalWhitelist    []ExternalWhitelist  `json:"external-whitelist"`
-	ResourceRequirements ResourceRequirements `json:"resource-requirements"`
-	DisplayName          string               `json:"displayName"`
-	StoreURL             string               `json:"storeUrl"`
-	Registry             string               `json:"registry"`
+	ManifestVersion      int                  `json:"manifest-version"`      //
+	Name                 string               `json:"name"`                  // container name  e.g core-store
+	DockerImage          string               `json:"docker-image"`          // Optional: docker image name including registry e.g datboxsystems/core-store (-amd64 or -amd64v8 will be added depending on the platform)
+	DockerImageTag       string               `json:"docker-image-tag"`      // Optional: docker image tag e.g latest or v0.5.1 etc (will be appended to DockerImage )
+	DataboxType          DataboxType          `json:"databox-type"`          // App or driver
+	Version              string               `json:"version"`               // this is databox version e.g 0.3.1
+	Description          string               `json:"description"`           // free text description
+	Author               string               `json:"author"`                // Tosh Brown <Anthony.Brown@nottingham.ac.uk>
+	License              string               `json:"license"`               // Software licence
+	Tags                 []string             `json:"tags"`                  // search tags
+	Homepage             string               `json:"homepage"`              // homepage url
+	Repository           Repository           `json:"repository"`            // git repo where the core can be found
+	Datasources          []DataSource         `json:"datasources"`           //
+	ExportWhitelists     []ExportWhitelist    `json:"export-whitelist"`      //
+	ExternalWhitelist    []ExternalWhitelist  `json:"external-whitelist"`    //
+	ResourceRequirements ResourceRequirements `json:"resource-requirements"` //this is where you can requests a store "store":"core-store" is the only valid option for now.
+	DisplayName          string               `json:"displayName"`           //
+	StoreURL             string               `json:"storeUrl"`              //
 }
 
 type ResourceRequirements struct {
