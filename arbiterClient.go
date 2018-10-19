@@ -180,7 +180,7 @@ func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, erro
 	arb.tokenCacheMutex.Unlock()
 	if !exists {
 		var status int
-		payload := []byte(`{"target":"` + host + `","path":"` + u.Path + `","method":"` + method + `", "caveats":[]}`)
+		payload := []byte(`{"target":"` + host + `","path":"` + u.Path + `","method":"` + method + `","caveats":[]}`)
 
 		token, status = arb.makeArbiterPostRequest("/token", host, u.Path, payload)
 		if status != 200 {
