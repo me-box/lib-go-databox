@@ -45,7 +45,7 @@ func (e Export) makeStoreRequestPOST(href string, destination string, data strin
 
 	method := "POST"
 	caveat := "destination = [\"" + destination + "\"]"
-	token, err := e.arb.RequestToken(exportServiceName, method, []string{caveat})
+	token, err := e.arb.RequestToken(href, method, []string{caveat})
 	if err != nil {
 		return "", err
 	}
