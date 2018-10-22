@@ -20,7 +20,7 @@ type Export struct {
 func newExport(arb *ArbiterClient) *Export {
 	return &Export{
 		arb:               arb,
-		databoxHTTPClient: NewDataboxHTTPsAPIWithPaths("/certs/containerManager.crt"),
+		databoxHTTPClient: NewDataboxHTTPsAPI(),
 	}
 }
 
