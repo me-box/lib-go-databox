@@ -44,7 +44,7 @@ func (e Export) Longpoll(destination string, payload string) (string, error) {
 func (e Export) makeStoreRequestPOST(href string, destination string, data string) (string, error) {
 
 	method := "POST"
-	caveat := "destination = [" + destination + "]"
+	caveat := "destination = [\"" + destination + "\"]"
 	token, err := e.arb.RequestToken(exportServiceName, method, []string{caveat})
 	if err != nil {
 		return "", err
