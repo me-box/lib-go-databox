@@ -7,9 +7,7 @@ import (
 	"net/http"
 )
 
-//TODO Make exportServiceClient work !!!
-
-var exportServiceURL = "https://export-service:8080"
+const exportServiceURL = "https://export-service:8080"
 
 const exportServiceName = "export-service"
 
@@ -44,6 +42,7 @@ func (e Export) makeStoreRequestPOST(href string, destination string, data strin
 
 	method := "POST"
 	caveat := "destination = [\"" + destination + "\"]"
+	fmt.Println("Requesting export token for " + href + " with  caveat " + caveat)
 	token, err := e.arb.RequestToken(href, method, []string{caveat})
 	if err != nil {
 		return "", err
