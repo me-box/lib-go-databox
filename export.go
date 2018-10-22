@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 )
 
 //TODO Make exportServiceClient work !!!
 
-var exportServiceURL = os.Getenv("DATABOX_EXPORT_SERVICE_ENDPOINT")
+var exportServiceURL = "https://export-service:8080"
 
 const exportServiceName = "export-service"
 
