@@ -162,7 +162,7 @@ func (arb *ArbiterClient) makeArbiterPostRequest(path string, hostname string, e
 }
 
 // RequestToken is used internally to request a token from the arbiter
-func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, error) {
+func (arb *ArbiterClient) RequestToken(href string, method string, caveats []string) ([]byte, error) {
 
 	u, err := url.Parse(href)
 	if err != nil {
@@ -174,13 +174,14 @@ func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, erro
 		return []byte{}, err1
 	}
 
-	routeHash := strings.ToUpper(href) + method
+	caveatsStr, _ := json.Marshal(caveats)
+	routeHash := strings.ToUpper(href) + method + string(caveatsStr)
 	arb.tokenCacheMutex.Lock()
 	token, exists := arb.tokenCache[routeHash]
 	arb.tokenCacheMutex.Unlock()
 	if !exists {
 		var status int
-		payload := []byte(`{"target":"` + host + `","path":"` + u.Path + `","method":"` + method + `","caveats":[]}`)
+		payload := []byte(`{"target":"` + host + `","path":"` + u.Path + `","method":"` + method + `","caveats":` + string(caveatsStr) + `}`)
 
 		token, status = arb.makeArbiterPostRequest("/token", host, u.Path, payload)
 		if status != 200 {
@@ -197,34 +198,14 @@ func (arb *ArbiterClient) RequestToken(href string, method string) ([]byte, erro
 
 // InvalidateCache can be used to remove a token from the arbiterClient cache.
 // This is done automatically if the token is rejected.
-func (arb *ArbiterClient) InvalidateCache(href string, method string) {
+func (arb *ArbiterClient) InvalidateCache(href string, method string, caveats []string) {
 
+	caveatsStr, _ := json.Marshal(caveats)
 	arb.tokenCacheMutex.Lock()
-	routeHash := strings.ToUpper(href) + method
+	routeHash := strings.ToUpper(href) + method + string(caveatsStr)
 	delete(arb.tokenCache, routeHash)
 	arb.tokenCacheMutex.Unlock()
 
-}
-
-func (arb *ArbiterClient) checkTokenCache(href string, method string) ([]byte, error) {
-
-	routeHash := strings.ToUpper(href) + method
-
-	arb.tokenCacheMutex.Lock()
-	_, exists := arb.tokenCache[routeHash]
-	arb.tokenCacheMutex.Unlock()
-	if !exists {
-		//request a token
-		newToken, err := arb.RequestToken(href, method)
-		if err != nil {
-			return []byte{}, err
-		}
-		arb.tokenCacheMutex.Lock()
-		arb.tokenCache[routeHash] = newToken
-		arb.tokenCacheMutex.Unlock()
-
-	}
-	return arb.tokenCache[routeHash], nil
 }
 
 func (arb *ArbiterClient) RemoveDataboxComponent() {

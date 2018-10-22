@@ -70,7 +70,7 @@ func (csc *CoreStoreClient) GetStoreDataSourceCatalogue(href string) (HypercatRo
 	target := href + "/cat"
 	method := "GET"
 
-	token, err := csc.Arbiter.RequestToken(target, method)
+	token, err := csc.Arbiter.RequestToken(target, method, []string{})
 	if err != nil {
 		return HypercatRoot{}, err
 	}
@@ -94,7 +94,7 @@ func (csc *CoreStoreClient) RegisterDatasource(metadata DataSourceMetadata) erro
 
 	path := "/cat"
 
-	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "POST")
+	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "POST", []string{})
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (csc *CoreStoreClient) RegisterDatasource(metadata DataSourceMetadata) erro
 
 	_, writeErr := csc.ZestC.Post(string(token), path, hypercatJSON, "JSON")
 	if writeErr != nil {
-		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "POST")
+		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "POST", []string{})
 		return errors.New("Error writing: " + writeErr.Error())
 	}
 
@@ -158,14 +158,14 @@ func (csc *CoreStoreClient) dataSourceMetadataToHypercat(metadata DataSourceMeta
 
 func (csc *CoreStoreClient) delete(path string, contentType StoreContentType) error {
 
-	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "DELETE")
+	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "DELETE", []string{})
 	if err != nil {
 		return errors.New("Error getting Arbiter Token: " + err.Error())
 	}
 
 	err = csc.ZestC.Delete(string(token), path, string(contentType))
 	if err != nil {
-		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "DELETE")
+		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "DELETE", []string{})
 		return errors.New("Error writing: " + err.Error())
 	}
 
@@ -174,7 +174,7 @@ func (csc *CoreStoreClient) delete(path string, contentType StoreContentType) er
 
 func (csc *CoreStoreClient) read(path string, contentType StoreContentType) ([]byte, error) {
 
-	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET")
+	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET", []string{})
 	if err != nil {
 		return []byte(""), errors.New("Error getting Arbiter Token: " + err.Error())
 
@@ -182,7 +182,7 @@ func (csc *CoreStoreClient) read(path string, contentType StoreContentType) ([]b
 
 	resp, getErr := csc.ZestC.Get(string(token), path, string(contentType))
 	if getErr != nil {
-		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET")
+		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET", []string{})
 		return []byte(""), errors.New("Error getting latest data: " + getErr.Error())
 	}
 
@@ -191,7 +191,7 @@ func (csc *CoreStoreClient) read(path string, contentType StoreContentType) ([]b
 
 func (csc *CoreStoreClient) observe(path string, contentType StoreContentType, observeMode zest.ObserveMode) (<-chan ObserveResponse, error) {
 
-	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET")
+	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET", []string{})
 	if err != nil {
 		return nil, errors.New("Error getting Arbiter Token: " + err.Error())
 
@@ -199,7 +199,7 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType, o
 
 	payloadChan, getErr := csc.ZestC.Observe(string(token), path, string(contentType), observeMode, 0)
 	if getErr != nil {
-		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET")
+		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET", []string{})
 		return nil, errors.New("Error observing: " + getErr.Error())
 	}
 
@@ -223,14 +223,14 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType, o
 
 func (csc *CoreStoreClient) notify(path string, contentType StoreContentType) (<-chan NotifyResponse, error) {
 
-	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET")
+	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET", []string{})
 	if err != nil {
 		return nil, errors.New("Error getting Arbiter Token: " + err.Error())
 	}
 
 	payloadChan, getErr := csc.ZestC.Notify(string(token), path, string(contentType), 0)
 	if getErr != nil {
-		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET")
+		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET", []string{})
 		return nil, errors.New("Error starting notify: " + getErr.Error())
 	}
 
@@ -250,14 +250,14 @@ func (csc *CoreStoreClient) notify(path string, contentType StoreContentType) (<
 
 func (csc *CoreStoreClient) write(path string, payload []byte, contentType StoreContentType) error {
 
-	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "POST")
+	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "POST", []string{})
 	if err != nil {
 		return errors.New("Error getting Arbiter Token: " + err.Error())
 	}
 
 	_, err = csc.ZestC.Post(string(token), path, payload, string(contentType))
 	if err != nil {
-		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "POST")
+		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "POST", []string{})
 		return errors.New("Error writing: " + err.Error())
 	}
 

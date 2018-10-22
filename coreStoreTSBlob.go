@@ -35,7 +35,7 @@ func (tbs *TSBlobStore) WriteAt(dataSourceID string, timstamp int64, payload []b
 
 	path := "/ts/blob/" + dataSourceID + "/at/"
 
-	token, err := tbs.csc.Arbiter.RequestToken(tbs.csc.ZEndpoint+path+"*", "POST")
+	token, err := tbs.csc.Arbiter.RequestToken(tbs.csc.ZEndpoint+path+"*", "POST", []string{})
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (tbs *TSBlobStore) WriteAt(dataSourceID string, timstamp int64, payload []b
 
 	_, err = tbs.csc.ZestC.Post(string(token), path, payload, string(tbs.contentType))
 	if err != nil {
-		tbs.csc.Arbiter.InvalidateCache(tbs.csc.ZEndpoint+path+"*", "POST")
+		tbs.csc.Arbiter.InvalidateCache(tbs.csc.ZEndpoint+path+"*", "POST", []string{})
 		return errors.New("Error writing: " + err.Error())
 	}
 

@@ -12,6 +12,8 @@ import (
 
 var exportServiceURL = os.Getenv("DATABOX_EXPORT_SERVICE_ENDPOINT")
 
+const exportServiceName = "export-service"
+
 type Export struct {
 	arb               *ArbiterClient
 	databoxHTTPClient *http.Client
@@ -34,15 +36,16 @@ func (e Export) Longpoll(destination string, payload string) (string, error) {
 
 	fmt.Println("Sending ", jsonStr)
 
-	res, err := e.makeStoreRequestPOST(exportServiceURL+"/lp/export", jsonStr)
+	res, err := e.makeStoreRequestPOST(exportServiceURL+"/lp/export", destination, jsonStr)
 
 	return res, err
 }
 
-func (e Export) makeStoreRequestPOST(href string, data string) (string, error) {
+func (e Export) makeStoreRequestPOST(href string, destination string, data string) (string, error) {
 
 	method := "POST"
-	token, err := e.arb.RequestToken(href, method)
+	caveat := "destination = [" + destination + "]"
+	token, err := e.arb.RequestToken(exportServiceName, method, []string{caveat})
 	if err != nil {
 		return "", err
 	}
