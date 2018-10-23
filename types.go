@@ -65,8 +65,9 @@ type DataSource struct {
 type Manifest struct {
 	ManifestVersion      int                  `json:"manifest-version"`      //
 	Name                 string               `json:"name"`                  //
-	DockerImage          string               `json:"docker-image"`          // Optional: docker image name including registry e.g datboxsystems/core-store (-amd64 or -amd64v8 will be added depending on the platform)
-	DockerImageTag       string               `json:"docker-image-tag"`      // Optional: docker image tag e.g latest or v0.5.1 etc (will be appended to DockerImage )
+	DockerImage          string               `json:"docker-image"`          // Optional: docker image name  e.g my-cool-app (-amd64 or -amd64v8 will be added depending on the platform) defaults to Name from above
+	DockerRegistry       string               `json:"docker-registry"`       // Optional: docker registry e.g myDockerRegistry defaults to datboxsystems
+	DockerImageTag       string               `json:"docker-image-tag"`      // Optional: docker image tag e.g latest or v0.5.1 etc defaults to the running version of databox
 	DataboxType          DataboxType          `json:"databox-type"`          //
 	Version              string               `json:"version"`               // this is databox version e.g 0.3.1
 	Description          string               `json:"description"`           // free text description
@@ -86,8 +87,9 @@ type Manifest struct {
 type SLA struct {
 	ManifestVersion      int                  `json:"manifest-version"`      //
 	Name                 string               `json:"name"`                  // container name  e.g core-store
-	DockerImage          string               `json:"docker-image"`          // Optional: docker image name including registry e.g datboxsystems/core-store (-amd64 or -amd64v8 will be added depending on the platform)
-	DockerImageTag       string               `json:"docker-image-tag"`      // Optional: docker image tag e.g latest or v0.5.1 etc (will be appended to DockerImage )
+	DockerImage          string               `json:"docker-image"`          // Optional: docker image name  e.g my-cool-app (-amd64 or -amd64v8 will be added depending on the platform) defaults to Name from above
+	DockerRegistry       string               `json:"docker-registry"`       // Optional: docker registry e.g myDockerRegistry defaults to datboxsystems
+	DockerImageTag       string               `json:"docker-image-tag"`      // Optional: docker image tag e.g latest or v0.5.1 etc defaults to the running version of databox
 	DataboxType          DataboxType          `json:"databox-type"`          // App or driver
 	Version              string               `json:"version"`               // this is databox version e.g 0.3.1
 	Description          string               `json:"description"`           // free text description
