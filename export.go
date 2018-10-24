@@ -43,7 +43,7 @@ func (e Export) makeStoreRequestPOST(href string, destination string, data strin
 	method := "POST"
 	caveat := `{"destination": "` + destination + `"}`
 	fmt.Println("Requesting export token for " + href + " with  caveat " + caveat)
-	token, err := e.arb.RequestToken(href, method, []string{caveat})
+	token, err := e.arb.RequestToken(href, method, caveat)
 	if err != nil {
 		return "", err
 	}

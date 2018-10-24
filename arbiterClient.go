@@ -109,21 +109,17 @@ type Route struct {
 }
 
 type ContainerPermissions struct {
-	Name    string   `json:"name"`
-	Route   Route    `json:"route"`
-	Caveats []string `json:"caveats"`
+	Name   string `json:"name"`
+	Route  Route  `json:"route"`
+	Caveat string `json:"caveats"`
 }
 
 // GrantContainerPermissions allows the container manager to grant permissions to an app or driver on a registered store.
 func (arb *ArbiterClient) GrantContainerPermissions(permissions ContainerPermissions) error {
 
-	if len(permissions.Caveats) == 0 {
-		permissions.Caveats = []string{}
-	}
+	postData := `{"name": "` + permissions.Name + `", "route": {"method": "` + permissions.Route.Method + `", "path": "` + permissions.Route.Path + `", "target": "` + permissions.Route.Target + `"}, "caveats": [` + permissions.Caveat + `]}`
 
-	jsonPostData, _ := json.Marshal(permissions)
-
-	_, err := arb.ZestC.Post(arb.ArbiterToken, "/cm/grant-container-permissions", jsonPostData, string(ContentTypeJSON))
+	_, err := arb.ZestC.Post(arb.ArbiterToken, "/cm/grant-container-permissions", []byte(postData), string(ContentTypeJSON))
 	if err != nil {
 		return err
 	}
@@ -162,7 +158,7 @@ func (arb *ArbiterClient) makeArbiterPostRequest(path string, hostname string, e
 }
 
 // RequestToken is used internally to request a token from the arbiter
-func (arb *ArbiterClient) RequestToken(href string, method string, caveats []string) ([]byte, error) {
+func (arb *ArbiterClient) RequestToken(href string, method string, caveat string) ([]byte, error) {
 
 	u, err := url.Parse(href)
 	if err != nil {
@@ -174,14 +170,13 @@ func (arb *ArbiterClient) RequestToken(href string, method string, caveats []str
 		return []byte{}, err1
 	}
 
-	caveatsStr, _ := json.Marshal(caveats)
-	routeHash := strings.ToUpper(href) + method + string(caveatsStr)
+	routeHash := strings.ToUpper(href) + method + caveat
 	arb.tokenCacheMutex.Lock()
 	token, exists := arb.tokenCache[routeHash]
 	arb.tokenCacheMutex.Unlock()
 	if !exists {
 		var status int
-		payload := []byte(`{"target":"` + host + `","path":"` + u.Path + `","method":"` + method + `","caveats":` + string(caveatsStr) + `}`)
+		payload := []byte(`{"target":"` + host + `","path":"` + u.Path + `","method":"` + method + `","caveats":[` + caveat + `]}`)
 
 		token, status = arb.makeArbiterPostRequest("/token", host, u.Path, payload)
 		if status != 200 {
@@ -198,7 +193,7 @@ func (arb *ArbiterClient) RequestToken(href string, method string, caveats []str
 
 // InvalidateCache can be used to remove a token from the arbiterClient cache.
 // This is done automatically if the token is rejected.
-func (arb *ArbiterClient) InvalidateCache(href string, method string, caveats []string) {
+func (arb *ArbiterClient) InvalidateCache(href string, method string, caveats string) {
 
 	caveatsStr, _ := json.Marshal(caveats)
 	arb.tokenCacheMutex.Lock()
