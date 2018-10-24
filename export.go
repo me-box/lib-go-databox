@@ -41,7 +41,7 @@ func (e Export) Longpoll(destination string, payload string) (string, error) {
 func (e Export) makeStoreRequestPOST(href string, destination string, data string) (string, error) {
 
 	method := "POST"
-	caveat := `{"destination": "` + destination + `"}`
+	caveat := `{"destination":"` + destination + `"}`
 	fmt.Println("Requesting export token for " + href + " with  caveat " + caveat)
 	token, err := e.arb.RequestToken(href, method, caveat)
 	if err != nil {
