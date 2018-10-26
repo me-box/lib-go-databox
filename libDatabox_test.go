@@ -31,7 +31,7 @@ func Setup() {
 	var err error
 	hostname, _ := os.Hostname()
 
-	//OutputDebug(true)
+	OutputDebug(false)
 
 	Arbiter, err := NewArbiterClient("", "", ArbiterURL)
 	if err != nil {

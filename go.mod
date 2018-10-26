@@ -5,5 +5,5 @@ require (
 	github.com/google/uuid v1.0.0
 	github.com/me-box/goZestClient v0.0.10
 	github.com/pebbe/zmq4 v1.0.0 // indirect
-	golang.org/x/tools v0.0.0-20180925155007-dca76387a03d // indirect
+	golang.org/x/tools v0.0.0-20181023010539-40a48ad93fbe // indirect
 )

@@ -50,6 +50,10 @@ type ExportWhitelist struct {
 	Description string `json:"description"`
 }
 
+type ExportDestination struct {
+	Destination string `json:"destination"`
+}
+
 type DataSource struct {
 	Type               string       `json:"type"`
 	Required           bool         `json:"required"`

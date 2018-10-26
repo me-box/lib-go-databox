@@ -111,7 +111,7 @@ type Route struct {
 type ContainerPermissions struct {
 	Name   string `json:"name"`
 	Route  Route  `json:"route"`
-	Caveat string `json:"caveats"`
+	Caveat string `json:"caveat"`
 }
 
 // GrantContainerPermissions allows the container manager to grant permissions to an app or driver on a registered store.
