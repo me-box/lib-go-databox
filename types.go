@@ -66,6 +66,12 @@ type DataSource struct {
 	NotifyOfNewSources bool         `json:"allow-notification-of-new-sources"`
 }
 
+type DriverProvides struct {
+	Type        string `json:"data-source-type"`
+	Description string `json:"description"`
+	StoreType   string `json:"store-type"`
+}
+
 type Manifest struct {
 	ManifestVersion      int                  `json:"manifest-version"`      //
 	Name                 string               `json:"name"`                  //
@@ -86,6 +92,7 @@ type Manifest struct {
 	ResourceRequirements ResourceRequirements `json:"resource-requirements"` //this is where you can requests a store "store":"core-store" is the only valid option for now.
 	DisplayName          string               `json:"displayName"`
 	StoreURL             string               `json:"storeUrl"`
+	Provides             []DriverProvides     `json:"provides"`
 }
 
 type SLA struct {
