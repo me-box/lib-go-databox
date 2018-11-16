@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -84,7 +85,7 @@ func (f *Func) Register(vendor string, functionName string, contentType StoreCon
 	if f.funcRequestChan == nil {
 		rawRequestChan, err := f.csc.observe("/notification/request/*", ContentTypeJSON, zest.ObserveModeNotification)
 		if err != nil {
-			Err("Could not observe /notification/request/* you will not receive any requests")
+			return errors.New("Could not observe /notification/request/* you will not receive any requests")
 		}
 		Debug("[Notifications] Setting up Observe on /notification/request/*")
 		go f.parseRawFuncRequest(rawRequestChan)
@@ -119,6 +120,7 @@ func (f *Func) parseRawFuncRequest(rawRequest <-chan ObserveResponse) {
 			payload = parts[4]
 		}
 
+		Debug("[Notifications] is " + functionName + " registered? " + strconv.Itoa(len(f.registeredFuncHandler)))
 		var contentType StoreContentType
 		if _, ok := f.registeredFuncHandler[functionName]; ok {
 
@@ -170,12 +172,13 @@ func (f *Func) parseRawFuncResponse(functionName string, payload []byte, content
 	jobID := uuid.New().String()
 
 	//set up a channel to receive the result
-	NotifyResponseChan, err := f.csc.notify("/notification/response/"+functionName+"/"+jobID, contentType)
+	NotifyResponseChan, doneChan, err := f.csc.notify("/notification/response/"+functionName+"/"+jobID, contentType)
 	if err != nil {
 		responseChan <- FuncResponse{
 			Status:   FuncStatusError,
 			Response: []byte(`[Error] failed setup notification functionName for /notification/response/` + functionName + `/` + jobID + `. ` + err.Error()),
 		}
+		close(doneChan)
 		return
 	}
 	Debug("[Notifications] Setting up notify on /notification/response/" + functionName + "/" + jobID)
@@ -188,6 +191,7 @@ func (f *Func) parseRawFuncResponse(functionName string, payload []byte, content
 			Status:   FuncStatusError,
 			Response: []byte(`[Error] failed to call to ` + functionName + " " + err.Error()),
 		}
+		close(doneChan)
 		return
 	}
 
@@ -202,6 +206,7 @@ func (f *Func) parseRawFuncResponse(functionName string, payload []byte, content
 			Status:   FuncStatusError,
 			Response: []byte(`[Error] failed to decode response from ` + functionName + " " + err.Error()),
 		}
+		close(doneChan)
 		return
 	}
 
@@ -209,6 +214,6 @@ func (f *Func) parseRawFuncResponse(functionName string, payload []byte, content
 
 	//send the result to the caller
 	responseChan <- funcResp
-
+	close(doneChan)
 	return
 }

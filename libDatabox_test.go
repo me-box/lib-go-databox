@@ -2,6 +2,10 @@ package libDatabox
 
 import (
 	"encoding/json"
+	"log"
+	"net/http"
+	_ "net/http"
+	_ "net/http/pprof"
 	"os"
 	"strconv"
 	s "strings"
@@ -27,6 +31,10 @@ const StoreURL = "tcp://127.0.0.1:5555"
 const ArbiterURL = "tcp://127.0.0.1:4444"
 
 func Setup() {
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	var err error
 	hostname, _ := os.Hostname()

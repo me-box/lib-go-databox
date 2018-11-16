@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"strconv"
+	"fmt"
 	s "strings"
 	"testing"
+	"time"
 )
 
 func TestFuncRegistration(t *testing.T) {
@@ -43,7 +44,7 @@ func TestFuncCall(t *testing.T) {
 		return []byte("Testingtesting132" + dsID), nil
 	}
 
-	err := StoreClient2.FUNC.Register("databox", "TestFunc", ContentTypeJSON, testFunc)
+	err := StoreClient.FUNC.Register("databox", "TestFunc", ContentTypeJSON, testFunc)
 	if err != nil {
 		t.Errorf("FUNC.Register failed expected err to be nil got %s", err.Error())
 	}
@@ -55,7 +56,7 @@ func TestFuncCall(t *testing.T) {
 	}
 
 	response := <-funcResponseChan
-
+	fmt.Println("got response:: ", string(response.Response))
 	if response.Status != FuncStatusOK {
 		t.Errorf("TestFunc Call failed expected status to be  to be FuncStatusOK got %d with the message %s", response.Status, response.Response)
 	}
@@ -74,19 +75,20 @@ func TestFuncCallWithPayload(t *testing.T) {
 		return payload, nil
 	}
 
-	err := StoreClient2.FUNC.Register("databox", "TestFuncWithPayload", ContentTypeJSON, testFunc)
+	err := StoreClient.FUNC.Register("databox", "TestFuncWithPayload", ContentTypeJSON, testFunc)
 	if err != nil {
 		t.Errorf("FUNC.Register failed expected err to be nil got %s", err.Error())
 	}
 
 	//call the function
-	funcResponseChan, err := StoreClient2.FUNC.Call("TestFuncWithPayload", []byte("This is a test"), ContentTypeJSON)
+	fmt.Println("CALLING TestFuncCallWithPayloadManyCalls")
+	funcResponseChan, err := StoreClient.FUNC.Call("TestFuncWithPayload", []byte("This is a test"), ContentTypeJSON)
 	if err != nil {
 		t.Errorf("TestFunc Call failed expected err to be nil got %s", err.Error())
 	}
 
 	response := <-funcResponseChan
-
+	fmt.Println(string(response.Response))
 	if response.Status != FuncStatusOK {
 		t.Errorf("TestFunc Call failed expected status to be  to be FuncStatusOK got %d with the message %s", response.Status, response.Response)
 	}
@@ -105,19 +107,22 @@ func TestFuncCallWithPayloadManyCalls(t *testing.T) {
 		return payload, nil
 	}
 
-	err := StoreClient2.FUNC.Register("databox", "TestFuncCallWithPayloadManyCalls", ContentTypeJSON, testFunc)
+	err := StoreClient.FUNC.Register("databox", "TestFuncCallWithPayloadManyCalls", ContentTypeJSON, testFunc)
 	if err != nil {
 		t.Errorf("FUNC.Register failed expected err to be nil got %s", err.Error())
 	}
 
+	time.Sleep(time.Second)
+
 	//call the function
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 3; i++ {
 		funcResponseChan, err := StoreClient2.FUNC.Call("TestFuncCallWithPayloadManyCalls", []byte("This is a test"), ContentTypeJSON)
 		if err != nil {
 			t.Errorf("TestFunc Call failed expected err to be nil got %s", err.Error())
 		}
 
 		response := <-funcResponseChan
+		fmt.Println(string(response.Response))
 
 		if response.Status != FuncStatusOK {
 			t.Errorf("TestFunc Call failed expected status to be  to be FuncStatusOK got %d with the message %s", response.Status, response.Response)
@@ -155,60 +160,6 @@ func TestFuncCallWithError(t *testing.T) {
 
 	if !bytes.Equal(response.Response, []byte("Test Error")) {
 		t.Errorf("TestFuncCallWithError Call failed Response to be 'Test Error' got %s ", response.Response)
-	}
-
-}
-
-func TestFuncCallWith2FuncsAndOneClient(t *testing.T) {
-
-	//Test function registration
-	testFunc := func(contentType StoreContentType, payload []byte) ([]byte, error) {
-
-		return payload, nil
-	}
-
-	err := StoreClient2.FUNC.Register("databox", "TestFuncCallWith2FuncsAndOneClient1", ContentTypeJSON, testFunc)
-	if err != nil {
-		t.Errorf("FUNC.Register failed expected err to be nil got %s", err.Error())
-	}
-
-	err = StoreClient2.FUNC.Register("databox", "TestFuncCallWith2FuncsAndOneClient2", ContentTypeJSON, testFunc)
-	if err != nil {
-		t.Errorf("FUNC.Register failed expected err to be nil got %s", err.Error())
-	}
-
-	//call the function
-	for i := 0; i < 30; i++ {
-		funcResponseChan1, err := StoreClient2.FUNC.Call("TestFuncCallWith2FuncsAndOneClient1", []byte("This is test "+strconv.Itoa(i)), ContentTypeJSON)
-		if err != nil {
-			t.Errorf("TestFunc Call failed expected err to be nil got %s", err.Error())
-		}
-
-		funcResponseChan2, err := StoreClient2.FUNC.Call("TestFuncCallWith2FuncsAndOneClient2", []byte("This is test "+strconv.Itoa(i)), ContentTypeJSON)
-		if err != nil {
-			t.Errorf("TestFunc Call failed expected err to be nil got %s", err.Error())
-		}
-
-		select {
-		case response1 := <-funcResponseChan1:
-			if response1.Status != FuncStatusOK {
-				t.Errorf("TestFuncCallWith2FuncsAndOneClient1 Call failed expected status to be  to be FuncStatusOK got %d with the message %s", response1.Status, response1.Response)
-			}
-
-			if !bytes.Equal(response1.Response, []byte("This is test "+strconv.Itoa(i))) {
-				t.Errorf("TestFuncCallWith2FuncsAndOneClient1 Call failed Response to be 'This is test %d' got '%s' ", i, response1.Response)
-			}
-		case response2 := <-funcResponseChan2:
-			if response2.Status != FuncStatusOK {
-				t.Errorf("TestFuncCallWith2FuncsAndOneClient2 Call failed expected status to be  to be FuncStatusOK got %d with the message %s", response2.Status, response2.Response)
-			}
-
-			if !bytes.Equal(response2.Response, []byte("This is test "+strconv.Itoa(i))) {
-				t.Errorf("TestFuncCallWith2FuncsAndOneClient2 Call failed Response to be 'This is test %d' got '%s' ", i, response2.Response)
-			}
-
-		}
-
 	}
 
 }

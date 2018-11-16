@@ -197,7 +197,7 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType, o
 
 	}
 
-	payloadChan, getErr := csc.ZestC.Observe(string(token), path, string(contentType), observeMode, 0)
+	payloadChan, _, getErr := csc.ZestC.Observe(string(token), path, string(contentType), observeMode, 0)
 	if getErr != nil {
 		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET", "")
 		return nil, errors.New("Error observing: " + getErr.Error())
@@ -221,17 +221,17 @@ func (csc *CoreStoreClient) observe(path string, contentType StoreContentType, o
 	return objectChan, err
 }
 
-func (csc *CoreStoreClient) notify(path string, contentType StoreContentType) (<-chan NotifyResponse, error) {
+func (csc *CoreStoreClient) notify(path string, contentType StoreContentType) (<-chan NotifyResponse, chan struct{}, error) {
 
 	token, err := csc.Arbiter.RequestToken(csc.ZEndpoint+path, "GET", "")
 	if err != nil {
-		return nil, errors.New("Error getting Arbiter Token: " + err.Error())
+		return nil, nil, errors.New("Error getting Arbiter Token: " + err.Error())
 	}
 
-	payloadChan, getErr := csc.ZestC.Notify(string(token), path, string(contentType), 0)
+	payloadChan, doneChan, getErr := csc.ZestC.Notify(string(token), path, string(contentType), 0)
 	if getErr != nil {
 		csc.Arbiter.InvalidateCache(csc.ZEndpoint+path, "GET", "")
-		return nil, errors.New("Error starting notify: " + getErr.Error())
+		return nil, nil, errors.New("Error starting notify: " + getErr.Error())
 	}
 
 	objectChan := make(chan NotifyResponse)
@@ -245,7 +245,7 @@ func (csc *CoreStoreClient) notify(path string, contentType StoreContentType) (<
 		close(objectChan)
 	}()
 
-	return objectChan, err
+	return objectChan, doneChan, err
 }
 
 func (csc *CoreStoreClient) write(path string, payload []byte, contentType StoreContentType) error {
