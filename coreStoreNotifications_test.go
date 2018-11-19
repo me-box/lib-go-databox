@@ -115,8 +115,8 @@ func TestFuncCallWithPayloadManyCalls(t *testing.T) {
 	time.Sleep(time.Second)
 
 	//call the function
-	for i := 0; i < 3; i++ {
-		funcResponseChan, err := StoreClient2.FUNC.Call("TestFuncCallWithPayloadManyCalls", []byte("This is a test"), ContentTypeJSON)
+	for i := 0; i < 5; i++ {
+		funcResponseChan, err := StoreClient.FUNC.Call("TestFuncCallWithPayloadManyCalls", []byte("This is a test"), ContentTypeJSON)
 		if err != nil {
 			t.Errorf("TestFunc Call failed expected err to be nil got %s", err.Error())
 		}
@@ -132,7 +132,6 @@ func TestFuncCallWithPayloadManyCalls(t *testing.T) {
 			t.Errorf("TestFunc Call failed Response to be 'this is a test' got %s ", response.Response)
 		}
 	}
-
 }
 
 func TestFuncCallWithError(t *testing.T) {
