@@ -23,6 +23,13 @@ type ContainerManagerOptions struct {
 	ExternalIP            string
 	HostPath              string
 	Arch                  string //current architecture used to chose the correct docker images "" for x86 or "arm64v8" for arm64v8 ;-)
+	DevMounts             []DevMounts
+}
+
+type DevMounts struct {
+	ContName    string `json:"contName"`
+	ContSrcPath string `json:"ContSrcPath"`
+	HostSrcPath string `json:"HostSrcPath"`
 }
 
 type DataboxType string
