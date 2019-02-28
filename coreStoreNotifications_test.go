@@ -29,9 +29,9 @@ func TestFuncRegistration(t *testing.T) {
 	}
 	catByteArray, _ := json.Marshal(hypercatRoot)
 
-	cont := s.Contains(string(catByteArray), StoreURL+"/notification/request/testFunc"+dsID)
+	cont := s.Contains(string(catByteArray), StoreURL+"/request/testFunc"+dsID)
 	if cont != true {
-		t.Errorf("TestFuncRegistration Error '%s' does not contain  %s", string(catByteArray), StoreURL+"/notification/request/testFunc"+dsID)
+		t.Errorf("TestFuncRegistration Error '%s' does not contain  %s", string(catByteArray), StoreURL+"/request/testFunc"+dsID)
 	}
 
 }
