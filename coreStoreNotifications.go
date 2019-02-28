@@ -70,6 +70,7 @@ func (f *Func) Register(vendor string, functionName string, contentType StoreCon
 		DataSourceID:   functionName,
 		StoreType:      StoreTypeFunc,
 		Description:    "A function",
+		IsFunc:         true,
 	}
 
 	err := f.csc.RegisterDatasource(metadata)
