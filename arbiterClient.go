@@ -157,7 +157,33 @@ func (arb *ArbiterClient) makeArbiterPostRequest(path string, hostname string, e
 	return resp, 200
 }
 
-// RequestToken is used internally to request a token from the arbiter
+// RequestDeligatedToken is used to request a token from the arbiter for another component
+// scrHost is the hostname to hume the permissions are deligated
+func (arb *ArbiterClient) RequestDeligatedToken(scrHost string, href string, method string, caveat string) ([]byte, error) {
+
+	u, err := url.Parse(href)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	targetHost, _, err1 := net.SplitHostPort(u.Host)
+	if err != nil {
+		return []byte{}, err1
+	}
+
+	var status int
+	payload := []byte(`{"target":"` + targetHost + `","path":"` + u.Path + `","method":"` + method + `","caveats":[` + caveat + `]}`)
+
+	token, status := arb.makeArbiterPostRequest("/token", scrHost, u.Path, payload)
+	if status != 200 {
+		err = errors.New(strconv.Itoa(status) + ": " + string(token))
+		return []byte{}, err
+	}
+
+	return token, err
+}
+
+// RequestToken is used internally to request a token from the arbiter for the current host
 func (arb *ArbiterClient) RequestToken(href string, method string, caveat string) ([]byte, error) {
 
 	u, err := url.Parse(href)
@@ -170,7 +196,7 @@ func (arb *ArbiterClient) RequestToken(href string, method string, caveat string
 		return []byte{}, err1
 	}
 
-	routeHash := strings.ToUpper(href) + method + caveat
+	routeHash := host + strings.ToUpper(u.Path) + method + caveat
 	arb.tokenCacheMutex.Lock()
 	token, exists := arb.tokenCache[routeHash]
 	arb.tokenCacheMutex.Unlock()
@@ -193,13 +219,25 @@ func (arb *ArbiterClient) RequestToken(href string, method string, caveat string
 
 // InvalidateCache can be used to remove a token from the arbiterClient cache.
 // This is done automatically if the token is rejected.
-func (arb *ArbiterClient) InvalidateCache(href string, method string, caveats string) {
+func (arb *ArbiterClient) InvalidateCache(href string, method string, caveats string) error {
+
+	u, err := url.Parse(href)
+	if err != nil {
+		return err
+	}
+
+	host, _, err1 := net.SplitHostPort(u.Host)
+	if err != nil {
+		return err1
+	}
 
 	caveatsStr, _ := json.Marshal(caveats)
 	arb.tokenCacheMutex.Lock()
-	routeHash := strings.ToUpper(href) + method + string(caveatsStr)
+	routeHash := host + strings.ToUpper(u.Path) + method + string(caveatsStr)
 	delete(arb.tokenCache, routeHash)
 	arb.tokenCacheMutex.Unlock()
+
+	return nil
 
 }
 

@@ -41,7 +41,7 @@ func Setup() {
 
 	OutputDebug(false)
 
-	Arbiter, err := NewArbiterClient("", "", ArbiterURL)
+	Arbiter, err = NewArbiterClient("", "", ArbiterURL)
 	if err != nil {
 		panic("Cant connect to Zest server. Did you start one? " + err.Error())
 	}
@@ -71,6 +71,24 @@ func Setup() {
 
 	Arbiter.GrantContainerPermissions(ContainerPermissions{
 		Name: hostname,
+		Route: Route{
+			Target: "127.0.0.1",
+			Path:   "/*",
+			Method: "GET",
+		},
+	})
+
+	Arbiter.GrantContainerPermissions(ContainerPermissions{
+		Name: "core-logger",
+		Route: Route{
+			Target: "127.0.0.1",
+			Path:   "/*",
+			Method: "GET",
+		},
+	})
+
+	Arbiter.GrantContainerPermissions(ContainerPermissions{
+		Name: "core-logger",
 		Route: Route{
 			Target: "127.0.0.1",
 			Path:   "/*",
