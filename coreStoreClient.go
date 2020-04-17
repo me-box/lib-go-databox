@@ -273,11 +273,11 @@ func (csc *CoreStoreClient) parseRawObserveResponseData(data []byte) ObserveResp
 
 	parts2 := bytes.Split(parts[1], []byte("/"))
 
-	_dataSourceID := string(parts2[2])
+	_dataSourceID := string(parts2[3])
 
 	_key := ""
-	if len(parts2) > 3 {
-		_key = string(parts2[3])
+	if len(parts2) > 4 {
+		_key = string(parts2[4])
 	}
 
 	_data := parts[3]
